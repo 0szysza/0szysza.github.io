@@ -4,59 +4,51 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b0d17">
-  <meta name="description" content="TrackCCU and Rebirth Calculator by 0szysza.">
+  <meta name="description" content="CCU Tracker and Rebirth Calculator by 0szysza.">
   <title>0szysza</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <style>
-    :root{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#eef2f8;background:#0b0d17;font-synthesis:none}
+    :root{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#f3f4f6;background:#0b0d17;font-synthesis:none}
     *{box-sizing:border-box}
     html{color-scheme:dark}
-    body{min-width:320px;min-height:100vh;min-height:100svh;display:grid;place-items:center;margin:0;background:radial-gradient(ellipse 520px 310px at 50% 49%,rgba(43,61,103,.14),transparent 80%),#0b0d17}
+    body{min-width:320px;min-height:100vh;min-height:100svh;display:grid;place-items:center;margin:0;background:#0b0d17}
     a{color:inherit;text-decoration:none}
-    :focus-visible{outline:2px solid #5cddfa;outline-offset:4px}
-    main{width:min(100% - 40px,660px);padding:54px 0}
+    :focus-visible{outline:2px solid #5cddfa;outline-offset:3px}
+    main{width:min(100% - 36px,760px);padding:44px 0}
     h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
-    .signature{display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:26px;color:#a7b6cb;font-size:12px;font-weight:800;letter-spacing:.1em}
-    .signature img{width:21px;height:21px}
-    .choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-    .choice{--accent:#5cddfa;--aura:rgba(92,221,250,.09);position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:205px;overflow:hidden;padding:23px;border:1px solid #2d3954;border-radius:16px;background:radial-gradient(circle at 14% 8%,var(--aura),transparent 48%),linear-gradient(145deg,#192137,#121827 85%);box-shadow:0 20px 38px rgba(0,0,0,.13),inset 0 1px 0 rgba(255,255,255,.025);transition:border-color .2s,box-shadow .2s,transform .2s}
-    .choice::before{position:absolute;top:0;left:23px;width:70px;height:2px;background:var(--accent);content:"";opacity:.6;transition:width .2s,opacity .2s}
-    .choice:hover,.choice:focus-visible{border-color:var(--accent);box-shadow:0 24px 48px rgba(0,0,0,.22),0 0 32px var(--aura);transform:translateY(-3px)}
-    .choice:hover::before,.choice:focus-visible::before{width:110px;opacity:1}
-    .choice.rebirth{--accent:#a38ffa;--aura:rgba(163,143,250,.1)}
-    .choice-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-    .choice-icon{display:grid;place-items:center;width:55px;height:55px;border:1px solid #3b4965;border-radius:13px;background:rgba(31,44,70,.88);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
-    .choice-icon img{display:block;width:38px;height:38px;object-fit:contain}
-    .choice-bottom{display:flex;align-items:end;justify-content:space-between;gap:10px}
-    .choice-arrow{display:grid;place-items:center;width:30px;height:30px;flex:none;border:1px solid #35415a;border-radius:8px;color:#8d9eb7;transition:border-color .2s,color .2s,transform .2s}
-    .choice-arrow svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-    .choice:hover .choice-arrow,.choice:focus-visible .choice-arrow{border-color:var(--accent);color:var(--accent);transform:translate(2px,-2px)}
-    .choice-name{display:block;color:#f8fafc;font-size:19px;font-weight:750;letter-spacing:-.035em;line-height:1.2}
-    .socials{display:flex;align-items:center;justify-content:center;gap:29px;margin-top:43px}
-    .socials a{display:inline-flex;align-items:center;gap:8px;color:#8d9ab0;font-size:12px;font-weight:600;transition:color .15s}
+    .choices{display:grid;grid-template-columns:minmax(0,1fr) 1px minmax(0,1fr);align-items:center}
+    .tool{display:flex;align-items:center;justify-content:center;gap:12px;min-width:0;min-height:96px;padding:16px;border-radius:10px;transition:background .16s}
+    .tool:hover,.tool:focus-visible{background:#15192d}
+    .tool img{display:block;width:44px;height:44px;flex:none;object-fit:contain}
+    .tool-copy{display:flex;flex-direction:column;min-width:0}
+    .tool-copy strong{color:#fff;font-size:20px;font-weight:800;letter-spacing:-.5px;line-height:28px;white-space:nowrap}
+    .tool-copy small{color:#94a3b8;font-size:11px;font-weight:400;line-height:16.5px;white-space:nowrap}
+    .divider{width:1px;height:46px;background:#2a334b}
+    .socials{display:flex;align-items:center;justify-content:center;gap:28px;margin-top:72px}
+    .socials a{display:inline-flex;align-items:center;gap:7px;color:#94a3b8;font-size:12px;font-weight:600;transition:color .16s}
     .socials a:hover{color:#fff}
     .socials svg{width:16px;height:16px;flex:none}
-    @media(max-width:600px){main{width:min(100% - 32px,420px)}.signature{margin-bottom:24px}.choices{grid-template-columns:1fr;gap:13px}.choice{min-height:151px;padding:20px}.choice-icon{width:47px;height:47px}.choice-icon img{width:33px;height:33px}.choice-name{font-size:18px}.socials{margin-top:37px}}
-    @media(prefers-reduced-motion:reduce){.choice,.choice::before,.choice-arrow{transition:none}}
+    @media(max-width:650px){main{width:min(100% - 32px,370px)}.choices{grid-template-columns:1fr}.tool{justify-content:flex-start;min-height:82px;padding:12px 16px}.divider{width:120px;height:1px;justify-self:center;margin:16px 0}.socials{margin-top:62px}}
+    @media(prefers-reduced-motion:reduce){.tool,.socials a{transition:none}}
   </style>
 </head>
 <body>
   <main>
-    <h1>0szysza tools</h1>
-    <div class="signature" aria-hidden="true"><img src="favicon.svg" alt=""><span>0SZYSZA</span></div>
+    <h1>Choose a tool</h1>
     <nav class="choices" aria-label="Choose a tool">
-      <a class="choice" href="https://0szysza.github.io/trackccu/">
-        <span class="choice-top"><span class="choice-icon"><img src="https://0szysza.github.io/trackccu/apple-touch-icon.png" alt=""></span></span>
-        <span class="choice-bottom"><span class="choice-name">TrackCCU</span><span class="choice-arrow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></span></span>
+      <a class="tool" href="https://0szysza.github.io/trackccu/">
+        <img src="https://0szysza.github.io/trackccu/favicon.png" alt="">
+        <span class="tool-copy"><strong>CCU Tracker</strong><small>Track any Roblox Game CCU!</small></span>
       </a>
-      <a class="choice rebirth" href="https://0szysza.github.io/rebirth/">
-        <span class="choice-top"><span class="choice-icon"><img src="https://0szysza.github.io/rebirth/favicon.svg" alt=""></span></span>
-        <span class="choice-bottom"><span class="choice-name">Rebirth Calculator</span><span class="choice-arrow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></span></span>
+      <span class="divider" aria-hidden="true"></span>
+      <a class="tool" href="https://0szysza.github.io/rebirth/">
+        <img src="https://0szysza.github.io/rebirth/favicon.svg" alt="">
+        <span class="tool-copy"><strong>Rebirth Calculator</strong><small>Plan your rebirth grind</small></span>
       </a>
     </nav>
     <div class="socials" aria-label="Social links">
       <a href="https://discord.com/users/0szysza" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="#5865F2" aria-hidden="true"><path d="M19.888 7.335a5.134 5.134 0 0 0-2.893-2.418 9.144 9.144 0 0 0-2.275-.508 9.963 9.963 0 0 0-.508 1.038 15.039 15.039 0 0 0-4.56 0 11.372 11.372 0 0 0-.519-1.038c-.752.082-1.493.249-2.208.497a5.123 5.123 0 0 0-2.904 2.44 16.176 16.176 0 0 0-1.91 9.717 16.562 16.562 0 0 0 4.98 2.528 4.339 4.339 0 0 0 1.104-1.777c-.54-.202-1.06-.45-1.557-.74-.089-.122.254-.32.364-.354a11.826 11.826 0 0 0 10.037 0c.1 0 .453.232.364.354-.441.342-1.424.585-1.59.828a7.4 7.4 0 0 0 1.105 1.69 16.628 16.628 0 0 0 4.99-2.53 16.232 16.232 0 0 0-2.02-9.727M8.669 14.7a1.943 1.943 0 0 1-1.92-1.955 1.943 1.943 0 0 1 1.92-1.91 1.942 1.942 0 0 1 1.933 1.965 1.943 1.943 0 0 1-1.933 1.9m6.625 0a1.943 1.943 0 0 1-1.932-1.944 1.932 1.932 0 1 1 3.865.034 1.932 1.932 0 0 1-1.933 1.899z"/></svg>0szysza</a>
-      <a href="https://x.com/0szysza" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 432 384" fill="#1DA1F2" aria-hidden="true"><path d="M383 105v11q0 45-16.5 88.5t-47 79.5t-79 58.5T134 365q-73 0-134-39 10 1 21 1 61 0 109-37-29-1-51.5-18T48 229q8 2 16 2 12 0 23-4-30-6-50-30t-20-55v-1q19 10 40 11-39-27-39-73 0-24 12-44 33 40 79.5 64T210 126q-2-10-2-20 0-36 25.5-61.5T295 19q38 0 64 27 30-6 56-21-10 31-39 48 27-3 51-13-18 26-44 45z"/></svg>@0szysza</a>
+      <a href="https://x.com/0szysza" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 432 384" fill="#1DA1F2" aria-hidden="true"><path d="M383 105v11q0 45-16.5 88.5t-47 79.5t-79 58.5T134 365q-73 0-134-39 10 1 21 1 61 0 109-37-29-1-51.5-18T48 229q8 2 16 2 12 0 23-4-30-6-50-30t-20-55v-1q19 10 40 11-39-27-39-73 0-24 12-44 33 40 79.5 64T210 126q-2-10-2-20 0-36 25-61.5T295 19q38 0 64 27 30-6 56-21-10 31-39 48 27-3 51-13-18 26-44 45z"/></svg>@0szysza</a>
     </div>
   </main>
 </body>

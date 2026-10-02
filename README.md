@@ -2,7 +2,7 @@
 
 A minimal home for two Roblox tools.
 
-**[Open the hub](https://0szysza.github.io/)**
+**[Open the tools](https://0szysza.github.io/)**
 
 ## Choose a tool
 

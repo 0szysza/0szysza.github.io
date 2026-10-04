@@ -13,8 +13,8 @@ A minimal home for two Roblox tools.
 
 ## Calculator sections
 
-- [Rebirth Calculator](https://0szysza.github.io/rebirth/): goal finish times and rebirth forecasts.
-- [Bubble Calculator](https://0szysza.github.io/bubble/): bubble forecasts for a duration, an exact end time or a target.
+- [Rebirth Calculator](https://0szysza.github.io/rebirth/rebirth/): goal finish times and rebirth forecasts.
+- [Bubble Calculator](https://0szysza.github.io/rebirth/bubble/): bubble forecasts for a duration, an exact end time or a target.
 - Both use the same header, custom calendar, account renaming and progress inspection. Their saved inputs are independent.
 
 ## Features

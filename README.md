@@ -9,7 +9,13 @@ A minimal home for two Roblox tools.
 | Tool | What you can do |
 | --- | --- |
 | [CCU Tracker](https://0szysza.github.io/trackccu/) | Explore live Roblox players, game/group history, peaks, game extras and comparisons. [Feature guide](https://github.com/0szysza/trackccu#features). |
-| [BGSI Rebirth Calculator](https://0szysza.github.io/rebirth/) | Track up to three named accounts, set a custom rebirth pace, save starting counts and estimate finish times. [Feature guide](https://github.com/0szysza/rebirth#features). |
+| [BGSI Stat Calculator](https://0szysza.github.io/rebirth/) | Forecast rebirths and bubbles for up to three named accounts. Choose a goal, duration or deadline, use M/B/T shortcuts and save your inputs. [Feature guide](https://github.com/0szysza/rebirth#features). |
+
+## Calculator sections
+
+- [Rebirth Calculator](https://0szysza.github.io/rebirth/): goal finish times and rebirth forecasts.
+- [Bubble Calculator](https://0szysza.github.io/bubble/): bubble forecasts for a duration, an exact end time or a target.
+- Both use the same header, custom calendar, account renaming and progress inspection. Their saved inputs are independent.
 
 ## Features
 

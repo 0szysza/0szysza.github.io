@@ -3,100 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#111713">
-  <meta name="description" content="Mapa świata serwera Minecraft Zygzakowice. Oglądaj budowle, odkrywaj teren i sprawdzaj pozycje graczy.">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Zygzakowice — mapa</title>
   <link rel="canonical" href="https://0szysza.github.io/zygzakowice/">
-  <title>Zygzakowice — mapa świata</title>
   <style>
-    :root { color-scheme: dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #e8eee9; background: #111713; }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-width: 280px; height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
-    button, a { -webkit-tap-highlight-color: transparent; }
-    button { font: inherit; cursor: pointer; }
-    button, .action { display: inline-flex; justify-content: center; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border: 1px solid #344039; border-radius: 7px; color: #e8eee9; background: #1b251e; font-size: 13px; font-weight: 550; text-decoration: none; white-space: nowrap; }
-    button:hover, .action:hover { border-color: #728b79; background: #26332a; }
-    :focus-visible { outline: 2px solid #a4d6b1; outline-offset: 3px; }
-    svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex: none; min-height: 68px; padding: max(12px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) 12px max(18px, env(safe-area-inset-left)); border-bottom: 1px solid #2b362f; }
-    .brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
-    .brand > svg { width: 28px; height: 28px; color: #a4d6b1; }
-    h1 { margin: 0; font-size: 18px; letter-spacing: -.35px; line-height: 1.2; font-weight: 650; }
-    .subtitle { margin: 3px 0 0; font-size: 12px; color: #a4b3a8; }
-    nav { display: flex; align-items: center; gap: 8px; }
-    main { flex: 1; min-height: 0; position: relative; background: #172019; }
-    iframe { display: block; width: 100%; height: 100%; border: 0; background: #172019; }
-    footer { flex: none; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px 18px; padding: 9px max(18px, env(safe-area-inset-right)) max(9px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left)); border-top: 1px solid #2b362f; font-size: 12px; line-height: 1.5; color: #a4b3a8; }
-    footer p { margin: 0; }
-    footer a { color: #c9dfcf; text-underline-offset: 3px; }
-    #feedback { position: fixed; z-index: 2; left: 50%; bottom: max(64px, calc(env(safe-area-inset-bottom) + 48px)); transform: translateX(-50%); max-width: calc(100vw - 32px); padding: 10px 16px; border: 1px solid #5d7a65; border-radius: 8px; background: #1b2c20; color: #eff8f1; font-size: 13px; box-shadow: 0 5px 18px #0004; overflow-wrap: anywhere; }
-    #feedback:empty { display: none; }
-    @media (max-width: 700px) {
-      header { gap: 10px; padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
-      h1 { font-size: 16px; }
-      .brand { gap: 8px; }
-      .brand > svg { width: 24px; height: 24px; }
-      nav { gap: 6px; }
-      button, .action { min-width: 44px; min-height: 44px; padding: 0 10px; }
-      .action-label { display: none; }
-      footer { font-size: 11px; padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
-    }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #111; }
+    iframe { display: block; width: 100%; height: 100%; border: 0; }
   </style>
 </head>
 <body>
-  <header>
-    <div class="brand">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z"/><path d="M9 3v15M15 6v15"/></svg>
-      <div><h1>Zygzakowice</h1><p class="subtitle">Mapa świata</p></div>
-    </div>
-    <nav aria-label="Narzędzia mapy">
-      <button type="button" id="copy-ip" aria-label="Kopiuj IP serwera: zygzakowicetest.minekeep.gg" title="Kopiuj IP serwera">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h4"/></svg>
-        <span class="action-label">Kopiuj IP</span>
-      </button>
-      <button type="button" id="reload-map" aria-label="Odśwież mapę" title="Odśwież mapę">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.1 6.1A8 8 0 0 1 20 12M4 12a8 8 0 0 0 13.9 5.9"/></svg>
-        <span class="action-label">Odśwież</span>
-      </button>
-      <a class="action" href="https://zygzakowicetest.minekeep.dev:2053/" target="_blank" rel="noopener noreferrer" aria-label="Otwórz mapę w nowej karcie" title="Otwórz mapę w nowej karcie">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7M21 3l-9 9M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5"/></svg>
-        <span class="action-label">Otwórz osobno</span>
-      </a>
-    </nav>
-  </header>
-  <main aria-label="Mapa serwera Minecraft">
-    <iframe id="world-map" src="https://zygzakowicetest.minekeep.dev:2053/" title="Interaktywna mapa świata Zygzakowice" allow="fullscreen" allowfullscreen></iframe>
-  </main>
-  <footer>
-    <p>Mapa działa, gdy serwer jest włączony. Jeśli się nie ładuje, uruchom serwer i kliknij „Odśwież”.</p>
-    <p><a href="https://zygzakowicetest.minekeep.dev:2053/" target="_blank" rel="noopener noreferrer">Przejdź bezpośrednio do mapy ↗</a></p>
-  </footer>
-  <div id="feedback" role="status" aria-live="polite" aria-atomic="true"></div>
-  <script>
-    (() => {
-      const serverAddress = 'zygzakowicetest.minekeep.gg';
-      const mapAddress = 'https://zygzakowicetest.minekeep.dev:2053/';
-      const map = document.getElementById('world-map');
-      const feedback = document.getElementById('feedback');
-      let feedbackTimer;
-      function announce(message) {
-        clearTimeout(feedbackTimer);
-        feedback.textContent = message;
-        feedbackTimer = setTimeout(() => { feedback.textContent = ''; }, 5000);
-      }
-      document.getElementById('copy-ip').addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(serverAddress);
-          announce('Skopiowano IP: ' + serverAddress);
-        } catch {
-          announce('IP serwera: ' + serverAddress);
-        }
-      });
-      document.getElementById('reload-map').addEventListener('click', () => {
-        map.src = mapAddress;
-        announce('Ponowne ładowanie mapy…');
-      });
-    })();
-  </script>
+  <iframe src="https://zygzakowicetest.minekeep.dev:2053/" title="Mapa świata Zygzakowice" allow="fullscreen" allowfullscreen></iframe>
 </body>
 </html>

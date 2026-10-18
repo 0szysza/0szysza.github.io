@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <meta charset="UTF-8" />
+  <title>Sondaże i wybory | Sejm Tracker</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --bg: #0b0d17;
+      --panel: #15192d;
+      --muted: #94a3b8;
+      --text: #e2e8f0;
+      --accent: #34bfe5;
+      --ok: #4caf50;
+      --warn: #f0b429;
+      --bad: #ff6b6b;
+
+      /* Kolory partii */
+      --c-ko: #ff5757;
+      --c-pis: #004494;
+      --c-kon: #545454;
+      --c-kkp: #d25f17;
+      --c-lew: #d31c3f;
+      --c-raz: #8c276f;
+      --c-psl: #39b54a;
+      --c-pl2050: #ffde59;
+      --c-inni: #7f8c8d;
+      --c-undec: #7f8c8d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Custom Scrollbars (suwaki) dopasowane do stylu strony */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(11, 16, 32, 0.5);
+      border-radius: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #262d4a;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.2s ease;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+      box-shadow: 0 0 10px rgba(52, 191, 229, 0.5);
+    }
+    ::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #262d4a rgba(11, 16, 32, 0.5);
+    }
+
+    /* Custom Range Sliders */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(30, 39, 70, 0.6);
+      border: 1px solid #262d4a;
+      border-radius: 6px;
+      outline: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    input[type="range"]:hover {
+      background: rgba(30, 39, 70, 0.9);
+      border-color: rgba(52, 191, 229, 0.4);
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 10px rgba(52, 191, 229, 0.6);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 14px rgba(52, 191, 229, 0.9);
+      background: #7ca8ff;
+    }
+    input[type="range"]::-webkit-slider-thumb:active {
+      transform: scale(1.3);
+      background: #9ebbff;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 10px rgba(52, 191, 229, 0.6);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    input[type="range"]::-moz-range-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 14px rgba(52, 191, 229, 0.9);
+    }
+    input[type="range"]::-moz-range-track {
+      height: 6px;
+      background: rgba(30, 39, 70, 0.6);
+      border: 1px solid #262d4a;
+      border-radius: 6px;
+    }
+
+    body {
+      background: linear-gradient(180deg, #0a0f1f, #0d1430);
+      color: var(--text);
+      font-family: Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+      min-height: 100vh;
+      font-size: 14px;
+      /* Opcjonalnie: można wymusić minimalną szerokość, aby uniknąć problemów z układem */
+      min-width: 1000px;
+    }
+
+    /* --- NAWIGACJA --- */
+    header {
+      padding: 10px 20px;
+      border-bottom: 1px solid #262d4a;
+      background: rgba(10, 15, 31, .9);
+      backdrop-filter: blur(6px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: inherit;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: .3px;
+    }
+
+    .logo svg {
+      margin-right: 8px;
+      width: 24px;
+      height: 24px;
+    }
+
+    .nav {
+      display: flex;
+      gap: 18px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      padding: 6px 0;
+      position: relative;
+      transition: color .2s;
+    }
+
+    .nav a:hover {
+      color: var(--text);
+    }
+
+    .nav a.active {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .nav a.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    /* --- GŁÓWNY KONTENER --- */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* --- SEKCJA ŚREDNIEJ SONDAŻOWEJ --- */
+    .average-section {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #262d4a;
+    }
+
+    .average-section h2 {
+      font-size: 20px;
+      margin-bottom: 15px;
+      background: linear-gradient(90deg, #34bfe5, #a78bff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .toggle-group {
+      background: var(--panel);
+      border: 1px solid #262d4a;
+      border-radius: 8px;
+      padding: 3px;
+      display: inline-flex;
+      margin: 0 auto 10px auto;
+    }
+    .toggle-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .toggle-btn:hover { color: var(--text); }
+    .toggle-btn.active { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(52, 191, 229, 0.4); }
+
+    /* --- STYL NOWOCZESNYCH KART --- */
+    .average-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px auto;
+      width: 100%;
+      max-width: 100%;
+      padding: 15px 10px 25px 10px;
+    }
+    
+    .average-grid::-webkit-scrollbar { height: 6px; }
+    .average-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+    .average-grid::-webkit-scrollbar-thumb { background: #2a375e; border-radius: 10px; }
+
+    .poll-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      flex: 0 0 100px; /* Stała szerokość elementu w poziomie */
+      min-width: 100px;
+      padding: 18px 10px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #18223d 0%, #11182c 100%);
+      border: 1px solid #1e2946;
+      border-top: 3px solid var(--party-color);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: fadeIn 0.6s ease backwards;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .poll-item::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 40px;
+      background: linear-gradient(180deg, var(--party-color) 0%, transparent 100%);
+      opacity: 0.1;
+      pointer-events: none;
+      transition: all 0.5s ease;
+    }
+
+    .poll-item:hover {
+      transform: scale(1.08) translateY(-6px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.7), 0 0 20px rgba(0,0,0,0.5);
+      border-color: var(--party-color); /* Cała ramka zapala się w kolorze partii */
+      background: linear-gradient(180deg, #1c2746 0%, #151e36 100%);
+      z-index: 10;
+    }
+
+    .poll-item:hover::before {
+      opacity: 0.25;
+      height: 100%; /* Poświata rozchodzi się na całą kartę */
+    }
+
+    @keyframes fadeIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .party-name {
+      font-size: 8.5px;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      text-align: center;
+      line-height: 1.2;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .party-pct {
+      font-size: 24px;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+      margin-bottom: 8px;
+    }
+
+    /* Style dla wskaźnika zmiany */
+    .party-change {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 50px;
+    }
+
+    .change-pos {
+      color: #4caf50;
+      background: rgba(76, 175, 80, 0.15);
+      border: 1px solid rgba(76, 175, 80, 0.2);
+    }
+
+    .change-neg {
+      color: #ff6b6b;
+      background: rgba(255, 107, 107, 0.15);
+      border: 1px solid rgba(255, 107, 107, 0.2);
+    }
+
+    .change-neu {
+      color: var(--muted);
+      background: rgba(125, 143, 179, 0.1);
+      border: 1px solid rgba(125, 143, 179, 0.15);
+    }
+
+    /* Link "Zobacz więcej" */
+    .see-more {
+      margin-top: 15px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .see-more a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      margin: 0 5px;
+      transition: color 0.2s;
+    }
+
+    .see-more a:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+
+    /* --- UKŁAD DOLNY (GRID) --- */
+    .split-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 25px;
+    }
+
+    /* USUNIĘTO: Media query dla split-layout */
+
+    /* Lewa kolumna: Kalkulatory */
+    .calculators-list {
+      background: var(--panel);
+      border: 1px solid #262d4a;
+      border-radius: 10px;
+      padding: 15px;
+    }
+
+    .calculators-list h3 {
+      font-size: 14px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 15px;
+      border-bottom: 1px solid #2a3766;
+      padding-bottom: 8px;
+    }
+
+    .calc-link {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      margin-bottom: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .calc-link:hover {
+      background: rgba(52, 191, 229, 0.1);
+      border-color: var(--accent);
+      transform: translateX(3px);
+    }
+
+    .calc-link i {
+      font-size: 16px;
+      color: var(--accent);
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .calc-link span {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* --- SONDA POPARCIA (WYKRESY BĄBELKOWE) --- */
+    .party-poll-section {
+      background: radial-gradient(ellipse at 50% -20%, rgba(30, 58, 138, 0.28), rgba(11, 16, 32, 0.96) 65%), #0b0d17;
+      border: 1px solid rgba(120, 160, 240, 0.18);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-top: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .party-poll-section::after {
+      content: '';
+      position: absolute;
+      top: -120px;
+      right: -60px;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(52, 191, 229, 0.08), transparent 70%);
+      pointer-events: none;
+    }
+
+    .poll-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 8px;
+    }
+
+    .poll-title-col {
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .poll-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(52, 191, 229, 0.12);
+      border: 1px solid rgba(52, 191, 229, 0.3);
+      color: #9bbfff;
+      font-size: 9px;
+      font-weight: 750;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-bottom: 3px;
+    }
+
+    .poll-badge .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 8px #4ade80;
+      animation: pollPulse 1.8s infinite;
+    }
+
+    @keyframes pollPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.8); }
+    }
+
+    .poll-header h2 {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.2px;
+      margin-bottom: 2px;
+    }
+
+    .poll-header p {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .poll-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .poll-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.18s ease;
+    }
+
+    .poll-action-btn:hover {
+      background: rgba(52, 191, 229, 0.18);
+      border-color: rgba(52, 191, 229, 0.45);
+      color: #ffffff;
+    }
+
+    .poll-action-btn.active {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      border-color: #60a5fa;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+    }
+
+    .poll-action-btn:disabled,
+    .poll-action-btn.voted-badge {
+      background: rgba(74, 222, 128, 0.12) !important;
+      border-color: rgba(74, 222, 128, 0.35) !important;
+      color: #86efac !important;
+      cursor: default !important;
+      box-shadow: none !important;
+    }
+
+    /* Siatka głosowania (przyciski partii - wersja kompaktowa) */
+    .poll-vote-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .poll-party-card {
+      background: linear-gradient(135deg, rgba(20, 28, 54, 0.7), rgba(12, 18, 36, 0.8));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      position: relative;
+      overflow: hidden;
+      font-family: inherit;
+      text-align: left;
+      color: var(--text);
+    }
+
+    .poll-party-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--party-color);
+      box-shadow: 0 0 8px var(--party-color);
+      transition: width 0.15s ease;
+    }
+
+    .poll-party-card:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(135deg, rgba(28, 38, 72, 0.85), rgba(16, 23, 46, 0.9));
+      border-color: color-mix(in srgb, var(--party-color) 60%, rgba(255, 255, 255, 0.25));
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    }
+
+    .poll-party-card:hover::before {
+      width: 5px;
+    }
+
+    .poll-party-card.voted {
+      border-color: var(--party-color);
+      background: linear-gradient(135deg, rgba(35, 50, 95, 0.65), rgba(18, 26, 52, 0.8));
+      box-shadow: 0 0 12px color-mix(in srgb, var(--party-color) 35%, transparent);
+    }
+
+    .party-card-badge {
+      width: 25px;
+      height: 25px;
+      border-radius: 5px;
+      background: var(--party-color);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+    }
+
+    .party-card-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .party-card-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .party-card-check {
+      opacity: 0;
+      transform: scale(0.6);
+      transition: all 0.18s ease;
+      color: #4ade80;
+      font-size: 12px;
+    }
+
+    .poll-party-card.voted .party-card-check,
+    .poll-party-card:hover .party-card-check {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Wyniki z poziomymi wykresami bąbelkowymi (Kompaktowe) */
+    .poll-results-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+    }
+
+    .poll-row {
+      display: grid;
+      grid-template-columns: 20px 185px 1fr 85px;
+      align-items: center;
+      gap: 10px;
+      padding: 3px 8px;
+      background: rgba(14, 21, 42, 0.4);
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      transition: all 0.18s ease;
+    }
+
+    .poll-row:hover {
+      background: rgba(22, 33, 64, 0.65);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .poll-row-rank {
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .poll-row-rank.top-1 { color: #ffd700; font-weight: 900; }
+    .poll-row-rank.top-2 { color: #e2e8f0; font-weight: 900; }
+    .poll-row-rank.top-3 { color: #cd7f32; font-weight: 900; }
+
+    .poll-row-party {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .poll-row-badge {
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: var(--party-color);
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      flex-shrink: 0;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .poll-row-name {
+      font-size: 12px;
+      font-weight: 650;
+      color: #e2e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .poll-row-voted-pill {
+      font-size: 8px;
+      font-weight: 750;
+      background: rgba(74, 222, 128, 0.16);
+      color: #4ade80;
+      border: 1px solid rgba(74, 222, 128, 0.35);
+      padding: 0 4px;
+      border-radius: 3px;
+      margin-left: 4px;
+      white-space: nowrap;
+    }
+
+    /* Bąbelkowy poziomy tor (Kompaktowy 14px) */
+    .poll-bubble-track {
+      position: relative;
+      height: 14px;
+      background: #060b18;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 7px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.85);
+    }
+
+    .poll-bubble-fill {
+      height: 100%;
+      min-width: 0;
+      border-radius: inherit;
+      position: relative;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--party-color) 65%, transparent), var(--party-color));
+      box-shadow: 0 0 10px color-mix(in srgb, var(--party-color), transparent 50%), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+      transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    /* Animowane bąbelki */
+    .poll-bubbles {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    .poll-bubbles i {
+      position: absolute;
+      left: var(--x);
+      bottom: -4px;
+      width: var(--s);
+      height: var(--s);
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.2));
+      box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+      animation: pollBubbleRise var(--d) var(--delay) infinite linear;
+      pointer-events: none;
+    }
+
+    @keyframes pollBubbleRise {
+      0% {
+        transform: translate(0, 2px) scale(0.6);
+        opacity: 0;
+      }
+      25% {
+        opacity: 0.95;
+      }
+      75% {
+        opacity: 0.8;
+      }
+      100% {
+        transform: translate(10px, -20px) scale(1.1);
+        opacity: 0;
+      }
+    }
+
+    .poll-row-score {
+      text-align: right;
+      display: flex;
+      align-items: baseline;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .poll-row-pct {
+      font-size: 13px;
+      font-weight: 800;
+      font-family: monospace;
+      color: color-mix(in srgb, var(--party-color) 45%, #ffffff);
+      text-shadow: 0 0 10px color-mix(in srgb, var(--party-color) 40%, transparent);
+      letter-spacing: -0.2px;
+    }
+
+    .poll-row-count {
+      font-size: 9px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Stopka sondy */
+    .poll-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .poll-footer-stats {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .poll-footer-stats strong {
+      color: #e2e8f0;
+      font-size: 12px;
+    }
+
+    .poll-footer-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .party-poll-section { padding: 12px 14px; }
+      .poll-row { grid-template-columns: 18px 145px 1fr 75px; gap: 8px; }
+      .poll-row-name { font-size: 11px; }
+      .poll-row-pct { font-size: 12px; }
+    }
+    .term-container {
+      margin-top: 15px;
+      background: rgba(10, 15, 31, 0.5);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 1;
+    }
+    .term-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      color: #e2e8f0;
+      font-weight: 800;
+    }
+    .term-progress-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.02);
+    }
+    .term-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #a78bff, #34bfe5, #00e676);
+      width: 0%;
+      transition: width 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: 0 0 10px rgba(52, 191, 229, 0.5);
+    }
+    .term-days-left {
+      color: var(--warn);
+    }
+
+    /* --- AKTUALNY SKŁAD PARLAMENTU --- */
+    .current-parliament-section {
+      background: var(--panel);
+      border: 1px solid #262d4a;
+      border-radius: 14px;
+      padding: 22px 22px 18px;
+      margin-bottom: 25px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    .current-parliament-section::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #8c276f, #d31c3f, #ff5757, #39b54a, #004494, #545454);
+    }
+    .current-parliament-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    .current-parliament-badge {
+      background: linear-gradient(135deg, #34bfe5, #7c5cff);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+    .current-parliament-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .current-parliament-subtitle {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+    .parliament-chambers {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .parliament-chamber {
+      min-width: 0;
+    }
+    .parliament-chamber h3 {
+      text-align: center;
+      font-size: 18px;
+      letter-spacing: .8px;
+      margin-bottom: 3px;
+    }
+    .parliament-chamber-note {
+      color: var(--muted);
+      font-size: 11px;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .parliament-seats-svg {
+      width: 100%;
+      display: block;
+    }
+    .parliament-legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px 10px;
+      margin-top: 8px;
+    }
+    .parliament-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 5px;
+      border-radius: 5px;
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .parliament-legend-item:hover {
+      background: rgba(255, 255, 255, .07);
+    }
+    .parliament-legend-dot {
+      width: 10px;
+      height: 10px;
+      flex: 0 0 10px;
+      border-radius: 50%;
+    }
+    .current-parliament-tooltip {
+      position: fixed;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0;
+      color: var(--text);
+      background: rgba(13, 18, 33, .97);
+      border: 1px solid #2a3766;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.5);
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      transition: opacity .15s;
+      white-space: nowrap;
+    }
+    @keyframes parliamentPulse {
+      from { filter: brightness(1); }
+      to { filter: brightness(1.55); }
+    }
+  </style>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0b0d17">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ccu-theme.css?v=1">
+<script src="ccu-ui.js?v=1" defer></script>
+<link rel="canonical" href="https://0szysza.github.io/sejm/">
+</head>
+
+<body class="sejm-app" data-page="index">
+
+  <header id="sejm-header"><div class="sejm-topbar"><a class="sejm-back" href="/" aria-label="Wróć do narzędzi 0szysza"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 5-7 7 7 7M5 12h14"/></svg></a><a class="sejm-brand" href="index.html"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="3" y="13" width="26" height="16" rx="5" fill="#34bfe5" fill-opacity=".14" stroke="#34bfe5" stroke-width="1.8"/><path d="m9 12 7-9 9 7-7 9-9-7Z" fill="#15192d" stroke="#34bfe5" stroke-width="1.8" stroke-linejoin="round"/><path d="m15 10 1 3 5-2M10 22h12" stroke="#34bfe5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>Sejm Tracker</strong><small>Sondaże, wybory i symulacje</small></span></a><div class="sejm-header-tools"><a class="sejm-source" href="https://dawidstats.pl/" target="_blank" rel="noopener">DawidStats <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M15 3h6v6m-1-5L10 14m8-1v7H4V6h7"/></svg></a><details class="sejm-tools-menu"><summary>Narzędzia <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 9 6 6 6-6"/></svg></summary><div><a href="/trackccu/">CCU Tracker<small>Statystyki gier Roblox</small></a><a href="/stat/">BGSI Stat Calculator<small>Kalkulatory rebirthów i bubbles</small></a><a href="/">Wszystkie narzędzia</a></div></details></div></div><nav class="sejm-navigation" aria-label="Sekcje serwisu"><a href="index.html" class="is-active" aria-current="page">Przegląd</a><a href="wybory.html">Historia wyborów</a><a href="sondaze.html">Sondaże</a><a href="sejm.html">Sejm</a><a href="senat.html">Senat</a><a href="prezydent.html">Prezydent</a><a href="europarlament.html">Europarlament</a><a href="sejmiki.html">Sejmiki</a><a href="panel-wyborczy.html">Panel wyborczy</a></nav></header><section class="sejm-intro"><p>SEJM TRACKER</p><h1>Sondaże i wybory</h1><span>Śledź poparcie, poznaj historię i sprawdź własny scenariusz wyborczy.</span></section>
+
+  <div class="container">
+
+    <div class="average-section">
+      <h2>Średnia Sondażowa (30 dni)</h2>
+      <div style="text-align: center; margin-bottom: 8px;">
+        <div class="toggle-group">
+          <button type="button" class="toggle-btn active" id="btn-index-all">Z niezdecydowanymi</button>
+          <button type="button" class="toggle-btn" id="btn-index-decided">Tylko zdecydowani</button>
+        </div>
+      </div>
+      <div class="average-grid" id="index-average-grid">Ładowanie...</div>
+      <p style="text-align: center; font-size: 11px; color: #a0a0a0; margin-top: 5px; margin-bottom: 10px;">*uwzględniono sondaże tylko z Rozwój+</p>
+      <div class="see-more">
+        Zobacz więcej:
+        <a href="sondaze.html"><i class="fa-solid fa-map"></i> Mapa rozkładu</a> •
+        <a href="sondaze.html"><i class="fa-solid fa-chart-line"></i> Wykres poparcia</a> •
+        <a href="sondaze.html"><i class="fa-solid fa-users"></i> Rozkład mandatów</a>
+      </div>
+    </div>
+
+    <div class="split-layout">
+
+      <div class="left-col">
+        <div class="calculators-list">
+          <h3>Kalkulatory Wyborcze</h3>
+
+          <a href="sejm.html" class="calc-link">
+            <i class="fa-solid fa-building-columns"></i>
+            <span>Kalkulator Sejmu</span>
+          </a>
+
+          <a href="senat.html" class="calc-link">
+            <i class="fa-solid fa-landmark"></i>
+            <span>Kalkulator Senatu</span>
+          </a>
+
+          <a href="prezydent.html" class="calc-link">
+            <i class="fa-solid fa-check-to-slot"></i>
+            <span>Kalkulator prezydencki</span>
+          </a>
+
+          <a href="europarlament.html" class="calc-link">
+            <i class="fa-solid fa-globe-europe"></i>
+            <span>Europarlament</span>
+          </a>
+
+          <a href="sejmiki.html" class="calc-link">
+            <i class="fa-solid fa-map-location-dot"></i>
+            <span>Kalkulator Samorządowy</span>
+          </a>
+        </div>
+
+        <div class="buycoffee-banner" style="background: var(--panel); border: 1px solid #262d4a; border-radius: 10px; padding: 14px 12px; text-align: center; margin-top: 15px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+          <a href="https://buycoffee.to/dawidstats" target="_blank" rel="noopener noreferrer" style="display: inline-block; transition: transform 0.2s ease;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+            <img src="https://buycoffee.to/static/img/share/share-button-dark--pl.png" style="width: 146px; height: 38px; display: block;" alt="Postaw kawę dla DawidStats na buycoffee.to">
+          </a>
+          <div style="font-size: 11px; line-height: 1.45; color: var(--muted); margin-top: 10px; text-align: center;">
+            Od grudnia 2026 zacznę ponosić koszty związane z utrzymaniem (hosting) oraz z rozwijaniem strony (subskrypcje AI) więc gdyby ktoś chciał wspomóc byłbym wdzięczny. Przychody z reklam w obecnym tempie mógłbym wypłacić dopiero po 3 latach co nie jest zbyt bliskie.
+          </div>
+        </div>
+
+      </div>
+
+      <div class="trust-section">
+
+        <section class="current-parliament-section" aria-labelledby="current-parliament-title">
+          <div class="current-parliament-header">
+            <span class="current-parliament-badge">🏛️ Parlament</span>
+            <span class="current-parliament-title" id="current-parliament-title">Aktualny skład parlamentu</span>
+          </div>
+          <div class="current-parliament-subtitle">Najedź na mandat lub pozycję legendy, aby zobaczyć szczegóły</div>
+
+          <div class="parliament-chambers">
+            <div class="parliament-chamber">
+              <h3>SEJM</h3>
+              <div class="parliament-chamber-note">460 mandatów</div>
+              <svg id="current-sejm-svg" class="parliament-seats-svg" viewBox="0 0 700 370" preserveAspectRatio="xMidYMid meet" aria-label="Aktualny skład Sejmu"></svg>
+              <div id="current-sejm-legend" class="parliament-legend"></div>
+            </div>
+
+            <div class="parliament-chamber">
+              <h3>SENAT</h3>
+              <div class="parliament-chamber-note">100 mandatów</div>
+              <svg id="current-senat-svg" class="parliament-seats-svg" viewBox="0 0 700 370" preserveAspectRatio="xMidYMid meet" aria-label="Aktualny skład Senatu"></svg>
+              <div id="current-senat-legend" class="parliament-legend"></div>
+            </div>
+          </div>
+          <div id="current-parliament-tooltip" class="current-parliament-tooltip"></div>
+          <p style="text-align: center; font-size: 13px; color: #a0a0a0; margin-top: 20px; margin-bottom: 5px;">
+            &#377;r&oacute;d&#322;o danych: strona Sejmu i Senatu | Ostatnia aktualizacja: 5 września 2026
+          </p>
+        </section>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SONDA POPARCIA (WYKRESY BĄBELKOWE) -->
+    <!-- ========================================== -->
+    <section class="party-poll-section" id="party-poll-section">
+      <div class="poll-header">
+        <div class="poll-title-col">
+          <div class="poll-badge">
+            <span class="live-dot"></span> SONDA POPARCIA
+          </div>
+          <h2>Sonda poparcia dla partii politycznych</h2>
+          <p>Gdyby wybory do Sejmu odbyły się w najbliższą niedzielę, na którą partię oddałbyś swój głos? Wybierz ugrupowanie lub sprawdź aktualne wyniki.</p>
+        </div>
+        <div class="poll-controls">
+          <button type="button" class="poll-action-btn active" id="btn-poll-view-results">
+            <i class="fa-solid fa-chart-simple"></i> Wyniki
+          </button>
+          <button type="button" class="poll-action-btn" id="btn-poll-view-vote">
+            <i class="fa-solid fa-check-to-slot"></i> <span id="btn-poll-vote-label">Oddaj głos</span>
+          </button>
+          <button type="button" class="poll-action-btn" id="btn-poll-sort" title="Przełącz sortowanie">
+            <i class="fa-solid fa-arrow-down-wide-short"></i> <span id="btn-poll-sort-label">Sortuj wg %</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Widok oddawania głosu (Karty partii) -->
+      <div id="poll-vote-container" class="poll-vote-grid" style="display: none;"></div>
+
+      <!-- Widok wyników (Poziome wykresy bąbelkowe) -->
+      <div id="poll-results-container" class="poll-results-wrap"></div>
+
+      <!-- Stopka sondy -->
+      <div class="poll-footer">
+        <div class="poll-footer-stats">
+          <span><i class="fa-solid fa-users"></i> Łącznie oddanych głosów: <strong id="poll-total-votes">0</strong></span>
+          <span id="poll-user-status" style="display: none;"><i class="fa-solid fa-circle-check" style="color: #4ade80;"></i> Twój wybór: <strong id="poll-user-choice" style="color: #60a5fa;"></strong></span>
+        </div>
+        <div class="poll-footer-actions">
+          <span style="font-size: 11px; color: var(--muted);"><i class="fa-solid fa-shield-halved"></i> 1 głos na przeglądarkę • Wyniki na żywo</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+  <script src="data.js"></script>
+
+  <script>
+    (function () {
+      const SEJM_PARTIES = [
+        { key: 'razem', name: 'Razem', seats: 4, color: '#8c276f' },
+        { key: 'lewica', name: 'Lewica', seats: 21, color: '#d31c3f' },
+        { key: 'ko', name: 'KO', seats: 156, color: '#ff5757' },
+        { key: 'pl2050', name: 'Polska 2050', seats: 15, color: '#ffbf01' },
+        { key: 'psl', name: 'PSL', seats: 32, color: '#39b54a' },
+        { key: 'centrum', name: 'Centrum', seats: 15, color: '#57bfc1' },
+        { key: 'niez', name: 'Niezale&#380;ni', seats: 7, color: '#7f8c8d' },
+        { key: 'db', name: 'Demokracja Bezpo&#347;rednia', seats: 4, color: '#14b8a6' },
+        { key: 'rozwoj', name: 'Rozw&oacute;j+', seats: 40, color: '#165ea2' },
+        { key: 'pis', name: 'PiS', seats: 147, color: '#004494' },
+        { key: 'konf', name: 'Konfederacja', seats: 16, color: '#545454' },
+        { key: 'braun', name: 'Braun', seats: 3, color: '#d25f17' }
+      ];
+
+      const SENAT_PARTIES = [
+        { key: 'lewica', name: 'Lewica', seats: 8, color: '#d31c3f' },
+        { key: 'ko', name: 'KO', seats: 42, color: '#ff5757' },
+        { key: 'td', name: 'Trzecia Droga', seats: 8, color: '#39b54a' },
+        { key: 'nowa-polska', name: 'NOWA Polska–Centrum', seats: 6, color: '#57bfc1' },
+        { key: 'niez', name: 'Niezrzeszeni', seats: 2, color: '#7f8c8d' },
+        { key: 'rozwoj', name: 'Rozw&oacute;j+', seats: 2, color: '#165ea2' },
+        { key: 'pis', name: 'PiS', seats: 31, color: '#004494' },
+        { key: 'puste', name: 'Puste', seats: 1, color: '#4a5568' }
+      ];
+
+      const SEJM_ROWS = [71, 66, 60, 54, 49, 43, 38, 32, 26, 21];
+      const SENAT_ROWS = [23, 20, 18, 15, 13, 11];
+      const tooltip = document.getElementById('current-parliament-tooltip');
+
+      function seatPositions(rows, outerRadius, innerRadius) {
+        const positions = [];
+        const cx = 350;
+        const cy = 360;
+        const radiusStep = (outerRadius - innerRadius) / (rows.length - 1);
+
+        rows.forEach((seatsInRow, rowIndex) => {
+          const radius = outerRadius - rowIndex * radiusStep;
+          for (let seat = 0; seat < seatsInRow; seat++) {
+            const angle = Math.PI - (seat / (seatsInRow - 1)) * Math.PI;
+            positions.push({
+              x: cx + radius * Math.cos(angle),
+              y: cy - radius * Math.sin(angle),
+              angle,
+              radius
+            });
+          }
+        });
+
+        return positions.sort((a, b) => Math.abs(a.angle - b.angle) > 1e-5 ? b.angle - a.angle : b.radius - a.radius);
+      }
+
+      function buildSeatChart(config) {
+        const svg = document.getElementById(config.svgId);
+        const legend = document.getElementById(config.legendId);
+        if (!svg || !legend || !tooltip) return;
+
+        const totalSeats = config.parties.reduce((sum, party) => sum + party.seats, 0);
+        if (totalSeats !== config.total) {
+          console.warn(`Nieprawidłowa liczba mandatów w ${config.chamber}: ${totalSeats}`);
+          return;
+        }
+
+        const partyByKey = Object.fromEntries(config.parties.map(party => [party.key, party]));
+        const seats = config.parties.flatMap(party => Array(party.seats).fill(party.key));
+        const positions = seatPositions(config.rows, config.outerRadius, config.innerRadius);
+        svg.innerHTML = '';
+        legend.innerHTML = '';
+
+        function resetHighlight() {
+          tooltip.style.opacity = '0';
+          svg.querySelectorAll('circle').forEach(circle => {
+            circle.style.opacity = '1';
+            circle.style.animation = 'none';
+          });
+        }
+
+        function highlight(partyKey, event) {
+          const party = partyByKey[partyKey];
+          tooltip.innerHTML = `<span style="color:${party.color}">●</span> ${party.name}: <b>${party.seats}</b> mandatów`;
+          tooltip.style.opacity = '1';
+          if (event) {
+            tooltip.style.left = `${event.clientX + 14}px`;
+            tooltip.style.top = `${event.clientY - 36}px`;
+          }
+          svg.querySelectorAll('circle').forEach(circle => {
+            const active = circle.dataset.party === partyKey;
+            circle.style.opacity = active ? '1' : '.2';
+            circle.style.animation = active ? 'parliamentPulse .8s infinite alternate' : 'none';
+          });
+        }
+
+        positions.forEach((position, index) => {
+          const partyKey = seats[index];
+          const party = partyByKey[partyKey];
+          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('cx', position.x.toFixed(2));
+          circle.setAttribute('cy', position.y.toFixed(2));
+          circle.setAttribute('r', config.dotRadius);
+          circle.setAttribute('fill', party.color);
+          circle.dataset.party = partyKey;
+          circle.style.cursor = 'pointer';
+          circle.style.transition = 'opacity .15s, filter .15s';
+          circle.addEventListener('mouseenter', event => highlight(partyKey, event));
+          circle.addEventListener('mousemove', event => {
+            tooltip.style.left = `${event.clientX + 14}px`;
+            tooltip.style.top = `${event.clientY - 36}px`;
+          });
+          circle.addEventListener('mouseleave', resetHighlight);
+          svg.appendChild(circle);
+        });
+
+        config.parties.forEach(party => {
+          const item = document.createElement('div');
+          item.className = 'parliament-legend-item';
+          item.innerHTML = `<span class="parliament-legend-dot" style="background:${party.color}"></span>${party.name}: <b>${party.seats}</b>`;
+          item.addEventListener('mouseenter', event => highlight(party.key, event));
+          item.addEventListener('mouseleave', resetHighlight);
+          legend.appendChild(item);
+        });
+      }
+
+      buildSeatChart({
+        chamber: 'Sejm', svgId: 'current-sejm-svg', legendId: 'current-sejm-legend',
+        parties: SEJM_PARTIES, rows: SEJM_ROWS, total: 460, outerRadius: 340, innerRadius: 100, dotRadius: 6
+      });
+      buildSeatChart({
+        chamber: 'Senat', svgId: 'current-senat-svg', legendId: 'current-senat-legend',
+        parties: SENAT_PARTIES, rows: SENAT_ROWS, total: 100, outerRadius: 330, innerRadius: 150, dotRadius: 13
+      });
+    })();
+  </script>
+
+  <!-- Krak\u00f3w poll chart renderer -->
+  <script>
+  (function() {
+    const KRAKOW_DATA = [
+      { name: 'Łukasz\nGibała',   initials: 'ŁG',  pct: 22.1, color: '#04cb67', badge: 'KdM',  badgeColor: '#039e50', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/%C5%81ukasz_Giba%C5%82a%2C_2013.jpg/120px-%C5%81ukasz_Giba%C5%82a%2C_2013.jpg' },
+      { name: 'Monika\nPiątkowska', initials: 'MP', pct: 13.7, color: '#ff5757', badge: 'KO/PSL', badgeColor: '#e03030', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Monika_Pi%C4%85tkowska_%2816315747540%29_%28cropped%29.jpg/120px-Monika_Pi%C4%85tkowska_%2816315747540%29_%28cropped%29.jpg' },
+      { name: 'Jan\nHoffman',     initials: 'JH',  pct: 8.3,  color: '#6b7a8d', badge: 'bezp.', badgeColor: '#505a6b', photo: 'https://tse1.mm.bing.net/th/id/OIP.kZQulgEoofq3rIEmpUx4dwHaE8?r=0&cb=thfc1falcon3&rs=1&pid=ImgDetMain&o=7&rm=3' },
+      { name: 'Daria\nGosek-Pop.', initials: 'DG', pct: 8.1,  color: '#d31c3f', badge: 'LEW',  badgeColor: '#a81530', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Daria_Gosek-Popio%C5%82ek_%28cropped%29.jpg/120px-Daria_Gosek-Popio%C5%82ek_%28cropped%29.jpg' },
+      { name: 'Michał\nDrewnicki', initials: 'MD', pct: 7.8,  color: '#004494', badge: 'PiS',  badgeColor: '#003070', photo: 'https://tse4.mm.bing.net/th/id/OIF.7eeh0ZPIwno6NSZIidDQZQ?r=0&cb=thfc1falcon3&rs=1&pid=ImgDetMain&o=7&rm=3' },
+      { name: 'Aleksandra\nOwca', initials: 'AO',  pct: 5.8,  color: '#8c276f', badge: 'RAZ',  badgeColor: '#6e1d57', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Aleksandra-owca-2025.jpg/120px-Aleksandra-owca-2025.jpg' },
+      { name: 'Bartosz\nBocheńczak', initials: 'BB', pct: 4.5, color: '#545454', badge: 'KONF', badgeColor: '#3a3a3a', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Bartosz_Boche%C5%84czak.jpg/120px-Bartosz_Boche%C5%84czak.jpg' },
+      { name: 'Marian\nBanaś',    initials: 'MB',  pct: 3.5,  color: '#6b7a8d', badge: 'bezp.', badgeColor: '#505a6b', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Marian_Bana%C5%9B_2019_%28cropped%29.jpg/120px-Marian_Bana%C5%9B_2019_%28cropped%29.jpg' },
+      { name: 'Michał\nKlimek',   initials: 'MK',  pct: 2.4,  color: '#d25f17', badge: 'KKP',  badgeColor: '#a84c10', photo: 'https://tse3.mm.bing.net/th/id/OIF.0VrbhCDJywj0JGlVEDSNSg?r=0&cb=thfc1falcon3&rs=1&pid=ImgDetMain&o=7&rm=3' },
+      { name: 'Rafał\nKomarewicz', initials: 'RK', pct: 1.3,  color: '#c8a800', badge: '2050', badgeColor: '#a08800', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/RK-2025.jpg/120px-RK-2025.jpg' },
+      { name: 'Inny',             initials: '?',   pct: 3.6,  color: '#4a5568', badge: '—',    badgeColor: '#374151', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Profile_avatar_placeholder_large.png/120px-Profile_avatar_placeholder_large.png' },
+      { name: 'Niezdec.',         initials: '?',   pct: 18.5, color: '#374151', badge: 'N/D',  badgeColor: '#2a2f3d', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Portrait_Placeholder.png/120px-Portrait_Placeholder.png' }
+    ];
+
+    function renderKrakowChart() {
+      const chart = document.getElementById('krakow-chart');
+      if (!chart) return;
+      chart.innerHTML = '';
+
+      const maxPct = Math.max(...KRAKOW_DATA.map(d => d.pct));
+      const chartH = 200; // total chart height px
+      // Reserve: 44px avatar + 5px gap + 16px name ≈ 65px bottom; text needs ~20px; bars take rest
+      const BAR_AREA = chartH - 85;
+
+      const firstPct = KRAKOW_DATA[0].pct;
+      const highlightTwo = firstPct <= 50;
+
+      KRAKOW_DATA.forEach((cand, i) => {
+        const col = document.createElement('div');
+        const isHighlighted = (i === 0) || (highlightTwo && i === 1);
+        col.className = 'krakow-col' + (isHighlighted ? ' top-1' : '');
+
+        const barH = Math.max(4, Math.round((cand.pct / maxPct) * BAR_AREA));
+
+        col.innerHTML = `
+          <div class="krakow-bar-wrap">
+            <div class="krakow-pct">${cand.pct.toFixed(1).replace('.', ',')}%</div>
+            <div class="krakow-bar" data-h="${barH}"
+                 style="background: linear-gradient(to top, ${cand.color}, ${cand.color}cc); height: 0;"></div>
+          </div>
+          <div class="krakow-avatar-wrap">
+            <div class="krakow-avatar" style="background: radial-gradient(circle at 40% 35%, ${cand.color}ee, ${cand.color}99);">
+              ${cand.photo ? `<img src="${cand.photo}" alt="${cand.name}">` : cand.initials}
+            </div>
+            <div class="krakow-mini-badge" style="background: ${cand.badgeColor};" title="${cand.badge}">${cand.badge}</div>
+          </div>
+          <div class="krakow-name">${cand.name.replace('\n', '<br>')}</div>
+        `;
+        chart.appendChild(col);
+      });
+
+      // Animate bars in after paint
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          chart.querySelectorAll('.krakow-bar').forEach(bar => {
+            bar.style.height = bar.dataset.h + 'px';
+          });
+        });
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', renderKrakowChart);
+    } else {
+      renderKrakowChart();
+    }
+  })();
+  </script>
+
+  <script>
+    (function () {
+      // Konfiguracja
+      const TARGET_ID = 'index-average-grid';
+      const TERM_ID = 'term_current';
+      let currentIndexMode = 'all';
+
+      // Funkcje pomocnicze
+      function parsePollDate(dateStr) {
+        if (!dateStr) return null;
+        const cleanDate = dateStr.replace(/-/g, '.');
+        const parts = cleanDate.split('.').filter(p => p.trim() !== "");
+        if (parts.length < 3) return null;
+        const year = parseInt(parts[parts.length - 1], 10);
+        const month = parseInt(parts[parts.length - 2], 10) - 1;
+        const day = parseInt(parts[parts.length - 3], 10);
+        return new Date(year, month, day);
+      }
+
+      function calculateAverage(polls, parties, mode = 'all') {
+        if (!polls || polls.length === 0) return {};
+
+        let validPolls = polls;
+        if (typeof TERM_ID !== 'undefined' && TERM_ID === 'term_current') {
+           const withRozwoj = polls.filter(p => p.data && p.data.RozwojPlus !== undefined);
+           if (withRozwoj.length > 0) {
+              validPolls = withRozwoj;
+           }
+        }
+
+        let sums = {};
+        parties.forEach(p => sums[p.key] = 0);
+        if (mode === 'all') sums['und'] = 0;
+
+        let count = 0;
+        validPolls.forEach(poll => {
+          let sumParties = 0;
+          parties.forEach(p => sumParties += (poll.data[p.key] || 0));
+          let undVal = 0;
+          if (sumParties < 99.9) {
+             undVal = 100 - sumParties;
+          }
+
+          if (mode === 'decided') {
+            if (sumParties > 0) {
+              parties.forEach(p => {
+                const raw = poll.data[p.key] || 0;
+                sums[p.key] += (raw / sumParties) * 100;
+              });
+              count++;
+            }
+          } else {
+            parties.forEach(p => sums[p.key] += (poll.data[p.key] || 0));
+            sums['und'] += undVal;
+            count++;
+          }
+        });
+
+        if (count === 0) return {};
+        let averages = {};
+        Object.keys(sums).forEach(k => averages[k] = sums[k] / count);
+        return averages;
+      }
+
+      // Główna logika
+      function initIndexAverage() {
+        if (typeof termsData === 'undefined') {
+          document.getElementById(TARGET_ID).innerHTML = 'Błąd: Brak pliku data.js';
+          return;
+        }
+
+        const termData = termsData[TERM_ID];
+        const allSurveys = termData.surveys;
+        const partyOrder = termData.parties;
+
+        // Przetwarzanie dat
+        const surveysWithDates = allSurveys.map(s => {
+          const dateRegex = /[0-9]{1,2}(?:[-.][0-9]{1,2})*[.-]\d{4}/;
+          const match = s.title.match(dateRegex);
+          if (!match) return null;
+          const dateObj = parsePollDate(match[0]);
+          return dateObj ? { ...s, dateObj } : null;
+        }).filter(s => s !== null);
+
+        surveysWithDates.sort((a, b) => b.dateObj - a.dateObj);
+
+        if (surveysWithDates.length === 0) return;
+
+        const latestDate = surveysWithDates[0].dateObj;
+        const range30 = 30 * 24 * 60 * 60 * 1000; // 30 dni w ms
+
+        // Filtracja: Ostatnie 30 dni
+        const currentPolls = surveysWithDates.filter(s => {
+          const diff = latestDate.getTime() - s.dateObj.getTime();
+          return diff >= 0 && diff <= range30;
+        });
+
+        // Filtracja: Poprzednie 30 dni (zakres 30-60 dni temu)
+        const prevPolls = surveysWithDates.filter(s => {
+          const diff = latestDate.getTime() - s.dateObj.getTime();
+          return diff > range30 && diff <= (2 * range30);
+        });
+
+        // Oblicz średnią (obecna i poprzednia)
+        const averages = calculateAverage(currentPolls, partyOrder, currentIndexMode);
+        const averagesPrev = calculateAverage(prevPolls, partyOrder, currentIndexMode);
+
+        // Renderowanie HTML
+        const grid = document.getElementById(TARGET_ID);
+        grid.innerHTML = '';
+
+        let displayItems = [];
+        partyOrder.forEach(p => {
+          const val = averages[p.key];
+          if (val !== undefined && val > 0.5) {
+            const textColor = (p.label === '25' || p.label === 'Inni' || p.label === 'TD') ? '#0b0d17' : '#fff';
+
+            displayItems.push({
+              label: p.label,
+              val: val,
+              prev: averagesPrev[p.key], // Dodajemy poprzednią wartość
+              color: p.color,
+              textColor: textColor
+            });
+          }
+        });
+        displayItems.sort((a, b) => b.val - a.val);
+
+        if (currentIndexMode === 'all' && averages['und'] !== undefined && averages['und'] > 0.1) {
+          displayItems.push({
+            label: '?',
+            val: averages['und'],
+            prev: averagesPrev['und'] !== undefined ? averagesPrev['und'] : null,
+            color: '#6b7280',
+            textColor: '#fff',
+            isUndecided: true
+          });
+        }
+
+        displayItems.forEach((item, index) => {
+          // Obliczanie zmiany (identyczne jak w sondaze.html)
+          let diffClass = 'change-neu';
+          let diffText = '-';
+          
+          if (item.prev !== undefined && item.prev !== null) {
+            const diff = item.val - item.prev;
+            if (Math.abs(diff) < 0.1) {
+              diffText = '0,0%';
+              diffClass = 'change-neu';
+            } else if (diff > 0) {
+              diffText = `+${diff.toFixed(1).replace('.', ',')}%`;
+              diffClass = 'change-pos';
+            } else {
+              diffText = `${diff.toFixed(1).replace('.', ',')}%`;
+              diffClass = 'change-neg';
+            }
+          }
+
+          // Staggered animation delay
+          const delay = (index * 0.05).toFixed(2);
+          
+          const partyFullNames = {
+            'KO': 'Koalicja Obywatelska',
+            'PiS': 'Prawo i Sprawiedliwość',
+            'R+': 'Rozwój+',
+            'KON': 'Konfederacja',
+            'KKP': 'Konfederacja Korony Polskiej',
+            'LEW': 'Nowa Lewica',
+            'RAZ': 'Razem',
+            'TD': 'Trzecia Droga',
+            'PSL': 'Polskie Stronnictwo Ludowe',
+            '25': 'Polska 2050',
+            'Inni': 'Inni',
+            '?': 'Niezdecydowani',
+            'Niezdecydowani': 'Niezdecydowani'
+          };
+          const fullName = partyFullNames[item.label] || item.label;
+
+          const html = `
+          <div class="poll-item" style="--party-color: ${item.color}; animation-delay: ${delay}s;">
+            <div class="party-name">${fullName}</div>
+            <div class="party-pct">${item.val.toFixed(1).replace('.', ',')}%</div>
+            <div class="party-change ${diffClass}">${diffText}</div>
+          </div>
+        `;
+          grid.innerHTML += html;
+        });
+
+        const infoDiv = document.createElement('div');
+        infoDiv.style.width = '100%';
+        infoDiv.style.textAlign = 'center';
+        infoDiv.style.fontSize = '11px';
+        infoDiv.style.color = 'var(--muted)';
+        infoDiv.style.marginTop = '10px';
+
+        grid.appendChild(infoDiv);
+      }
+
+      function setIndexMode(mode) {
+        currentIndexMode = mode;
+        const btnAll = document.getElementById('btn-index-all');
+        const btnDec = document.getElementById('btn-index-decided');
+        if (btnAll) btnAll.classList.toggle('active', mode === 'all');
+        if (btnDec) btnDec.classList.toggle('active', mode === 'decided');
+        initIndexAverage();
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const btnAll = document.getElementById('btn-index-all');
+        const btnDec = document.getElementById('btn-index-decided');
+        if (btnAll) btnAll.addEventListener('click', () => setIndexMode('all'));
+        if (btnDec) btnDec.addEventListener('click', () => setIndexMode('decided'));
+        initIndexAverage();
+      });
+    })();
+  </script>
+
+  <!-- ========================================== -->
+  <!-- SONDA POPARCIA (WYKRESY BĄBELKOWE) -->
+  <!-- ========================================== -->
+  <script>
+  (function () {
+    const POLL_PARTIES = [
+      { id: 'ko', name: 'Koalicja Obywatelska', short: 'KO', color: '#ff5757' },
+      { id: 'pis', name: 'Prawo i Sprawiedliwość', short: 'PiS', color: '#004494' },
+      { id: 'konfederacja', name: 'Konfederacja', short: 'KONF', color: '#16325c' },
+      { id: 'kkp', name: 'Konfederacja Korony Polskiej', short: 'KKP', color: '#d25f17' },
+      { id: 'lewica', name: 'Lewica', short: 'LEW', color: '#d31c3f' },
+      { id: 'rozwoj', name: 'Rozwój+', short: 'R+', color: '#0284c7' },
+      { id: 'razem', name: 'Razem', short: 'RAZ', color: '#8c276f' },
+      { id: 'psl', name: 'Polskie Stronnictwo Ludowe', short: 'PSL', color: '#39b54a' },
+      { id: 'pl2050', name: 'Polska 2050', short: 'PL2050', color: '#e5aa00' },
+      { id: 'bs', name: 'Bezpartyjni Samorządowcy', short: 'BS', color: '#0094ff' },
+      { id: 'nf', name: 'Nowa Fala', short: 'NF', color: '#ff66c4' },
+      { id: 'rdip', name: 'Ruch Dobrobytu i Pokoju', short: 'RDiP', color: '#2e8b57' },
+      { id: 'inni', name: 'Inni', short: 'INNI', color: '#7f8c8d' }
+    ];
+
+    const VOTE_STORAGE_KEY = 'dawidstats_sejm_poll_voted_locked_v1';
+    const LOCAL_VOTES_KEY = 'dawidstats_sejm_poll_totals_locked_v1';
+
+    // Całkowity reset starych błędnych kluczy
+    [
+      'dawidstats_sejm_poll_voted_fresh',
+      'dawidstats_sejm_poll_counts_fresh',
+      'dawidstats_sejm_poll_voted',
+      'dawidstats_sejm_poll_counts'
+    ].forEach(k => {
+      try { localStorage.removeItem(k); } catch (e) {}
+    });
+
+    let currentView = 'vote';
+    let sortByPct = true;
+    let votesData = {};
+
+    function getStoredLocalCounts() {
+      try {
+        const raw = localStorage.getItem(LOCAL_VOTES_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      const initial = {};
+      POLL_PARTIES.forEach(p => {
+        initial[p.id] = 0;
+      });
+      return initial;
+    }
+
+    function saveLocalCounts(counts) {
+      try {
+        localStorage.setItem(LOCAL_VOTES_KEY, JSON.stringify(counts));
+      } catch (e) {}
+    }
+
+    votesData = getStoredLocalCounts();
+
+    // Generowanie animowanych bąbelków
+    function renderBubbles() {
+      const bubbleCount = 12;
+      let html = '<span class="poll-bubbles" aria-hidden="true">';
+      for (let i = 0; i < bubbleCount; i++) {
+        const x = ((i * 23 + 7) % 96);
+        const s = 2 + (i % 3);
+        const d = (1.8 + (i % 4) * 0.35).toFixed(2);
+        const delay = (- (i * 0.25)).toFixed(2);
+        html += `<i style="--x:${x}%;--s:${s}px;--d:${d}s;--delay:${delay}s"></i>`;
+      }
+      html += '</span>';
+      return html;
+    }
+
+    // Renderowanie widoku oddawania głosu
+    function renderVoteView() {
+      const container = document.getElementById('poll-vote-container');
+      if (!container) return;
+      const userChoice = localStorage.getItem(VOTE_STORAGE_KEY);
+
+      // Jeśli użytkownik już zagłosował, nie pokazuj formularza i przełącz na wyniki
+      if (userChoice) {
+        switchView('results');
+        return;
+      }
+
+      container.innerHTML = POLL_PARTIES.map(p => {
+        return `
+          <button type="button" class="poll-party-card" 
+                  style="--party-color: ${p.color};" 
+                  data-party-id="${p.id}"
+                  title="Zagłosuj na ${p.name}">
+            <div class="party-card-badge">${p.short}</div>
+            <div class="party-card-info">
+              <div class="party-card-name">${p.name}</div>
+            </div>
+            <div class="party-card-check"><i class="fa-solid fa-circle-check"></i></div>
+          </button>
+        `;
+      }).join('');
+
+      container.querySelectorAll('.poll-party-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const partyId = card.dataset.partyId;
+          castVote(partyId);
+        });
+      });
+    }
+
+    // Renderowanie widoku wyników z poziomymi wykresami bąbelkowymi
+    function renderResults() {
+      const container = document.getElementById('poll-results-container');
+      if (!container) return;
+
+      const userChoice = localStorage.getItem(VOTE_STORAGE_KEY);
+      let total = 0;
+      POLL_PARTIES.forEach(p => {
+        total += (votesData[p.id] || 0);
+      });
+
+      let partiesWithPct = POLL_PARTIES.map(p => {
+        const count = votesData[p.id] || 0;
+        const pct = total > 0 ? (count / total * 100) : 0;
+        return { ...p, count, pct };
+      });
+
+      if (sortByPct && total > 0) {
+        partiesWithPct.sort((a, b) => b.pct - a.pct || b.count - a.count);
+      }
+
+      const totalEl = document.getElementById('poll-total-votes');
+      if (totalEl) totalEl.textContent = total.toLocaleString('pl-PL');
+
+      const userStatusEl = document.getElementById('poll-user-status');
+      const userChoiceEl = document.getElementById('poll-user-choice');
+      if (userChoice) {
+        const found = POLL_PARTIES.find(p => p.id === userChoice);
+        if (found && userStatusEl && userChoiceEl) {
+          userChoiceEl.textContent = found.name;
+          userChoiceEl.style.color = found.color;
+          userStatusEl.style.display = 'inline-flex';
+        }
+      } else if (userStatusEl) {
+        userStatusEl.style.display = 'none';
+      }
+
+      const bubblesHtml = renderBubbles();
+
+      let rowsHtml = partiesWithPct.map((p, idx) => {
+        const rankClass = total > 0 && idx === 0 ? 'top-1' : total > 0 && idx === 1 ? 'top-2' : total > 0 && idx === 2 ? 'top-3' : '';
+        const isUserVote = userChoice === p.id;
+        const formattedPct = p.pct.toFixed(1).replace('.', ',');
+
+        return `
+          <div class="poll-row" style="--party-color: ${p.color};">
+            <div class="poll-row-rank ${rankClass}">${idx + 1}</div>
+            <div class="poll-row-party">
+              <span class="poll-row-badge">${p.short}</span>
+              <span class="poll-row-name" title="${p.name}">
+                ${p.name}
+                ${isUserVote ? '<span class="poll-row-voted-pill"><i class="fa-solid fa-check"></i> Twój głos</span>' : ''}
+              </span>
+            </div>
+            <div class="poll-bubble-track" title="${p.name}: ${formattedPct}% (${p.count.toLocaleString('pl-PL')} głosów)">
+              <div class="poll-bubble-fill" style="width: 0%;" data-target-width="${p.pct}">
+                ${p.pct > 0 ? bubblesHtml : ''}
+              </div>
+            </div>
+            <div class="poll-row-score">
+              <span class="poll-row-pct">${formattedPct}%</span>
+              <span class="poll-row-count">${p.count.toLocaleString('pl-PL')} gł.</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Przycisk powrotu do głosowania tylko dla osób, które jeszcze NIE oddały głosu
+      if (!userChoice) {
+        rowsHtml += `
+          <div style="text-align: center; margin-top: 10px;">
+            <button type="button" class="poll-action-btn" id="btn-poll-return-to-vote" style="background: rgba(52, 191, 229, 0.15); border-color: rgba(52, 191, 229, 0.4);">
+              <i class="fa-solid fa-arrow-left"></i> Wróć do wyboru partii i zagłosuj
+            </button>
+          </div>
+        `;
+      }
+
+      container.innerHTML = rowsHtml;
+
+      const returnBtn = document.getElementById('btn-poll-return-to-vote');
+      if (returnBtn) {
+        returnBtn.addEventListener('click', () => switchView('vote'));
+      }
+
+      // Płynna animacja wysunięcia pasków
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          container.querySelectorAll('.poll-bubble-fill').forEach(fill => {
+            const tw = parseFloat(fill.dataset.targetWidth) || 0;
+            fill.style.width = tw > 0 ? tw.toFixed(1) + '%' : '0%';
+          });
+        });
+      });
+    }
+
+    // Oddawanie głosu (jednorazowe, ostateczne - brak możliwości zmiany)
+    function castVote(partyId) {
+      const alreadyVoted = localStorage.getItem(VOTE_STORAGE_KEY);
+      if (alreadyVoted) return; // Zablokowane po zagłosowaniu
+
+      votesData[partyId] = (votesData[partyId] || 0) + 1;
+      saveLocalCounts(votesData);
+      localStorage.setItem(VOTE_STORAGE_KEY, partyId);
+
+      updateControls();
+      switchView('results');
+    }
+
+    function updateControls() {
+      const btnVote = document.getElementById('btn-poll-view-vote');
+      const label = document.getElementById('btn-poll-vote-label');
+      const userChoice = localStorage.getItem(VOTE_STORAGE_KEY);
+
+      if (btnVote && label) {
+        if (userChoice) {
+          label.textContent = 'Głos oddany';
+          btnVote.classList.add('voted-badge');
+          btnVote.disabled = true;
+          btnVote.title = 'Twój głos został już zarejestrowany. Głosowanie jest jednorazowe.';
+        } else {
+          label.textContent = 'Oddaj głos';
+          btnVote.classList.remove('voted-badge');
+          btnVote.disabled = false;
+          btnVote.title = 'Przejdź do wyboru partii';
+        }
+      }
+    }
+
+    function switchView(view) {
+      const userChoice = localStorage.getItem(VOTE_STORAGE_KEY);
+      // Jeśli użytkownik już zagłosował, zablokuj powrót do głosowania
+      if (view === 'vote' && userChoice) {
+        view = 'results';
+      }
+
+      currentView = view;
+      const btnResults = document.getElementById('btn-poll-view-results');
+      const btnVote = document.getElementById('btn-poll-view-vote');
+      const voteContainer = document.getElementById('poll-vote-container');
+      const resultsContainer = document.getElementById('poll-results-container');
+
+      if (view === 'results') {
+        if (btnResults) btnResults.classList.add('active');
+        if (btnVote && !userChoice) btnVote.classList.remove('active');
+        if (voteContainer) voteContainer.style.display = 'none';
+        if (resultsContainer) resultsContainer.style.display = 'flex';
+        renderResults();
+      } else {
+        if (btnVote) btnVote.classList.add('active');
+        if (btnResults) btnResults.classList.remove('active');
+        if (resultsContainer) resultsContainer.style.display = 'none';
+        if (voteContainer) voteContainer.style.display = 'grid';
+        renderVoteView();
+      }
+    }
+
+    function setupPoll() {
+      const btnResults = document.getElementById('btn-poll-view-results');
+      const btnVote = document.getElementById('btn-poll-view-vote');
+      const btnSort = document.getElementById('btn-poll-sort');
+      const btnSortLabel = document.getElementById('btn-poll-sort-label');
+
+      if (btnResults) {
+        btnResults.addEventListener('click', () => switchView('results'));
+      }
+      if (btnVote) {
+        btnVote.addEventListener('click', () => {
+          const userChoice = localStorage.getItem(VOTE_STORAGE_KEY);
+          if (!userChoice) {
+            switchView('vote');
+          }
+        });
+      }
+      if (btnSort) {
+        btnSort.addEventListener('click', () => {
+          sortByPct = !sortByPct;
+          if (btnSortLabel) btnSortLabel.textContent = sortByPct ? 'Sortuj wg %' : 'Domyślna kolejność';
+          if (currentView === 'results') renderResults();
+        });
+      }
+
+      const hasVoted = Boolean(localStorage.getItem(VOTE_STORAGE_KEY));
+      updateControls();
+      
+      if (hasVoted) {
+        switchView('results');
+      } else {
+        switchView('vote');
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupPoll);
+    } else {
+      setupPoll();
+    }
+  })();
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      function calculateTerm(startDateStr, endDateStr, containerId) {
+          const start = new Date(startDateStr).getTime();
+          const end = new Date(endDateStr).getTime();
+          const now = new Date().getTime();
+          
+          const container = document.getElementById(containerId);
+          if (!container) return;
+          
+          let percent = 0;
+          let daysLeft = 0;
+          
+          if (now >= end) {
+              percent = 100;
+              daysLeft = 0;
+          } else if (now <= start) {
+              percent = 0;
+              daysLeft = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+          } else {
+              const totalDuration = end - start;
+              const passedDuration = now - start;
+              percent = (passedDuration / totalDuration) * 100;
+              daysLeft = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+          }
+          
+          container.querySelector('.term-percent').innerText = percent.toFixed(1) + '%';
+          container.querySelector('.term-days-left').innerText = daysLeft + ' dni do końca';
+          
+          setTimeout(() => {
+               container.querySelector('.term-progress-fill').style.width = percent.toFixed(1) + '%';
+          }, 300);
+      }
+      
+      calculateTerm('2025-08-06', '2030-08-06', 'term-president');
+      calculateTerm('2023-12-13', '2027-11-13', 'term-pm');
+    });
+  </script>
+<footer id="sejm-footer"><div><a class="sejm-footer-brand" href="index.html">Sejm Tracker</a><span>Wersja w stylistyce CCU Tracker · 0szysza</span></div><p>Kod, modele i zestawienia: <a href="https://dawidstats.pl/" target="_blank" rel="noopener">DawidStats</a>. Przeniesiono za zgodą autora.<br>Dane historyczne: PKW. Prognozy i symulacje są wynikami modelu.</p><a href="https://x.com/DawidStats" target="_blank" rel="noopener">Autor oryginału ↗</a></footer>
+</body>
+
+</html>

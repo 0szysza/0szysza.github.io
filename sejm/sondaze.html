@@ -1,0 +1,2968 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head><script>window.onerror = function(msg, url, line) { alert('Error: ' + msg + ' at line ' + line); };</script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1280" />
+  <title>Sondaże | Sejm Tracker</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+  /* --- NOWY STYL DLA MANDATÓW (WIĘKSZE I BARDZIEJ WIDOCZNE) --- */
+    .mandate-badge {
+      margin-top: 5px;
+      padding: 4px 10px;        /* Większy padding */
+      border-radius: 6px;
+      color: #fff;
+      font-weight: 900;         /* Bardzo gruba czcionka */
+      font-size: 15px;          /* Dużo większy rozmiar (było 11px) */
+      box-shadow: 0 3px 6px rgba(0,0,0,0.6); /* Mocniejszy cień */
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 35px;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.5); /* Wyraźniejsze obramowanie */
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);  /* Cień pod tekstem dla kontrastu */
+      z-index: 5;
+    }
+    .mandate-badge i { font-size: 11px; opacity: 1; }
+    /* --- STYLE BAZOWE --- */
+    :root {
+      --bg: #0b0d17;
+      --panel: #15192d;
+      --muted: #94a3b8;
+      --text: #e2e8f0;
+      --accent: #34bfe5;
+      --ok: #4caf50;
+      --warn: #f0b429;
+      --bad: #ff6b6b;
+      
+      /* Kolory partii */
+      --c-ko: #ff5757;
+      --c-pis: #34bfe5;
+      --c-rozwojplus: #165ea2;
+      --c-kon: #545454;
+      --c-kkp: #d25f17;
+      --c-lew: #d31c3f;
+      --c-raz: #8c276f;
+      --c-psl: #39b54a;
+      --c-pl2050: #ffde59;
+      --c-inni: #7f8c8d;
+      --c-und: #95a5a6;
+    }
+    * { box-sizing: border-box; margin:0; padding:0; }
+
+    /* Custom Scrollbars (suwaki) dopasowane do stylu strony */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(11, 16, 32, 0.5);
+      border-radius: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #262d4a;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.2s ease;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+      box-shadow: 0 0 10px rgba(52, 191, 229, 0.5);
+    }
+    ::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #262d4a rgba(11, 16, 32, 0.5);
+    }
+
+    /* Custom Range Sliders */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(30, 39, 70, 0.6);
+      border: 1px solid #262d4a;
+      border-radius: 6px;
+      outline: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    input[type="range"]:hover {
+      background: rgba(30, 39, 70, 0.9);
+      border-color: rgba(52, 191, 229, 0.4);
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 10px rgba(52, 191, 229, 0.6);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 14px rgba(52, 191, 229, 0.9);
+      background: #7ca8ff;
+    }
+    input[type="range"]::-webkit-slider-thumb:active {
+      transform: scale(1.3);
+      background: #9ebbff;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 10px rgba(52, 191, 229, 0.6);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    input[type="range"]::-moz-range-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 14px rgba(52, 191, 229, 0.9);
+    }
+    input[type="range"]::-moz-range-track {
+      height: 6px;
+      background: rgba(30, 39, 70, 0.6);
+      border: 1px solid #262d4a;
+      border-radius: 6px;
+    }
+
+    body {
+      background: linear-gradient(180deg, #0a0f1f, #0d1430);
+      color: var(--text);
+      font-family: Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+      min-height: 100vh;
+      font-size: 14px; /* Mniejsza bazowa czcionka */
+    }
+    header {
+      padding: 10px 20px; /* Mniejszy padding */
+      border-bottom: 1px solid #262d4a;
+      background: rgba(10,15,31,.8);
+      backdrop-filter: blur(6px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: inherit;
+      font-size: 22px; /* Mniejsze logo */
+      font-weight: 800;
+      letter-spacing: .3px;
+    }
+    .logo svg { margin-right: 8px; width: 24px; height: 24px; }
+    .nav {
+      display: flex;
+      gap: 18px;
+      margin-top: 10px; /* Mniejszy odstęp */
+      flex-wrap: wrap;
+    }
+    .nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px; /* Mniejsza czcionka menu */
+      padding: 5px 0;
+      position: relative;
+      transition: color .2s;
+    }
+    .nav a:hover { color: var(--text); }
+    .nav a.active {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .nav a.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 1px;
+    }
+    .container {
+      width: 1200px; /* Sztywna szerokość zamiast max-width */
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 15px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid #262d4a;
+      border-radius: 10px;
+      padding: 16px; /* Zmniejszony padding karty */
+      box-shadow: 0 4px 12px rgba(0,0,0,.25);
+      margin-bottom: 20px; /* Mniejszy odstęp między kartami */
+    }
+    h1 {
+      font-size: 24px; /* Znacznie mniejszy nagłówek */
+      margin-bottom: 6px;
+      background: linear-gradient(90deg, #34bfe5, #a78bff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* --- STYL NOWOCZESNYCH KART (skopiowane z index.html) --- */
+    .average-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px auto;
+      width: 100%;
+      max-width: 100%;
+      padding: 15px 10px 25px 10px;
+    }
+    
+    .average-grid::-webkit-scrollbar { height: 6px; }
+    .average-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+    .average-grid::-webkit-scrollbar-thumb { background: #2a375e; border-radius: 10px; }
+
+    .poll-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      flex: 0 0 100px;
+      min-width: 100px;
+      padding: 18px 10px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #18223d 0%, #11182c 100%);
+      border: 1px solid #1e2946;
+      border-top: 3px solid var(--party-color);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: fadeIn 0.6s ease backwards;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .poll-item::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 40px;
+      background: linear-gradient(180deg, var(--party-color) 0%, transparent 100%);
+      opacity: 0.1;
+      pointer-events: none;
+      transition: all 0.5s ease;
+    }
+
+    .poll-item:hover {
+      transform: scale(1.08) translateY(-6px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.7), 0 0 20px rgba(0,0,0,0.5);
+      border-color: var(--party-color);
+      background: linear-gradient(180deg, #1c2746 0%, #151e36 100%);
+      z-index: 10;
+    }
+
+    .poll-item:hover::before {
+      opacity: 0.25;
+      height: 100%;
+    }
+
+    @keyframes fadeIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .party-name {
+      font-size: 8.5px;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      text-align: center;
+      line-height: 1.2;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .party-pct {
+      font-size: 24px;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+      margin-bottom: 8px;
+    }
+
+    .party-change {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 50px;
+    }
+
+    .change-pos {
+      color: #4caf50;
+      background: rgba(76, 175, 80, 0.15);
+      border: 1px solid rgba(76, 175, 80, 0.2);
+    }
+
+    .change-neg {
+      color: #ff6b6b;
+      background: rgba(255, 107, 107, 0.15);
+      border: 1px solid rgba(255, 107, 107, 0.2);
+    }
+
+    .change-neu {
+      color: var(--muted);
+      background: rgba(125, 143, 179, 0.1);
+      border: 1px solid rgba(125, 143, 179, 0.15);
+    }
+
+    /* --- PRZEŁĄCZNIK --- */
+    .toggle-container {
+      display: flex;
+      background: #0f1524;
+      border: 1px solid #262d4a;
+      border-radius: 6px;
+      padding: 3px;
+      width: fit-content;
+      margin-bottom: 15px;
+    }
+    .toggle-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 6px 14px; /* Mniejsze przyciski */
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .toggle-btn:hover { color: var(--text); }
+    .toggle-btn.active { background: var(--accent); color: #fff; }
+
+    /* --- TABELA (Kompaktowa) --- */
+    .table-responsive { overflow-x: auto; }
+    .polls-list {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 5px;
+    }
+    .polls-list th {
+      text-align: left;
+      padding: 10px; /* Mniejszy padding */
+      color: var(--muted);
+      font-weight: 600;
+      border-bottom: 2px solid #2a3766;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .polls-list td {
+      padding: 8px 10px; /* Dużo mniejszy padding komórek */
+      border-bottom: 1px solid #262d4a;
+      color: var(--text);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .polls-list tr:last-child td { border-bottom: none; }
+    .polls-list tr:hover td { background: rgba(52, 191, 229, 0.05); }
+
+    .average-row td {
+      background: rgba(52, 191, 229, 0.1);
+      font-weight: bold;
+      border-top: 2px solid #2a3766;
+      border-bottom: 2px solid #2a3766;
+    }
+
+    .winner-cell {
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 4px;
+    }
+    
+    .col-undecided.hidden { display: none; }
+    
+   /* --- STYL WYKRESU: RESPANSYWNY (HYBRYDOWY) --- */
+    
+    /* 1. Wygląd domyślny (KOMPUTER/TABLET POZIOMO) - Brak przewijania */
+    .chart-wrapper {
+        width: 100%;
+        position: relative;
+        /* Na komputerze wysokość definiujemy tutaj */
+        height: 450px; 
+        overflow: hidden; /* Ukrywamy suwaki na PC */
+    }
+
+    .chart-body {
+        width: 100%;
+        height: 100%;
+        min-width: 0; /* Na komputerze szerokość dopasowuje się automatycznie */
+    }
+
+    /* 2. Wygląd mobilny (TELEFON) - Włączone przewijanie */
+    @media (max-width: 768px) {
+        .chart-wrapper {
+            /* Włączamy przewijanie tylko tutaj */
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* Płynne przewijanie na iOS */
+            /* Opcjonalnie: ramka, żeby było widać obszar przewijania */
+            border: 1px solid #262d4a;
+            border-radius: 6px;
+            /* Na telefonie wrapper dopasowuje się do zawartości */
+            height: auto; 
+        }
+
+        .chart-body {
+            /* To jest najważniejsze: wymuszamy szerokość "wirtualną" wykresu */
+            min-width: 1000px; 
+            /* Ustawiamy sztywną wysokość dla kontenera canvas na mobilce */
+            height: 350px; 
+            position: relative;
+        }
+    }
+
+    /* --- OPCJE POD WYKRESEM --- */
+    .chart-options-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #262d4a;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .chart-option-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: all 0.2s ease;
+      color: var(--text);
+      font-weight: 500;
+      font-size: 12.5px;
+    }
+    .chart-option-item:hover {
+      background: rgba(52, 191, 229, 0.08);
+      border-color: rgba(52, 191, 229, 0.3);
+      color: #fff;
+    }
+    .chart-option-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid #2a3766;
+      border-radius: 4px;
+      background: #0b0d17;
+      cursor: pointer;
+      position: relative;
+      outline: none;
+      transition: all 0.2s;
+      margin: 0;
+      flex-shrink: 0;
+    }
+    .chart-option-checkbox:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .chart-option-checkbox:checked::after {
+      content: '';
+      position: absolute;
+      left: 4.5px;
+      top: 1.5px;
+      width: 4px;
+      height: 8px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+	/* --- NOWE STYLE DLA ROZWIJANYCH WIERSZY --- */
+.poll-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.poll-row:hover {
+  background-color: rgba(52, 191, 229, 0.08) !important;
+}
+.poll-row.expanded {
+  background-color: rgba(52, 191, 229, 0.12) !important;
+  border-bottom: none;
+}
+
+.details-row {
+  display: none; /* Domyślnie ukryte */
+  background-color: #0d1221; /* Bardzo ciemne tło */
+  box-shadow: inset 0 3px 8px rgba(0,0,0,0.4);
+}
+.details-row.show {
+  display: table-row;
+  animation: slideDown 0.3s ease-out;
+}
+.details-row td {
+  border-top: 1px dashed #2a3766; /* Oddzielenie przerywaną linią */
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.diff-pos { color: #4caf50; font-weight: 700; }
+.diff-neg { color: #ff6b6b; font-weight: 700; }
+.diff-neu { color: #94a3b8; opacity: 0.7; }
+.diff-label { color: #94a3b8; font-style: italic; text-align: right; display:block; font-size: 11px;}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+  </style>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0b0d17">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ccu-theme.css?v=1">
+<script src="ccu-ui.js?v=1" defer></script>
+<link rel="canonical" href="https://0szysza.github.io/sejm/sondaze.html">
+</head>
+<body class="sejm-app" data-page="sondaze">
+
+  <header id="sejm-header"><div class="sejm-topbar"><a class="sejm-back" href="/" aria-label="Wróć do narzędzi 0szysza"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 5-7 7 7 7M5 12h14"/></svg></a><a class="sejm-brand" href="index.html"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="3" y="13" width="26" height="16" rx="5" fill="#34bfe5" fill-opacity=".14" stroke="#34bfe5" stroke-width="1.8"/><path d="m9 12 7-9 9 7-7 9-9-7Z" fill="#15192d" stroke="#34bfe5" stroke-width="1.8" stroke-linejoin="round"/><path d="m15 10 1 3 5-2M10 22h12" stroke="#34bfe5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>Sejm Tracker</strong><small>Sondaże, wybory i symulacje</small></span></a><div class="sejm-header-tools"><a class="sejm-source" href="https://dawidstats.pl/" target="_blank" rel="noopener">DawidStats <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M15 3h6v6m-1-5L10 14m8-1v7H4V6h7"/></svg></a><details class="sejm-tools-menu"><summary>Narzędzia <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 9 6 6 6-6"/></svg></summary><div><a href="/trackccu/">CCU Tracker<small>Statystyki gier Roblox</small></a><a href="/stat/">BGSI Stat Calculator<small>Kalkulatory rebirthów i bubbles</small></a><a href="/">Wszystkie narzędzia</a></div></details></div></div><nav class="sejm-navigation" aria-label="Sekcje serwisu"><a href="index.html">Przegląd</a><a href="wybory.html">Historia wyborów</a><a href="sondaze.html" class="is-active" aria-current="page">Sondaże</a><a href="sejm.html">Sejm</a><a href="senat.html">Senat</a><a href="prezydent.html">Prezydent</a><a href="europarlament.html">Europarlament</a><a href="sejmiki.html">Sejmiki</a><a href="panel-wyborczy.html">Panel wyborczy</a></nav></header>
+<div class="card" style="text-align: center; margin-bottom: 20px;">
+  <h2 style="margin-bottom: 10px; font-size: 16px; color: var(--muted);">WYBIERZ KADENCJĘ SEJMU</h2>
+  <div class="toggle-container" style="margin: 0 auto; display: inline-flex;">
+    <button class="toggle-btn" onclick="switchTerm('term_2019')" id="btn-term-2019">2019-2023</button>
+    <button class="toggle-btn active" onclick="switchTerm('term_current')" id="btn-term-current">Obecna (2023-)</button>
+  </div>
+</div>
+  <div class="container">
+    
+    <div class="card">
+      <h1>ŚREDNIA SONDAŻOWA</h1>
+      
+      <p style="text-align: center; font-size: 11px; color: #a0a0a0; margin-top: -10px; margin-bottom: 15px;">*uwzględniono sondaże tylko z Rozwój+</p>
+
+      <div class="toggle-container" style="margin: 0 auto 15px auto; justify-content: center; flex-wrap: wrap;">
+        <button class="toggle-btn active" onclick="setMode('all')" id="btn-all">Z niezdecydowanymi</button>
+        <button class="toggle-btn" onclick="setMode('decided')" id="btn-decided">Tylko zdecydowani</button>
+      </div>
+
+     <div class="toggle-container" style="margin: 0 auto 15px auto; justify-content: center; flex-wrap: wrap;">
+        <button class="toggle-btn active" onclick="setAggMode('parties')" id="btn-agg-parties">Partie</button>
+        <button class="toggle-btn" onclick="setAggMode('blocks')" id="btn-agg-blocks">K15X vs Prawica</button>
+        <button class="toggle-btn" onclick="setAggMode('blocks_razem')" id="btn-agg-blocks-razem">K15X+Razem vs Prawica</button>
+      </div>
+
+      <div class="subtitle" id="average-subtitle" style="text-align:center;">Ładowanie danych...</div>
+      
+      <div class="average-grid" id="average-grid"></div>
+    </div>
+
+   <div class="card">
+      <h1>TREND POPARCIA</h1>
+      <div class="subtitle">Zmiany poparcia w czasie <br><small></small></div>
+      
+      <div class="toggle-container" style="margin: 0 auto 15px auto; justify-content: center;">
+        <button class="toggle-btn active" onclick="setChartMode('support')" id="btn-chart-support">Poparcie (%)</button>
+        <button class="toggle-btn" onclick="setChartMode('seats')" id="btn-chart-seats">Mandaty (Sejm)</button>
+      </div>
+      <div class="chart-wrapper">
+        <div class="chart-body">
+          <canvas id="supportChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Opcje pod wykresem -->
+      <div class="chart-options-bar">
+        <label class="chart-option-item" for="toggle-individual-polls" title="Włącz/wyłącz wyświetlanie pojedynczych badań na wykresie">
+          <input type="checkbox" id="toggle-individual-polls" class="chart-option-checkbox" onchange="toggleIndividualPolls(this.checked)">
+          <span><i class="fa-solid fa-braille" style="margin-right: 5px; color: var(--accent);"></i>Pokaż poszczególne badania (punkty)</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- WYKRES PARLAMENTU -->
+    <div class="card" id="parliament-card" style="display:none;">
+      <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:20px;">
+        <!-- Sejm -->
+        <div style="flex:1; min-width:300px; max-width:480px; display:flex; flex-direction:column;">
+          <h1 style="text-align:center;">SEJM</h1>
+          <div class="subtitle" style="text-align:center;">460 mandatów · najedź na kropkę by zobaczyć szczegóły</div>
+          <div style="position:relative; display:flex; justify-content:center; align-items:flex-end; padding: 10px 0 0 0;">
+            <svg id="parliament-svg" style="width:100%; display:block;" viewBox="0 0 700 370" preserveAspectRatio="xMidYMid meet">
+              <g id="parliament-dots"></g>
+            </svg>
+          </div>
+          <!-- Legenda Sejm -->
+          <div id="parliament-legend" style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px 12px; margin-top:14px;"></div>
+        </div>
+        <!-- Senat -->
+        <div style="flex:1; min-width:300px; max-width:480px; display:flex; flex-direction:column;">
+          <h1 style="text-align:center;">SENAT</h1>
+          <div class="subtitle" style="text-align:center;">100 mandatów (Pakt Senacki)</div>
+          <div style="position:relative; display:flex; justify-content:center; align-items:flex-end; padding: 10px 0 0 0;">
+            <svg id="senat-svg" style="width:100%; display:block;" viewBox="0 0 700 370" preserveAspectRatio="xMidYMid meet">
+              <g id="senat-dots"></g>
+            </svg>
+          </div>
+          <!-- Legenda Senat -->
+          <div id="senat-legend" style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px 12px; margin-top:14px;"></div>
+        </div>
+      </div>
+      <!-- Wspólny Tooltip -->
+      <div id="parliament-tooltip" style="
+        position:fixed; background:rgba(13,18,33,0.97); color:#e2e8f0; padding:8px 14px;
+        border-radius:8px; font-size:13px; font-weight:700; pointer-events:none;
+        opacity:0; transition:opacity 0.15s; z-index:9999; box-shadow:0 4px 16px rgba(0,0,0,0.5);
+        border:1px solid #2a3766; white-space:nowrap;"></div>
+    </div>
+
+    <div class="card">
+      <h1>LISTA SONDAŻY</h1>
+	  
+	  <div id="map-section" style="margin-bottom: 20px; border-bottom: 1px solid #262d4a; padding-bottom: 20px;">
+  <h3 style="text-align: center; margin-bottom: 10px; font-size: 16px; color: #c9d7ff;">Przewidywani zwycięzcy w okręgach</h3>
+  
+  <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:20px;">
+    <!-- Map Sejm -->
+    <div style="flex:1; min-width:300px; max-width:500px;">
+      <h4 style="text-align:center; color:#8ea1d9; margin-bottom:5px;">SEJM</h4>
+      <div style="text-align:center; margin-bottom: 10px; visibility: hidden;">
+        <select style="padding: 4px 8px; border-radius: 4px; font-size: 11px; max-width: 90%;"><option>Wariant</option></select>
+      </div>
+      <div id="map-container" style="position: relative; width: 100%; margin: 0 auto;">
+        <!-- Tooltip Sejm -->
+        <div id="map-tooltip" style="position: fixed; background: rgba(19,26,46,0.95); color: #e2e8f0; padding: 8px 12px; border-radius: 8px; font-size: 12px; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.4); transform: translate(-50%, -100%); margin-top: -10px;"></div>
+      </div>
+    </div>
+    <!-- Map Senat -->
+    <div style="flex:1; min-width:300px; max-width:500px;">
+            <h4 style="text-align:center; color:#8ea1d9; margin-bottom:5px;">SENAT</h4>
+      <div style="text-align:center; margin-bottom: 10px;">
+        <select id="senat-variant-select" onchange="renderAll()" style="padding: 4px 8px; border-radius: 4px; background: #15192d; color: #e2e8f0; border: 1px solid #3c4b73; font-size: 11px; max-width: 90%;">
+          <option value="1">Pakt Senacki vs PiS</option>
+          <option value="2">Pakt Senacki vs PiS-R+</option>
+          <option value="3">Pakt Senacki vs PiS-R+-Konfederacja</option>
+          <option value="4">Pakt Senacki vs PiS-R+-Konfederacja-KKP</option>
+          <option value="5">Pakt Senacki-Razem vs PiS-R+-Konfederacja-KKP</option>
+        </select>
+      </div>
+      <div id="map-senat-container" style="position: relative; width: 100%; margin: 0 auto;">
+        <!-- Tooltip Senat -->
+        <div id="map-senat-tooltip" style="position: fixed; background: rgba(19,26,46,0.95); color: #e2e8f0; padding: 8px 12px; border-radius: 8px; font-size: 12px; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.4); transform: translate(-50%, -100%); margin-top: -10px;"></div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top: 8px; font-size: 11px; color: #94a3b8; text-align: center;">
+    Symulacja rozkładu poparcia
+  </div>
+</div>
+
+      <div class="buycoffee-banner" style="background: rgba(11, 16, 32, 0.5); border: 1px solid #262d4a; border-radius: 10px; padding: 14px 16px; text-align: center; max-width: 600px; margin: 20px auto; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
+        <a href="https://buycoffee.to/dawidstats" target="_blank" rel="noopener noreferrer" style="display: inline-block; transition: transform 0.2s ease;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+          <img src="https://buycoffee.to/static/img/share/share-button-dark--pl.png" style="width: 146px; height: 38px; display: block;" alt="Postaw kawę dla DawidStats na buycoffee.to">
+        </a>
+        <div style="font-size: 11px; line-height: 1.45; color: #94a3b8; margin-top: 10px; text-align: center;">
+          Od grudnia 2026 zacznę ponosić koszty związane z utrzymaniem (hosting) oraz z rozwijaniem strony (subskrypcje AI) więc gdyby ktoś chciał wspomóc byłbym wdzięczny. Przychody z reklam w obecnym tempie mógłbym wypłacić dopiero po 3 latach co nie jest zbyt bliskie.
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="polls-list">
+          <thead id="polls-head"></thead>
+          <tbody id="polls-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+<script src="data.js"></script>
+  <script>
+  
+   
+	
+
+    // Zmienne globalne, które będą się zmieniać
+    let currentTermId = 'term_current';
+    let partyOrder = termsData[currentTermId].parties; // Inicjalizacja obecną
+    let sampleSurveys = termsData[currentTermId].surveys; // Inicjalizacja obecną
+    let currentChartMode = 'support';
+    let showIndividualPolls = false; // Opcja: wyświetlanie pojedynczych badań (domyślnie wyłączone)
+
+    let currentMode = 'all'; 
+    let myChart = null; // Uchwyt do wykresu
+
+    function toggleIndividualPolls(enabled) {
+      showIndividualPolls = !!enabled;
+      renderChart();
+    }
+
+    function hexToRgba(hex, alpha) {
+      if (!hex) return `rgba(125, 143, 179, ${alpha})`;
+      if (hex.startsWith('rgba') || hex.startsWith('rgb')) return hex;
+      let c = hex.replace('#', '');
+      if (c.length === 3) c = c.split('').map(x => x + x).join('');
+      const num = parseInt(c, 16);
+      const r = (num >> 16) & 255;
+      const g = (num >> 8) & 255;
+      const b = num & 255;
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    /* =========================================
+       2. LOGIKA PRZELICZANIA
+       ========================================= */
+
+    function parseDetails(title) {
+      const dateRegex = /[0-9]{1,2}(?:[-.][0-9]{1,2})*[.-]\d{4}/;
+      const match = title.match(dateRegex);
+      let dateStr = "";
+      let firmStr = title;
+      
+      if (match) {
+        dateStr = match[0];
+        firmStr = title.replace(dateStr, "").trim().replace(/-$/, "").trim();
+      }
+      if (title.toLowerCase().includes("średnia")) {
+        firmStr = "Średnia sondażowa";
+      }
+      return { dateStr, firmStr };
+    }
+	
+    let currentAggMode = 'parties'; // 'parties' (zwykły) lub 'blocks' (koalicje)
+
+   
+    function setAggMode(mode) {
+      currentAggMode = mode;
+      document.getElementById('btn-agg-parties').classList.toggle('active', mode === 'parties');
+      document.getElementById('btn-agg-blocks').classList.toggle('active', mode === 'blocks');
+      document.getElementById('btn-agg-blocks-razem').classList.toggle('active', mode === 'blocks_razem');
+      
+      renderAverageBubbles(); // Odśwież bąbelki
+      renderChart();          // Odśwież wykres
+    }
+	function setChartMode(mode) {
+      currentChartMode = mode;
+      document.getElementById('btn-chart-support').classList.toggle('active', mode === 'support');
+      document.getElementById('btn-chart-seats').classList.toggle('active', mode === 'seats');
+      renderChart();
+    }
+	// Nowa funkcja licząca mandaty dla pojedynczego punktu danych (np. średniej dziennej)
+   function calculateSeatsForPoll(pollValues, dateObj) {
+        // KROK 1: Normalizacja głosów (obliczamy poparcie tylko wśród zdecydowanych)
+        // To naprawia błąd w widoku "Z niezdecydowanymi"
+        let sumValid = 0;
+        for (let p in pollValues) {
+             if (p !== 'und' && p !== 'niezdecydowani' && typeof pollValues[p] === 'number') {
+                 sumValid += pollValues[p];
+             }
+        }
+
+        let normalized = {};
+        if (sumValid > 0) {
+            for (let p in pollValues) {
+                if (p !== 'und' && typeof pollValues[p] === 'number') {
+                    // Przeliczamy wynik na % głosów ważnych
+                    normalized[p] = (pollValues[p] / sumValid) * 100;
+                }
+            }
+        } else {
+            normalized = { ...pollValues }; 
+        }
+
+        // KROK 2: Sprawdzamy progi na podstawie ZNORMALIZOWANYCH wyników
+        let eligible = [];
+        for (let p in normalized) {
+            // Pomijamy klucz niezdecydowanych w pętli
+            if (p === 'und' || p === 'niezdecydowani') continue;
+
+            let threshold = 5.0; // Domyślny próg 5%
+            
+            // Próg 8% dla Trzeciej Drogi (i ewentualnie innych koalicji)
+            if (p === 'TD' || p === 'TrzeciaDroga' || p === 'KKW Trzecia Droga') {
+                threshold = 8.0; 
+            }
+            // Opcjonalnie: Jeśli chcesz, by KO i Lewica też miały 8% (zgodnie z prawem), odkomentuj poniższe:
+            // if (p === 'KO' || p === 'Lewica') threshold = 8.0;
+
+            if (normalized[p] >= threshold) {
+                eligible.push(p);
+            }
+        }
+        
+        let totalSeats = {};
+        for (let p in normalized) { totalSeats[p] = 0; } // Inicjalizacja zerami
+        
+        if (eligible.length === 0) return totalSeats;
+
+        const cutoffDate = new Date(2025, 0, 1); // 1 stycznia 2025
+        const isBefore2025 = dateObj < cutoffDate;
+
+        // KROK 3: Podział mandatów w okręgach
+        for (let i = 1; i <= 41; i++) {
+            let dId = i.toString();
+            let numSeats = mandatyOkregow[i];
+            if (!numSeats || !procenty[dId]) continue;
+
+            let districtVotes = {};
+            
+            eligible.forEach(party => {
+                let distKey = party;
+                if (isBefore2025) {
+                    if (party === 'KO') distKey = 'KO2023';
+                    else if (party === 'PiS') distKey = 'PiS2023';
+                    else if (party === 'Konfederacja') distKey = 'Konfederacja2023';
+                    else if (party === 'Lewica') distKey = 'Lewica2023';
+                    else if (party === 'TD' || party === 'PL2050' || party === 'PSL') distKey = 'TD - PL2050 i PSL2023';
+                    else if (party === 'Bezpartyjni' || party === 'BS') distKey = 'BS2023';
+                    else if (party === 'PJJ') distKey = 'PJJ2023';
+                } else {
+                    if (party === 'TD') distKey = 'PL2050'; 
+                    else if (party === 'KO') distKey = 'KO2023'; // Fallbacki dla logiki po 2025
+                    else if (party === 'PiS') distKey = 'PiS2023';
+                }
+                
+                let multiplier = procenty[dId][distKey] || 0;
+                // Używamy znormalizowanego wyniku do obliczania siły w okręgu
+                districtVotes[party] = normalized[party] * multiplier;
+            });
+
+            // Metoda D'Hondta
+            let quotients = [];
+            eligible.forEach(key => {
+                let votes = districtVotes[key];
+                for (let s = 1; s <= numSeats; s++) {
+                    quotients.push({ party: key, val: votes / s });
+                }
+            });
+
+            quotients.sort((a, b) => b.val - a.val);
+
+            for (let k = 0; k < numSeats; k++) {
+                if (quotients[k]) {
+                    totalSeats[quotients[k].party]++;
+                }
+            }
+        }
+        return totalSeats;
+    }
+
+    function calculateSeatsDhondt(nationalAverages) {
+      // 1. Inicjalizacja liczników
+      let seatsTotal = {};
+      partyOrder.forEach(p => seatsTotal[p.key] = 0);
+      
+      // 2. Sprawdzenie progu wyborczego (5% w skali kraju dla wszystkich)
+      let eligibleParties = [];
+      partyOrder.forEach(p => {
+         // Zakładamy próg 5% dla wszystkich (zgodnie z instrukcją)
+         // Używamy toFixed, aby uniknąć problemów z float (np. 4.99999)
+         if (nationalAverages[p.key] && nationalAverages[p.key] >= 5.0) {
+             eligibleParties.push(p.key);
+         }
+      });
+
+      // Zabezpieczenie: Jeśli nikt nie przekroczył (teoretycznie), nic nie licz
+      if (eligibleParties.length === 0) return seatsTotal;
+
+      // 3. Iteracja po okręgach
+      for (let i = 1; i <= 41; i++) {
+        const okregId = i.toString();
+        const numSeats = mandatyOkregow[i];
+        if (!numSeats || !procenty[okregId]) continue;
+
+        let districtVotes = {};
+        
+        // Obliczamy "głosy" (wagę) w okręgu na podstawie distribution map
+        eligibleParties.forEach(key => {
+            const nationalSupport = nationalAverages[key];
+            const multiplier = procenty[okregId][key] || 0;
+            districtVotes[key] = nationalSupport * multiplier; 
+        });
+
+        // Metoda D'Hondta dla okręgu
+        let quotients = [];
+        eligibleParties.forEach(key => {
+            let votes = districtVotes[key];
+            for (let s = 1; s <= numSeats; s++) {
+                quotients.push({
+                    party: key,
+                    val: votes / s
+                });
+            }
+        });
+
+        // Sortujemy ilorazy malejąco
+        quotients.sort((a, b) => b.val - a.val);
+
+        // Przydzielamy mandaty top N ilorazom
+        for (let k = 0; k < numSeats; k++) {
+            if (quotients[k]) {
+                seatsTotal[quotients[k].party]++;
+            }
+        }
+      }
+
+      return seatsTotal;
+    }
+   function renderAverageBubbles() {
+      const grid = document.getElementById('average-grid');
+      const subtitle = document.getElementById('average-subtitle');
+      grid.innerHTML = '';
+
+      // --- SCENARIUSZ 1: POPRZEDNIE KADENCJE (Bez zmian - wyświetlamy wyniki wyborów) ---
+      if (currentTermId !== 'term_current') {
+          subtitle.innerHTML = 'Wynik wyborów (podział mandatów)';
+          let electionResults = [];
+          if (currentTermId === 'term_2019') {
+              electionResults = [
+                  { label: 'PiS', val: 35.4, seats: 194, color: '#004494' },
+                  { label: 'KO', val: 30.7, seats: 157, color: '#ff5757' },
+                  { label: 'TD', val: 14.4, seats: 65, color: '#00bf63' },
+                  { label: 'LEW', val: 8.6, seats: 26, color: '#d31c3f' },
+                  { label: 'KON', val: 7.2, seats: 18, color: '#545454' }
+              ];
+          }
+          // Renderowanie kafelków dla wyników historycznych
+          electionResults.forEach(item => {
+              const textColor = '#fff';
+              const seatsHTML = `
+                <div class="mandate-badge" style="background-color: ${item.color}; border: 1px solid rgba(255,255,255,0.3);">
+                  ${item.seats}
+                </div>`;
+              const html = `
+                <div class="poll-item">
+                  <div class="poll-circle-wrapper">
+                    <div class="big-circle" style="color: ${item.color}; border: 2px solid ${item.color}; background: #fff;">
+                      ${item.val.toFixed(1).replace('.', ',')}%
+                    </div>
+                    <div class="small-circle" style="background-color: ${item.color}; color: ${textColor};">
+                      ${item.label}
+                    </div>
+                  </div>
+                  ${seatsHTML}
+                  <div class="change-label" style="color: #94a3b8; font-size: 10px; margin-top:4px;">WYNIK</div>
+                </div>`;
+              grid.innerHTML += html;
+          });
+          return;
+      }
+
+      // --- SCENARIUSZ 2: OBECNA KADENCJA (NOWA LOGIKA: Ostatnie 30 dni) ---
+      
+      // 1. Pobieramy wszystkie sondaże z obecnej kadencji
+      const allSurveys = termsData[currentTermId].surveys;
+      
+      // 2. Parsujemy daty dla każdego sondażu, aby móc je filtrować
+      const surveysWithDates = allSurveys.map(s => {
+          const det = parseDetails(s.title); // Wyciągamy datę z tytułu
+          const d = parsePollDate(det.dateStr); // Parsujemy na dzień/miesiąc/rok
+          if (!d) return null;
+          // Tworzymy obiekt z datą JS i upewniamy się, że pole 'values' istnieje (dla calculateAverage)
+          return { 
+              ...s, 
+              dateObj: new Date(d.year, d.month, d.day),
+              values: s.data 
+          };
+      }).filter(s => s !== null);
+
+      // 3. Sortujemy od najnowszych, aby znaleźć punkt odniesienia ("dziś" wg danych)
+      surveysWithDates.sort((a, b) => b.dateObj - a.dateObj);
+      
+      if (surveysWithDates.length === 0) {
+          subtitle.innerText = "Brak danych sondażowych.";
+          return;
+      }
+
+      // Najnowsza data w bazie danych (np. data ostatniego sondażu)
+      const latestDate = surveysWithDates[0].dateObj;
+      
+      // Definicja przedziałów czasowych w milisekundach
+      const msDay = 24 * 60 * 60 * 1000;
+      const range30 = 30 * msDay;
+      
+      // FILTR 1: Ostatnie 30 dni (od Latest do Latest-30)
+      const currentPolls = surveysWithDates.filter(s => {
+          const diff = latestDate.getTime() - s.dateObj.getTime();
+          return diff >= 0 && diff <= range30;
+      });
+
+      // FILTR 2: Poprzednie 30 dni (od Latest-30 do Latest-60)
+      const prevPolls = surveysWithDates.filter(s => {
+          const diff = latestDate.getTime() - s.dateObj.getTime();
+          return diff > range30 && diff <= (2 * range30);
+      });
+
+      // 4. Aktualizujemy podpis pod nagłówkiem
+      let modeInfo = "";
+      if (currentAggMode === 'blocks') modeInfo = " (K15X vs Prawica)";
+      if (currentAggMode === 'blocks_razem') modeInfo = " (K15X+Razem vs Prawica)";
+      
+      const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+      const latestStr = latestDate.toLocaleDateString('pl-PL', dateOptions);
+      // Data początkowa zakresu (30 dni temu)
+      const startDate = new Date(latestDate.getTime() - range30);
+      const startStr = startDate.toLocaleDateString('pl-PL', dateOptions);
+
+      subtitle.innerHTML = `Średnia z 30 dni`;
+
+      // 5. Obliczenia średnich
+      const avgCurrent = calculateAverage(currentPolls, currentMode);
+      const avgPrev = calculateAverage(prevPolls, currentMode);
+
+      // 6. Obliczanie symulacji mandatów (zawsze na podstawie zdecydowanych wyborców)
+      const avgForSeats = calculateAverage(currentPolls, 'decided');
+      const calculatedSeats = calculateSeatsDhondt(avgForSeats);
+
+      // --- DALEJ KOD RENDEROWANIA (BEZ ZMIAN W LOGICE WYŚWIETLANIA) ---
+      let displayItems = [];
+
+      if (currentAggMode === 'parties') {
+        partyOrder.forEach(p => {
+          if (avgCurrent[p.key] !== undefined && avgCurrent[p.key] > 0.05) {
+            displayItems.push({
+              label: p.label,
+              val: avgCurrent[p.key],
+              prev: avgPrev[p.key] !== undefined ? avgPrev[p.key] : null,
+              color: p.color,
+              bgColor: p.color,
+              textColor: (p.label === '25' || p.label === 'Inni' || p.label === 'TD') ? '#0b0d17' : '#fff',
+              seats: calculatedSeats[p.key] || 0
+            });
+          }
+        });
+      } else {
+        let k15xParties = ['KO', 'Lewica', 'PSL', 'PL2050', 'TD'];
+        let k15xLabel = 'K15X';
+        if (currentAggMode === 'blocks_razem') { k15xParties.push('Razem'); }
+        
+        const blocks = [
+          { id: 'K15X', label: k15xLabel, parties: k15xParties, color: '#ff5757', textColor: '#fff' },
+          { id: 'Prawica', label: 'OPZ', parties: ['PiS', 'RozwojPlus', 'Konfederacja', 'KoronaPolska'], color: '#004494', textColor: '#fff' }
+        ];
+        if (currentAggMode === 'blocks') {
+           blocks.push({ id: 'Razem', label: 'Raz', parties: ['Razem'], color: '#8c276f', textColor: '#fff' });
+        }
+        blocks.push({ id: 'Inni', label: 'Inni', parties: ['Inni'], color: '#7f8c8d', textColor: '#0b0d17' });
+
+        blocks.forEach(block => {
+          let sumCurrent = 0;
+          let sumPrev = 0;
+          let sumSeats = 0;
+          let hasPrevData = false;
+          
+          block.parties.forEach(pKey => {
+            sumCurrent += (avgCurrent[pKey] || 0);
+            sumSeats += (calculatedSeats[pKey] || 0);
+            if (avgPrev[pKey] !== undefined) {
+              sumPrev += avgPrev[pKey];
+              hasPrevData = true;
+            }
+          });
+          displayItems.push({
+            label: block.label,
+            val: sumCurrent,
+            prev: hasPrevData ? sumPrev : null,
+            color: block.color,
+            bgColor: block.color,
+            textColor: block.textColor,
+            seats: sumSeats
+          });
+        });
+      }
+
+      displayItems.sort((a, b) => b.val - a.val);
+
+      if (currentMode === 'all' && avgCurrent['und'] > 0.1) {
+        displayItems.push({
+          label: '?',
+          val: avgCurrent['und'],
+          prev: avgPrev['und'] !== undefined ? avgPrev['und'] : null,
+          color: 'var(--c-und)',
+          bgColor: 'var(--c-und)',
+          textColor: '#fff',
+          isUndecided: true,
+          seats: 0
+        });
+      }
+
+      displayItems.forEach((item, index) => {
+        let diffClass = 'change-neu';
+        let diffText = '-';
+        if (item.prev !== null) {
+          const diff = item.val - item.prev;
+          if (Math.abs(diff) < 0.1) {
+            diffText = '0,0%';
+            diffClass = 'change-neu';
+          } else if (diff > 0) {
+            diffText = `+${diff.toFixed(1).replace('.', ',')}%`;
+            diffClass = 'change-pos';
+          } else {
+            diffText = `${diff.toFixed(1).replace('.', ',')}%`;
+            diffClass = 'change-neg';
+          }
+        }
+
+        const partyFullNames = {
+          'KO': 'Koalicja Obywatelska',
+          'PiS': 'Prawo i Sprawiedliwo&#347;&#263;',
+          'R+': 'Rozw&oacute;j+',
+          'Rozwój+': 'Rozw&oacute;j+',
+          'KON': 'Konfederacja',
+          'Konfederacja': 'Konfederacja',
+          'KKP': 'Konfederacja Korony Polskiej',
+          'KoronaPolska': 'Konf. Korony Polskiej',
+          'LEW': 'Nowa Lewica',
+          'Lewica': 'Nowa Lewica',
+          'RAZ': 'Razem',
+          'Razem': 'Razem',
+          'TD': 'Trzecia Droga',
+          'PSL': 'Polskie Stronnictwo Ludowe',
+          '25': 'Polska 2050',
+          'PL2050': 'Polska 2050',
+          'Inni': 'Inni',
+          '?': 'Niezdecydowani'
+        };
+        const fullName = partyFullNames[item.label] || item.label;
+        const delay = (index * 0.05).toFixed(2);
+
+        let seatsHTML = '';
+        if (!item.isUndecided && item.seats !== undefined) {
+           seatsHTML = `
+            <div class="party-seats" style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px; background: rgba(255,255,255,0.05); color: #8e9bb0; border: 1px solid rgba(255,255,255,0.1); width: 100%; box-sizing: border-box; text-align: center;">
+              <i class="fa-solid fa-chair" style="margin-right: 3px; color: ${item.color};"></i> ${item.seats}
+            </div>
+           `;
+        }
+
+        const html = `
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 0 0 100px; min-width: 100px;">
+            <div class="poll-item" style="--party-color: ${item.color}; animation-delay: ${delay}s; width: 100%; padding: 18px 5px; flex: none;">
+              <div class="party-name">${fullName}</div>
+              <div class="party-pct">${item.val.toFixed(1).replace('.', ',')}%</div>
+              <div class="party-change ${diffClass}">${diffText}</div>
+            </div>
+            ${seatsHTML}
+          </div>
+        `;
+        grid.innerHTML += html;
+      });
+    }
+
+    function parsePollDate(dateStr) {
+      if (!dateStr) return null;
+      // Zamiana myślników na kropki, obsługa zakresów
+      const cleanDate = dateStr.replace(/-/g, '.'); 
+      const parts = cleanDate.split('.').filter(p => p.trim() !== "");
+      // Próbujemy wyciągnąć dzień, miesiąc, rok z OSTATNIEJ daty w zakresie (data zakończenia badania)
+      // Np. 9-15.12.2025 -> parts: [9, 15, 12, 2025] -> bierzemy 15.12.2025
+      if (parts.length < 3) return null;
+
+      const year = parseInt(parts[parts.length - 1], 10);
+      const month = parseInt(parts[parts.length - 2], 10) - 1; // 0-indexed
+      const day = parseInt(parts[parts.length - 3], 10);
+      
+      return { day, month, year };
+    }
+
+    // Funkcja zwracająca klucz sortowania "YYYY-MM-P", gdzie P to 1 (pierwsza połowa) lub 2 (druga)
+    function getBiMonthlyKey(year, month, day) {
+        const part = day <= 15 ? 1 : 2;
+        // Miesiąc +1 do stringa
+        const mStr = (month + 1).toString().padStart(2, '0');
+        return `${year}-${mStr}-${part}`;
+    }
+
+    function getLabelFromKey(key) {
+        // key: YYYY-MM-PART
+        const [y, m, p] = key.split('-');
+        const monthNames = ["STY", "LUT", "MAR", "KWI", "MAJ", "CZE", "LIP", "SIE", "WRZ", "PAŹ", "LIS", "GRU"];
+        const monthIdx = parseInt(m, 10) - 1;
+        const roman = p === '1' ? 'I' : 'II';
+        return `${monthNames[monthIdx]} ${roman} ${y}`;
+    }
+	const mandatyOkregow = {
+      1: 12, 2: 8, 3: 14, 4: 12, 5: 13, 6: 15, 7: 12, 8: 12, 9: 10, 10: 9, 
+      11: 12, 12: 8, 13: 14, 14: 10, 15: 9, 16: 10, 17: 9, 18: 12, 19: 20, 20: 12, 
+      21: 12, 22: 11, 23: 15, 24: 14, 25: 12, 26: 14, 27: 9, 28: 7, 29: 9, 30: 9, 
+      31: 12, 32: 9, 33: 16, 34: 8, 35: 10, 36: 12, 37: 9, 38: 9, 39: 10, 40: 8, 41: 12
+    };
+
+    function getPollsByMonth(month, year) {
+       return sampleSurveys.filter(p => {
+         if (p.title.toLowerCase().includes("średnia")) return false;
+         const { dateStr } = parseDetails(p.title);
+         const d = parsePollDate(dateStr);
+         return d && d.month === month && d.year === year;
+       });
+    }
+
+    function getCurrentDataMonth() {
+      const first = parseDetails(sampleSurveys[0].title);
+      const d = parsePollDate(first.dateStr);
+      let targetMonth = d ? d.month : new Date().getMonth();
+      let targetYear = d ? d.year : new Date().getFullYear();
+
+      let polls = getPollsByMonth(targetMonth, targetYear);
+      let safety = 0;
+      while (polls.length === 0 && safety < 12) {
+        targetMonth--;
+        if (targetMonth < 0) { targetMonth = 11; targetYear--; }
+        polls = getPollsByMonth(targetMonth, targetYear);
+        safety++;
+      }
+      return { month: targetMonth, year: targetYear, polls };
+    }
+
+    function calculateAverage(polls, mode) {
+      if (!polls || polls.length === 0) return {};
+
+      let validPolls = polls;
+      if (typeof currentTermId !== 'undefined' && currentTermId === 'term_current') {
+         const withRozwoj = polls.filter(p => p.data && p.data.RozwojPlus !== undefined);
+         if (withRozwoj.length > 0) {
+            validPolls = withRozwoj;
+         }
+      }
+
+      let sums = {};
+      partyOrder.forEach(p => sums[p.key] = 0);
+      if (mode === 'all') sums['und'] = 0;
+
+      let count = 0;
+      validPolls.forEach(poll => {
+        let sumParties = 0;
+        partyOrder.forEach(p => sumParties += (poll.data[p.key] || 0));
+        let undVal = 0;
+        if (sumParties < 99.9) {
+           undVal = 100 - sumParties;
+        }
+
+        if (mode === 'decided') {
+          if (sumParties > 0) {
+            partyOrder.forEach(p => {
+              const raw = poll.data[p.key] || 0;
+              sums[p.key] += (raw / sumParties) * 100;
+            });
+            count++;
+          }
+        } else {
+          partyOrder.forEach(p => sums[p.key] += (poll.data[p.key] || 0));
+          sums['und'] += undVal;
+          count++;
+        }
+      });
+
+      if (count === 0) return {};
+      let averages = {};
+      Object.keys(sums).forEach(k => {
+        averages[k] = sums[k] / count;
+      });
+      return averages;
+    }
+
+    /* =========================================
+       3. RENDEROWANIE I WYKRES
+       ========================================= */
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('btn-all').classList.toggle('active', mode === 'all');
+      document.getElementById('btn-decided').classList.toggle('active', mode === 'decided');
+      renderAll();
+    }
+
+   function renderAll() {
+      renderTable();
+      renderAverageBubbles();
+      renderChart(); 
+      
+      // --- OBSŁUGA MAPY ---
+      const mapSection = document.getElementById('map-section');
+      
+      // Mapa działa TYLKO dla obecnej kadencji
+      if (currentTermId === 'term_current') {
+          mapSection.style.display = 'block'; // Pokaż mapę
+          
+          const currentData = getCurrentDataMonth();
+          if (currentData.polls && currentData.polls.length > 0) {
+            const averages = calculateAverage(currentData.polls, currentMode);
+            updateMap(averages);
+            if (typeof updateSenatMap === 'function') updateSenatMap(averages);
+          }
+      } else {
+          mapSection.style.display = 'none'; // Ukryj mapę dla starych kadencji
+      }
+    }
+
+   /* --- FUNKCJA ROZWIJANIA WIERSZA --- */
+function toggleDetails(id) {
+  const detailRow = document.getElementById('details-' + id);
+  const mainRow = document.getElementById('row-' + id);
+  
+  if (detailRow.classList.contains('show')) {
+    detailRow.classList.remove('show');
+    mainRow.classList.remove('expanded');
+  } else {
+    detailRow.classList.add('show');
+    mainRow.classList.add('expanded');
+  }
+}
+
+/* --- ZAKTUALIZOWANA FUNKCJA RENDER TABLE --- */
+function renderTable() {
+  const container = document.querySelector('.table-responsive');
+  container.innerHTML = ''; 
+
+  // Funkcja generująca tabelę z logiką porównywania
+  const generateTableHTML = (polls, columns, title, tableIndex) => {
+      if (!polls || polls.length === 0) return '';
+
+      let headHTML = `<tr><th>Termin</th><th>Ośrodek</th>`;
+      columns.forEach(p => {
+          headHTML += `<th style="color:${p.color}">${p.label}</th>`;
+      });
+      
+      const undClass = (currentMode === 'decided') ? 'col-undecided hidden' : 'col-undecided';
+      headHTML += `<th class="${undClass}" style="color:var(--muted)">?</th></tr>`;
+
+      let bodyHTML = '';
+      
+      // Iterujemy po sondażach
+      polls.forEach((poll, index) => {
+          const uniqueId = `t${tableIndex}-p${index}`; // Unikalne ID dla wiersza
+          const trClass = poll.title.toLowerCase().includes("średnia") ? 'class="average-row"' : 'class="poll-row"';
+          const { dateStr, firmStr } = parseDetails(poll.title);
+          
+          // --- LOGIKA OBLICZANIA PROCENTÓW (OBECNY SONDAŻ) ---
+          let sumParties = 0;
+          partyOrder.forEach(p => sumParties += (poll.data[p.key] || 0));
+          let undVal = (sumParties < 99.9) ? (100 - sumParties) : 0;
+          
+          let displayValues = { ...poll.data };
+          if (currentMode === 'decided') {
+              if (sumParties > 0) {
+                  partyOrder.forEach(p => {
+                      const raw = poll.data[p.key] || 0;
+                      displayValues[p.key] = (raw / sumParties) * 100;
+                  });
+              }
+              undVal = 0;
+          }
+
+          // Szukanie zwycięzcy w wierszu
+          let maxVal = -1;
+          let winnerKey = '';
+          columns.forEach(p => {
+              let v = displayValues[p.key] || 0;
+              if (v > maxVal) { maxVal = v; winnerKey = p.key; }
+          });
+
+          // --- LOGIKA SZUKANIA POPRZEDNIEGO SONDAŻU TEJ SAMEJ FIRMY ---
+          let prevPoll = null;
+          // Szukamy w dół listy (starsze sondaże mają wyższy indeks)
+          for (let k = index + 1; k < polls.length; k++) {
+             const prevDetails = parseDetails(polls[k].title);
+             // Porównujemy nazwę firmy (np. "IBRiS dla Onet")
+             if (prevDetails.firmStr === firmStr) {
+                 prevPoll = polls[k];
+                 break; // Znaleziono pierwszy pasujący, przerywamy
+             }
+          }
+
+          // Obliczanie wartości poprzedniego sondażu (dla porównania)
+          let prevValues = null;
+          let prevDate = "";
+          
+          if (prevPoll) {
+              prevDate = parseDetails(prevPoll.title).dateStr;
+              prevValues = { ...prevPoll.data };
+              let prevSum = 0;
+              partyOrder.forEach(p => prevSum += (prevPoll.data[p.key] || 0));
+              
+              if (currentMode === 'decided' && prevSum > 0) {
+                  partyOrder.forEach(p => {
+                      prevValues[p.key] = ((prevPoll.data[p.key] || 0) / prevSum) * 100;
+                  });
+              }
+          }
+
+          // --- BUDOWANIE GŁÓWNEGO WIERSZA ---
+          // Dodajemy onclick tylko jeśli to nie jest wiersz średniej
+          const clickAttr = !poll.title.toLowerCase().includes("średnia") ? `onclick="toggleDetails('${uniqueId}')"` : '';
+          
+          let rowHTML = `<tr id="row-${uniqueId}" ${trClass} ${clickAttr}>
+              <td>${dateStr}</td>
+              <td><strong>${firmStr}</strong></td>`;
+
+          columns.forEach(p => {
+              const val = displayValues[p.key];
+              const isWinner = (p.key === winnerKey && !poll.title.toLowerCase().includes("średnia"));
+              let styleAttr = isWinner ?
+                  `style="background-color:${hexToRgba(p.color, 0.2)}; font-weight:800; border:1px solid ${hexToRgba(p.color, 0.4)}; color:#fff; border-radius:4px;"` :
+                  `style="border:1px solid transparent;"`;
+
+              const formatted = (val !== undefined && val > 0.01) ? val.toFixed(1).replace('.', ',') + '%' : '-';
+              rowHTML += `<td ${styleAttr}>${formatted}</td>`;
+          });
+
+          const undFormatted = undVal > 0.1 ? undVal.toFixed(1).replace('.', ',') + '%' : '-';
+          rowHTML += `<td class="${undClass}" style="color:var(--muted)">${undFormatted}</td></tr>`;
+          
+          // --- BUDOWANIE UKRYTEGO WIERSZA SZCZEGÓŁÓW (DIFF) ---
+          if (!poll.title.toLowerCase().includes("średnia")) {
+              let diffHTML = `<tr id="details-${uniqueId}" class="details-row">
+                  <td colspan="2"><span class="diff-label">Zmiana vs ${prevDate || 'brak danych'}:</span></td>`;
+              
+              columns.forEach(p => {
+                  let cellContent = '<span class="diff-neu">-</span>';
+                  
+                  if (prevValues && displayValues[p.key] !== undefined && prevValues[p.key] !== undefined) {
+                      const diff = displayValues[p.key] - prevValues[p.key];
+                      if (Math.abs(diff) < 0.1) {
+                          cellContent = `<span class="diff-neu">0,0%</span>`;
+                      } else if (diff > 0) {
+                          cellContent = `<span class="diff-pos">+${diff.toFixed(1).replace('.', ',')}%</span>`;
+                      } else {
+                          cellContent = `<span class="diff-neg">${diff.toFixed(1).replace('.', ',')}%</span>`;
+                      }
+                  } else if (!prevValues) {
+                     cellContent = '<span class="diff-neu" style="font-size:10px">Pierwszy<br>sondaż</span>';
+                  }
+                  
+                  diffHTML += `<td>${cellContent}</td>`;
+              });
+              
+              // Kolumna niezdecydowanych w diff
+              diffHTML += `<td class="${undClass}"></td></tr>`;
+              rowHTML += diffHTML;
+          }
+
+          bodyHTML += rowHTML;
+      });
+
+      return `
+          <h3 style="margin: 20px 0 10px 0; color: #94a3b8; font-size: 14px; text-transform:uppercase; letter-spacing:1px; text-align: center;">${title}</h3>
+          <table class="polls-list">
+              <thead>${headHTML}</thead>
+              <tbody>${bodyHTML}</tbody>
+          </table>
+        `;
+  };
+
+  // --- LOGIKA GŁÓWNA TABELI ---
+  if (currentTermId === 'term_current') {
+      const currentCols = partyOrder.filter(p => p.key !== 'TD');
+      const historyCols = partyOrder.filter(p => p.key !== 'PSL' && p.key !== 'PL2050');
+      const cutoffDate = new Date(2025, 6, 1).getTime(); 
+
+      const pollsNew = [];
+      const pollsOld = [];
+
+      sampleSurveys.forEach(poll => {
+          const { dateStr } = parseDetails(poll.title);
+          const d = parsePollDate(dateStr);
+          if (!d) return;
+          const pollDate = new Date(d.year, d.month, d.day).getTime();
+
+          if (pollDate >= cutoffDate) {
+              pollsNew.push(poll);
+          } else {
+              pollsOld.push(poll);
+          }
+      });
+
+      let fullHTML = "";
+      // Dodajemy index tabeli (1 i 2), żeby ID wierszy były unikalne
+      fullHTML += generateTableHTML(pollsNew, currentCols, "Sondaże (Po rozpadzie Trzeciej Drogi)", 1);
+      fullHTML += generateTableHTML(pollsOld, historyCols, "Sondaże Archiwalne (Z Trzecią Drogą)", 2);
+      container.innerHTML = fullHTML;
+
+  } else {
+      const html = generateTableHTML(sampleSurveys, partyOrder, `Lista Sondaży - ${termsData[currentTermId].label}`, 1);
+      container.innerHTML = html;
+  }
+}
+
+function renderChart() {
+    const ctx = document.getElementById('supportChart').getContext('2d');
+
+    // ============================================================
+    // 1. OŚ CZASU (DYNAMICZNA NA PODSTAWIE KADENCJI)
+    // ============================================================
+    const termConfig = termsData[currentTermId];
+    if (!termConfig) return;
+
+    const startDate = new Date(termConfig.startDate);
+    const endDate = new Date(termConfig.endDate);
+
+    const monthTicks = [];
+    let tempDate = new Date(startDate);
+    tempDate.setDate(1);
+
+    while (tempDate <= endDate) {
+        monthTicks.push(tempDate.getTime());
+        tempDate.setMonth(tempDate.getMonth() + 1);
+    }
+
+    const minScale = startDate.getTime();
+    const maxScale = endDate.getTime();
+
+    // ============================================================
+    // 2. PRZETWARZANIE DANYCH SONDAŻOWYCH
+    // ============================================================
+    let rawPollsData = [];
+
+    sampleSurveys.forEach(poll => {
+        const { dateStr, firmStr } = parseDetails(poll.title);
+        const d = parsePollDate(dateStr);
+        if (!d) return;
+
+        const dateObj = new Date(d.year, d.month, d.day);
+        const timestamp = dateObj.getTime();
+
+        if (timestamp < (minScale - 2592000000) || timestamp > (maxScale + 2592000000)) return;
+
+        let dataPoint = { ...poll.data };
+        let sumParties = 0;
+        partyOrder.forEach(p => sumParties += (dataPoint[p.key] || 0));
+
+        // Przeliczanie na 'tylko zdecydowani'
+        if (currentMode === 'decided') {
+            if (sumParties > 0) {
+                partyOrder.forEach(p => {
+                    dataPoint[p.key] = ((dataPoint[p.key] || 0) / sumParties) * 100;
+                });
+            }
+        }
+
+        // Tutaj nie liczymy jeszcze mandatów dla pojedynczego sondażu, zrobimy to po uśrednieniu
+        rawPollsData.push({
+            x: timestamp,
+            dateObj: dateObj,
+            firm: firmStr,
+            title: poll.title,
+            values: dataPoint
+        });
+    });
+
+    // Sortowanie chronologiczne
+    rawPollsData.sort((a, b) => a.x - b.x);
+
+    // --- AGREGACJA DUBLE DAT (Średnia z tego samego dnia) ---
+    // Jeśli w jednym dniu jest kilka sondaży, łączymy je w jeden punkt
+    let pollsData = [];
+    if (rawPollsData.length > 0) {
+       const averagePollsGroup = (group) => {
+            if (group.length === 1) return group[0];
+            const base = group[0];
+            
+            const newValues = {};
+            
+            const allKeys = new Set();
+            group.forEach(p => Object.keys(p.values).forEach(k => allKeys.add(k)));
+
+            // Uśrednianie poparcia (%)
+            allKeys.forEach(k => {
+                let sum = 0;
+                let count = 0;
+                group.forEach(p => {
+                    if (typeof p.values[k] === 'number') {
+                        sum += p.values[k];
+                        count++;
+                    }
+                });
+                newValues[k] = count > 0 ? sum / count : 0;
+            });
+
+            return {
+                x: base.x,
+                dateObj: base.dateObj,
+                firm: group.map(p => p.firm).join(" + "),
+                values: newValues
+            };
+        };
+
+        let currentDayBuffer = [rawPollsData[0]];
+        for (let i = 1; i < rawPollsData.length; i++) {
+            if (rawPollsData[i].x === rawPollsData[i - 1].x) {
+                currentDayBuffer.push(rawPollsData[i]);
+            } else {
+                pollsData.push(averagePollsGroup(currentDayBuffer));
+                currentDayBuffer = [rawPollsData[i]];
+            }
+        }
+        pollsData.push(averagePollsGroup(currentDayBuffer));
+    }
+
+    // 3. PRZYGOTOWANIE SERII DANYCH (LINII)
+    let entitiesToRender = [];
+    if (currentAggMode === 'parties') {
+        entitiesToRender = partyOrder.map(p => ({
+            key: p.key,
+            label: p.label,
+            color: p.color,
+            isBlock: false
+        }));
+    } else {
+        if (currentTermId === 'term_current') {
+            let k15xParties = ['KO', 'Lewica', 'PSL', 'PL2050', 'TD'];
+            let k15xLabel = 'K15X';
+            if (currentAggMode === 'blocks_razem') {
+                k15xParties.push('Razem');
+                k15xLabel = 'K15X+Razem';
+            }
+
+            entitiesToRender = [{
+                key: 'K15X',
+                label: k15xLabel,
+                color: '#ff5757',
+                isBlock: true,
+                parties: k15xParties
+            },
+            {
+                key: 'Prawica',
+                label: 'Prawica',
+                color: '#004494',
+                isBlock: true,
+                parties: ['PiS', 'RozwojPlus', 'Konfederacja', 'KoronaPolska']
+            }];
+            if (currentAggMode === 'blocks') {
+                entitiesToRender.push({
+                    key: 'Razem',
+                    label: 'Razem',
+                    color: '#8c276f',
+                    isBlock: true,
+                    parties: ['Razem']
+                });
+            }
+            entitiesToRender.push({
+                key: 'Inni',
+                label: 'Inni',
+                color: '#7f8c8d',
+                isBlock: true,
+                parties: ['Inni']
+            });
+        } else {
+            // Fallback dla starych kadencji
+            entitiesToRender = partyOrder.map(p => ({
+                key: p.key,
+                label: p.label,
+                color: p.color,
+                isBlock: false
+            }));
+        }
+    }
+
+    // ============================================================
+    // 4. GENEROWANIE DATASETÓW (ŚREDNIA KROCZĄCA - POPRAWIONA LOGIKA)
+    // ============================================================
+    const datasets = [];
+    const windowSize = 7; // Okno czasowe
+
+    // KROK A: Pre-kalkulacja punktów wykresu
+    // Najpierw liczymy średnie poparcie z okna czasowego, a potem mandaty dla tej średniej.
+    const computedGraphData = pollsData.map((point, index) => {
+        let startIdx = Math.max(0, index - (windowSize - 1));
+        let slice = pollsData.slice(startIdx, index + 1);
+        
+        // 1. Sumujemy poparcie dla wszystkich partii w oknie czasowym
+        let avgValues = {};
+        partyOrder.forEach(p => avgValues[p.key] = 0);
+        
+        let validCount = 0;
+        slice.forEach(p => {
+             partyOrder.forEach(party => {
+                 avgValues[party.key] += (p.values[party.key] || 0);
+             });
+             validCount++;
+        });
+
+        // Dzielimy przez liczbę sondaży, aby uzyskać średnią procentową
+        if (validCount > 0) {
+            Object.keys(avgValues).forEach(k => avgValues[k] /= validCount);
+        }
+
+        // 2. Obliczamy mandaty dla tej UŚREDNIONEJ wartości
+        // Dzięki temu, jeśli średnia wynosi 4%, partia nie dostanie mandatów (zostanie odcięta progiem)
+        let computedSeats = {};
+        if (validCount > 0) {
+             computedSeats = calculateSeatsForPoll(avgValues, point.dateObj);
+        }
+
+        return {
+            x: point.x,
+            dateObj: point.dateObj,
+            avgValues: avgValues,
+            avgSeats: computedSeats,
+            valid: validCount > 0,
+            originalPoint: point // potrzebne do logiki wyniku wyborów (ostatni punkt)
+        };
+    });
+
+    // KROK B: Przypisanie danych do serii (linii na wykresie)
+    entitiesToRender.forEach(entity => {
+        const chartData = [];
+
+        for (let i = 0; i < computedGraphData.length; i++) {
+            const point = computedGraphData[i];
+            const currentPollDate = point.dateObj;
+
+            // LOGIKA UKRYWANIA LINI (DATE CUTOFFS)
+            let shouldHide = false;
+            if (currentTermId === 'term_current') {
+                if (entity.key === 'Razem' && currentPollDate < new Date(2024, 9, 27)) shouldHide = true;
+                if (entity.key === 'TD' && currentPollDate > new Date(2025, 6, 9)) shouldHide = true;
+                if (entity.key === 'RozwojPlus' && currentPollDate < new Date(2026, 6, 15)) shouldHide = true;
+
+                if ((entity.key === 'PSL' || entity.key === 'PL2050') && currentPollDate <= new Date(2025, 6, 9)) shouldHide = true;
+                if (entity.key === 'KoronaPolska' && currentPollDate < new Date(2025, 4, 26)) shouldHide = true;
+            }
+
+            if (shouldHide) {
+                chartData.push({ x: point.x, y: null });
+                continue;
+            }
+
+            // Ostatni punkt w przeszłych kadencjach to wynik wyborów (bez średniej)
+            // Dla obecnej kadencji (term_current) zawsze rysujemy średnią
+            if (currentTermId !== 'term_current' && i === computedGraphData.length - 1) {
+                let finalVal = 0;
+                const isSeatsMode = (typeof currentChartMode !== 'undefined' && currentChartMode === 'seats');
+                
+                // Dla wyniku wyborów musimy obliczyć mandaty z surowych danych wyborczych (ostatni punkt)
+                // Zakładamy, że ostatni punkt w pollsData dla starej kadencji to wynik wyborów
+                
+                let rawValuesForFinal = point.originalPoint.values;
+                let seatsForFinal = calculateSeatsForPoll(rawValuesForFinal, point.dateObj);
+
+                if (entity.isBlock) {
+                    entity.parties.forEach(pKey => {
+                         finalVal += isSeatsMode ? (seatsForFinal[pKey] || 0) : (rawValuesForFinal[pKey] || 0);
+                    });
+                } else {
+                    finalVal = isSeatsMode ? (seatsForFinal[entity.key] || 0) : (rawValuesForFinal[entity.key] || 0);
+                }
+                chartData.push({ x: point.x, y: finalVal });
+                continue;
+            }
+
+            if (!point.valid) {
+                chartData.push({ x: point.x, y: null });
+                continue;
+            }
+
+            let val = 0;
+            // Wybór wartości z przeliczonych danych (średnia mandatów vs średnia poparcia)
+            if (typeof currentChartMode !== 'undefined' && currentChartMode === 'seats') {
+                // Tryb MANDATÓW - bierzemy z point.avgSeats (obliczone z średniej poparcia)
+                if (entity.isBlock) {
+                    entity.parties.forEach(pKey => val += (point.avgSeats[pKey] || 0));
+                } else {
+                    val = (point.avgSeats[entity.key] || 0);
+                }
+            } else {
+                // Tryb POPARCIA - bierzemy z point.avgValues
+                if (entity.isBlock) {
+                    entity.parties.forEach(pKey => val += (point.avgValues[pKey] || 0));
+                } else {
+                    val = (point.avgValues[entity.key] || 0);
+                }
+            }
+
+            chartData.push({ x: point.x, y: val });
+        }
+
+        datasets.push({
+            type: 'line',
+            label: entity.label,
+            data: chartData,
+            borderColor: entity.color,
+            backgroundColor: entity.color,
+            borderWidth: 4,
+            tension: 0.3,
+            pointRadius: 0,
+            pointHoverRadius: 6,
+            pointHitRadius: 20,
+            spanGaps: false,
+            order: 1
+        });
+    });
+
+    // KROK C: Punkty poszczególnych badań (jeśli opcja jest włączona)
+    if (showIndividualPolls) {
+        entitiesToRender.forEach(entity => {
+            const scatterData = [];
+
+            rawPollsData.forEach(poll => {
+                const currentPollDate = poll.dateObj;
+
+                // LOGIKA UKRYWANIA PUNKTÓW (DATE CUTOFFS)
+                let shouldHide = false;
+                if (currentTermId === 'term_current') {
+                    if (entity.key === 'Razem' && currentPollDate < new Date(2024, 9, 27)) shouldHide = true;
+                    if (entity.key === 'TD' && currentPollDate > new Date(2025, 6, 9)) shouldHide = true;
+                    if (entity.key === 'RozwojPlus' && currentPollDate < new Date(2026, 6, 15)) shouldHide = true;
+
+                    if ((entity.key === 'PSL' || entity.key === 'PL2050') && currentPollDate <= new Date(2025, 6, 9)) shouldHide = true;
+                    if (entity.key === 'KoronaPolska' && currentPollDate < new Date(2025, 4, 26)) shouldHide = true;
+                }
+
+                if (shouldHide) return;
+
+                let val = 0;
+                if (typeof currentChartMode !== 'undefined' && currentChartMode === 'seats') {
+                    const pollSeats = calculateSeatsForPoll(poll.values, poll.dateObj);
+                    if (entity.isBlock) {
+                        entity.parties.forEach(pKey => val += (pollSeats[pKey] || 0));
+                    } else {
+                        val = (pollSeats[entity.key] || 0);
+                    }
+                } else {
+                    if (entity.isBlock) {
+                        entity.parties.forEach(pKey => val += (poll.values[pKey] || 0));
+                    } else {
+                        val = (poll.values[entity.key] || 0);
+                    }
+                }
+
+                if (typeof val === 'number' && val > 0) {
+                    scatterData.push({
+                        x: poll.x,
+                        y: val,
+                        firm: poll.firm,
+                        title: poll.title
+                    });
+                }
+            });
+
+            if (scatterData.length > 0) {
+                datasets.push({
+                    type: 'scatter',
+                    isScatter: true,
+                    label: entity.label + ' (badania)',
+                    data: scatterData,
+                    backgroundColor: hexToRgba(entity.color, 0.4),
+                    borderColor: hexToRgba(entity.color, 0.8),
+                    borderWidth: 1.2,
+                    pointRadius: 3.5,
+                    pointHoverRadius: 6,
+                    pointHitRadius: 10,
+                    order: 10
+                });
+            }
+        });
+    }
+
+    if (myChart) myChart.destroy();
+
+    // 5. KONFIGURACJA WYKRESU
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.font.family = 'Inter';
+    const monthNames = ["STY", "LUT", "MAR", "KWI", "MAJ", "CZE", "LIP", "SIE", "WRZ", "PAŹ", "LIS", "GRU"];
+
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: { datasets: datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#e2e8f0',
+                        boxWidth: 12,
+                        font: { size: 11 },
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        filter: function(item, chart) {
+                            const ds = chart.datasets[item.datasetIndex];
+                            return !ds || !ds.isScatter;
+                        }
+                    }
+                },
+                tooltip: {
+                    itemSort: function(a, b) {
+                        return b.parsed.y - a.parsed.y;
+                    },
+                    callbacks: {
+                        title: function(context) {
+                            const ts = context[0].parsed.x;
+                            const d = new Date(ts);
+                            const day = d.getDate() < 10 ? '0' + d.getDate() : d.getDate();
+                            const month = (d.getMonth() + 1) < 10 ? '0' + (d.getMonth() + 1) : (d.getMonth() + 1);
+                            return `${day}.${month}.${d.getFullYear()}`;
+                        },
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (context.parsed.y !== null && context.parsed.y !== undefined) {
+                                if (context.dataset.isScatter) {
+                                    const raw = context.raw;
+                                    const firmText = (raw && raw.firm) ? ` (${raw.firm})` : '';
+                                    const cleanLabel = label.replace(' (badania)', '');
+                                    if (typeof currentChartMode !== 'undefined' && currentChartMode === 'seats') {
+                                        return ` [Sondaż] ${cleanLabel}${firmText}: ${Math.round(context.parsed.y)} m.`;
+                                    } else {
+                                        return ` [Sondaż] ${cleanLabel}${firmText}: ${context.parsed.y.toFixed(1)}%`;
+                                    }
+                                }
+                                // Dynamiczna etykieta w zależności od trybu
+                                if (typeof currentChartMode !== 'undefined' && currentChartMode === 'seats') {
+                                    return ` ${label}: ${Math.round(context.parsed.y)} mandatów`;
+                                } else {
+                                    return ` ${label}: ${context.parsed.y.toFixed(1)}%`;
+                                }
+                            }
+                            return null;
+                        }
+                    },
+                    backgroundColor: 'rgba(19, 26, 46, 0.95)',
+                    titleColor: '#fff',
+                    bodyColor: '#e2e8f0',
+                    borderColor: '#262d4a',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grace: '5%',
+                    grid: { color: '#262d4a' },
+                    ticks: {
+                        color: '#94a3b8',
+                        font: { size: 10 }
+                    }
+                },
+                x: {
+                    type: 'linear',
+                    min: minScale,
+                    max: maxScale,
+                    afterBuildTicks: function(axis) {
+                        axis.ticks = monthTicks.map(ts => ({ value: ts }));
+                    },
+                    grid: { color: '#2a3766', drawBorder: false },
+                    ticks: {
+                        color: '#e2e8f0',
+                        font: { size: 11, weight: 'bold' },
+                        callback: function(value, index, values) {
+                            const d = new Date(value);
+                            return `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+                        },
+                        maxRotation: 0,
+                        autoSkip: true,
+                        autoSkipPadding: 15,
+                        maxTicksLimit: 24
+                    }
+                }
+            }
+        }
+    });
+}
+/* =========================================
+       BRAKUJĄCA FUNKCJA PRZEŁĄCZANIA KADENCJI
+       ========================================= */
+    function switchTerm(termId) {
+        // 1. Sprawdź czy kadencja istnieje w danych
+        if (!termsData[termId]) return;
+
+        // 2. Zaktualizuj globalny identyfikator kadencji
+        currentTermId = termId;
+        
+        // 3. Podmień dane na te z wybranej kadencji
+        partyOrder = termsData[termId].parties;
+        sampleSurveys = termsData[termId].surveys;
+
+        // --- NOWA CZĘŚĆ: UKRYWANIE WYKRESU MANDATÓW DLA 2019 ---
+        const seatsBtn = document.getElementById('btn-chart-seats');
+        
+        if (termId === 'term_2019') {
+            // Ukrywamy przycisk "Mandaty (Sejm)"
+            seatsBtn.style.display = 'none';
+            
+            // Jeśli użytkownik był w trybie mandatów, przełączamy go siłowo na poparcie
+            if (currentChartMode === 'seats') {
+                setChartMode('support'); 
+            }
+        } else {
+            // Dla obecnej (i innych przyszłych) kadencji pokazujemy przycisk
+            seatsBtn.style.display = 'inline-block'; 
+        }
+        // --------------------------------------------------------
+
+        // 4. Zaktualizuj wygląd przycisków wyboru kadencji (aktywny/nieaktywny)
+        document.querySelectorAll('.toggle-container button[id^="btn-term-"]').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        const btnId = termId.replace('term_', 'btn-term-'); 
+        const activeBtn = document.getElementById(btnId);
+        if (activeBtn) activeBtn.classList.add('active');
+
+        // 5. Reset trybu agregacji (bloków)
+        currentAggMode = 'parties'; 
+        document.querySelectorAll('#btn-agg-parties, #btn-agg-blocks, #btn-agg-blocks-razem').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-agg-parties').classList.add('active');
+
+        // 6. Zniszcz stary wykres
+        if (myChart) {
+            myChart.destroy();
+            myChart = null;
+        }
+
+        // 7. Przerysuj całą stronę
+        renderAll();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+  drawMap();   // 1. Najpierw narysuj kontury mapy
+  if (typeof drawSenatMap === 'function') drawSenatMap();
+  renderAll(); // 2. Potem przelicz dane i pokoloruj mapę
+});
+/* =========================================
+   LOGIKA MAPY (Przeniesiona z sejm.html)
+   ========================================= */
+
+// 1. Nazwy okręgów (do dymków)
+const okregiNames = {
+  1: "Legnica", 2: "Wałbrzych", 3: "Wrocław", 4: "Bydgoszcz", 5: "Toruń",
+  6: "Lublin", 7: "Chełm", 8: "Zielona Góra", 9: "Łódź", 10: "Piotrków Trybunalski",
+  11: "Sieradz", 12: "Chrzanów", 13: "Kraków", 14: "Nowy Sącz", 15: "Tarnów",
+  16: "Płock", 17: "Radom", 18: "Siedlce", 19: "Warszawa I", 20: "Warszawa II",
+  21: "Opole", 22: "Krosno", 23: "Rzeszów", 24: "Białystok", 25: "Gdańsk",
+  26: "Gdynia", 27: "Bielsko-Biała", 28: "Częstochowa", 29: "Gliwice", 30: "Rybnik",
+  31: "Katowice", 32: "Sosnowiec", 33: "Kielce", 34: "Elbląg", 35: "Olsztyn",
+  36: "Kalisz", 37: "Konin", 38: "Piła", 39: "Poznań", 40: "Koszalin", 41: "Szczecin"
+};
+
+// === DANE ŚCIEŻEK OKRĘGÓW (twoje 41 pathów) ===
+const okrPaths = [
+ { id: 1, d: "m 51.293013,183.75194 -2.497412,2.11319 -0.288163,-3.65006 -3.169793,0.48027 -0.768435,-3.07374 -1.056598,0.76844 -9.125161,-3.55401 -1.248706,1.2487 -2.497413,-4.89877 0.288163,-2.20925 -1.536869,-1.63292 -1.440815,-0.96055 -0.864489,0.67238 -2.017141,-0.96054 -1.825033,0.48027 0.86449,1.72898 -0.86449,3.07374 -4.706662,0.19211 4.226391,-7.01197 2.497413,-7.68434 0.09605,-2.1132 -1.53687,-2.49741 5.667206,-4.22639 3.55401,1.72897 2.305304,-4.70666 3.073739,0.96055 2.017141,3.07373 2.977684,-4.22639 2.497413,-0.96054 1.536869,-6.05142 2.977684,-1.53687 -0.288163,-1.63293 h 0.864489 l 4.130337,2.20925 v 1.92109 l 1.921086,1.44082 5.186934,4.80271 0.09605,2.59347 -0.960544,3.3619 0.864489,3.65007 -1.825032,1.63292 1.632924,2.01714 v 6.7238 l -4.034282,0.28817 v 2.11319 h -3.169793 l -1.056598,1.72898 0.384217,2.40136 -1.632923,2.11319 H 51.19695 l 0.09605,3.74612 1.248707,2.30531 0.960543,0.57632 z" },
+{ id: 2, d: "m 54.943078,169.34379 -1.248706,2.59346 1.056597,2.68953 -3.938227,1.15265 0.384217,4.22639 1.632924,2.20925 -1.344761,1.34476 2.497413,1.53687 1.34476,-2.01714 2.305304,0.67238 2.497413,3.74612 -0.960543,0.86449 -1.440815,1.82503 -0.864489,-0.38422 -0.864489,1.82503 -2.497413,0.96055 2.113195,2.49741 h 2.113196 l 0.384217,1.82503 1.536869,0.86449 0.768435,1.63292 1.921087,2.68952 0.768434,2.40136 2.977685,2.49742 3.938227,-3.93823 3.55401,-1.63293 1.056598,0.96055 0.09605,-3.07374 -3.361901,-4.61061 0.864489,-1.63292 3.746119,-1.15265 2.497412,-5.37905 -0.864489,-1.63292 0.288163,-0.67238 -6.243531,-2.01714 v -3.84218 l -1.440815,-0.96054 -3.650065,-0.28816 0.288163,-3.65007 h -2.88163 l 1.440815,-2.68952 -3.842173,-0.57632 -2.977684,-0.86449 z" },
+{ id: 3, d: "m 57.920762,142.73674 4.130337,4.61061 0.576326,2.40135 -1.344761,3.74612 1.440815,2.40136 -1.632924,2.01714 0.960544,2.88163 -0.672381,6.5317 -3.457956,0.96054 4.706663,2.1132 h 2.497412 l -1.152652,3.93822 2.593467,-1.34476 0.192109,4.32245 h 3.746119 l 1.248706,4.70666 5.955369,1.53687 1.536869,2.68952 h 2.20925 v -5.18693 l 2.593467,-2.97769 0.864489,-3.93823 3.842173,-2.97768 1.248706,-5.57115 -0.768434,-0.86449 7.396183,-1.44082 -2.785576,-7.58829 1.056598,-2.11319 -5.379042,0.28816 1.056597,-6.33959 -7.10802,-3.07373 -6.819858,3.74611 -4.994825,-1.53686 -2.113196,-2.40136 -2.113195,-1.15266 0.288163,-1.63292 -3.938227,-3.07374 h -2.401359 z" },
+{ id: 4, d: "m 105.54872,85.783805 5.84118,2.648908 -0.0679,3.396033 3.66771,0.815049 0.47545,4.346921 1.83386,1.969699 -3.32812,0.950891 -0.40752,4.279004 -0.27168,2.44514 -4.95821,4.00732 -2.78475,-0.95089 -1.22257,-1.69801 -2.44515,0.20376 -0.88296,-1.83386 -1.562179,-1.35841 -3.599797,-1.2905 -1.765935,2.24138 -0.679206,-1.96969 -0.747128,-0.27169 0.543364,-2.37722 -2.784747,1.15465 -1.698017,-0.54336 0.543364,-1.08674 -1.969698,-2.105536 0.679206,-0.950889 2.241384,-0.06792 v -5.094049 l -2.852669,-2.105541 h -1.630095 l -0.407525,-1.494256 0.882968,-0.475445 -0.475443,-2.03762 1.01881,-2.513065 -0.950892,-3.124351 2.716829,-1.765935 -1.969701,-2.648908 -0.407525,-1.154652 -2.580983,-1.15465 4.075239,-4.075242 1.01881,-5.433652 1.833859,-0.135843 1.01881,1.290495 3.192272,0.271682 1.154649,-2.988509 1.562177,-1.494255 2.377223,-0.339603 -0.407525,-2.03762 3.599801,0.815046 1.90178,-2.037619 1.69801,1.222573 2.58099,0.815046 v 1.222574 l 3.73563,0.950888 2.03762,-0.815049 1.15465,2.377226 0.74713,-2.241383 2.64891,-0.475446 2.3093,0.475446 -1.42633,2.580986 0.54336,3.803558 -0.88297,3.26019 -2.24138,1.765938 -4.21108,0.543367 -1.15465,0.950888 0.27168,0.950889 -2.17346,1.290495 -0.88297,3.192269 1.01881,3.260193 -0.88297,0.271682 -0.3396,0.950889 -2.10554,0.475446 z" },
+{ id: 5, d: "m 105.95624,85.512123 5.97702,3.05643 -0.74712,3.531875 2.85266,-0.271682 1.2905,2.92059 -0.47545,3.463954 1.49426,0.271682 v 0.882967 l -2.03762,1.018811 -0.61129,3.53187 -0.47544,3.05643 -1.2905,1.01882 -0.61128,2.37722 1.49425,0.54336 1.2905,-0.47544 5.29781,2.98851 0.88297,3.05643 5.16197,-1.90178 2.24138,2.10554 4.48276,-0.67921 1.9697,-2.10554 -1.08673,-1.83385 1.9697,-0.74713 0.74713,-1.76594 -0.47545,-0.67921 2.37723,-3.39603 -1.83386,-0.67921 3.26019,-3.53187 -1.22257,-3.735637 -0.67921,-1.154652 2.37723,-1.426334 -2.24139,-3.05643 h 2.98852 l 0.27168,-1.698016 2.10554,1.358413 0.54336,-2.648908 -1.22257,-1.222571 0.40753,-0.407524 -1.01882,-2.784748 3.80356,-0.747128 -0.47544,-3.328111 h -1.15465 l 0.61128,-2.648908 -2.10554,-2.03762 -2.78474,0.679207 -0.9509,-1.358413 -0.95088,0.203763 -2.58099,-1.833859 -1.42634,0.882968 -0.88296,-1.01881 -0.81505,-4.414843 -1.6301,-3.463954 -5.16197,0.407525 -3.73563,-0.88297 -0.74713,5.773258 -2.24138,2.105541 -4.68653,0.679207 -2.78475,3.328111 -1.49425,2.648908 1.22257,3.124351 -1.08673,1.833856 z" },
+{ id: 6, d: "m 218.43287,186.23848 2.98851,-3.53188 -1.22257,-4.21108 -1.22257,-3.53187 3.80356,-2.30931 1.08673,0.27169 v -2.58099 l 3.26019,-0.54336 0.40752,-1.6301 -2.3093,-2.98851 1.90178,-2.17346 2.85267,1.22257 0.13584,-6.2487 4.34692,-0.54337 0.95089,-3.39603 -7.47127,-3.66772 -0.13584,-3.80355 -3.53188,-1.49426 -1.35841,1.22257 -3.39603,-2.71682 -6.79207,-3.66772 0.27168,-1.6301 -2.03762,-4.75444 2.3093,0.27168 2.71683,-0.81505 0.27168,-2.85267 1.49426,-2.17346 -2.44515,-2.17346 -2.3093,-0.40752 -2.71683,1.90178 -2.17346,-1.49426 -3.26019,2.17346 -2.17346,-0.6792 -3.9394,2.17346 v 1.63009 l 0.67921,1.76594 -1.49426,1.90178 2.44515,1.76594 -2.71683,2.3093 1.49425,1.49426 -2.85266,3.66771 -2.85267,-1.76594 -0.81505,2.44515 1.76594,1.76593 3.26019,0.13585 1.6301,3.93939 -0.40753,1.35842 -2.71683,0.95089 2.85267,2.17346 -0.95089,2.17346 0.95089,0.54337 -0.95089,8.82968 1.08673,1.08673 -1.22257,2.44515 2.44515,7.74295 h 3.66771 l 2.17346,-1.22257 2.30931,1.49426 0.81504,1.08673 -1.35841,2.85267 2.17346,1.76593 3.66772,1.08673 z" },
+{ id: 7, d: "m 215.17268,193.16639 7.33543,2.03762 -1.63009,1.35841 10.1881,0.54336 4.89029,-5.97702 0.67921,2.58099 2.58098,-1.90178 2.44514,2.03762 -0.13584,2.3093 3.66772,1.22258 2.98851,-3.53188 0.6792,-2.44514 7.8788,-2.17346 c 0,0 2.44515,1.63009 1.35842,-4.48277 -1.08674,-6.11286 -1.08674,-6.11286 -1.08674,-6.11286 l -2.03761,-2.98851 -1.08674,-1.76594 4.89029,-2.17346 -6.38454,-6.11286 -2.03762,-5.16197 -5.84118,-5.56949 1.76594,-5.5695 -4.07524,-5.84117 -1.35841,-5.5695 2.58098,-3.26019 -1.63009,-3.9394 2.3093,-4.07524 -2.58099,-4.21108 -1.49425,-0.81505 -0.81505,-1.76594 -2.3093,-0.67921 -4.75445,-1.22257 -0.95089,-1.76593 -1.35841,-0.13585 -2.71683,2.58099 1.22257,1.22257 -2.3093,0.67921 -0.54336,2.3093 -2.30931,1.90178 -4.34692,-1.22257 -1.08673,2.58098 -0.27168,3.2602 -1.08674,0.81504 v 1.49426 l -2.85266,1.90178 h -2.03762 l 1.35841,5.70533 3.53187,2.85267 5.29782,2.71683 1.76594,2.71683 2.3093,-2.71683 2.17346,2.17346 -0.40753,3.12435 1.90178,0.95089 2.58099,1.76594 2.98851,1.63009 -1.08673,1.49426 0.81505,1.08673 -1.49426,0.27168 -1.08673,0.81505 h -1.22257 l -0.95089,6.38454 -2.58099,-1.63009 -1.90177,2.71682 2.17345,2.44515 -2.85266,1.76594 -1.22257,2.71682 -2.85267,2.17346 h -0.95089 l 1.08673,3.39604 -0.95089,2.85267 1.22257,1.90177 -3.39603,2.30931 0.54336,2.85266 0.95089,3.39604 -3.12435,-1.35841 z" },
+{ id: 8, d: "m 16.425291,101.72154 c 2.209249,2.88163 2.209249,2.88163 2.209249,2.88163 l -1.056597,1.63292 0.384217,2.20925 -2.305304,1.63292 1.056598,5.95537 3.457956,1.72898 -1.344761,4.61061 1.056598,1.82503 -1.152652,4.32245 -0.576326,2.78557 -2.977685,2.68952 1.53687,1.34476 0.480271,2.88163 1.248707,1.34476 0.384217,3.65007 -0.960543,1.15265 0.192108,1.44082 2.977685,2.11319 2.689521,1.34476 0.480272,3.74612 0.480272,1.0566 4.610607,-3.84217 4.226391,2.40135 1.440815,-5.6672 2.113195,0.48027 2.977684,3.3619 3.265848,-3.74612 3.169793,-1.0566 0.480271,-5.37904 c 0,0 1.248707,0.67238 2.497413,-1.0566 1.248706,-1.72897 1.248706,-1.72897 1.248706,-1.72897 l -0.480271,-0.67238 1.34476,-0.0961 1.344761,0.86449 2.20925,0.76844 v 1.92108 l 1.056597,0.76844 0.672381,1.15265 2.88163,-2.1132 1.440815,-2.68952 -0.192109,-2.49741 -1.536869,-1.24871 -1.440815,-0.57632 -1.248707,0.86449 -3.55401,-1.24871 1.632924,-1.92109 -0.768435,-1.72897 -3.55401,-0.67238 0.67238,-2.20925 -0.960543,-1.0566 -2.689522,-0.96055 1.248707,-1.63292 0.768434,-9.41332 -2.209249,-2.49742 2.017141,-0.38421 -2.20925,-7.20408 0.384217,-2.88163 3.842174,-1.056596 -1.056598,-3.073739 1.632924,-1.921087 -0.288163,-6.627748 1.728978,-3.842174 -3.554011,-0.384217 -2.785575,3.938228 -2.113196,1.536869 -2.785575,-1.056598 -2.689521,0.384218 -2.497413,1.632923 -1.344761,-0.09605 0.864489,2.017141 -6.915912,2.017141 -3.938227,-1.921087 v 1.632924 h -1.056598 l -2.977684,7.011962 -2.017141,1.15265 -0.672381,-0.76843 z" },
+{ id: 9, d: "m 147.38785,132.30947 c 1.6301,2.92058 1.6301,2.92058 1.6301,2.92058 l 2.92059,1.42634 0.27168,3.12435 -2.51306,4.00732 -3.66772,-1.83386 -1.22257,3.05643 -0.74713,-0.27168 -1.90178,0.61128 0.0679,4.41485 -3.39603,-0.54337 -0.88297,-3.39603 -0.67921,-0.61129 0.27169,-2.10554 -3.05643,-1.35841 0.88297,-1.35842 -1.08674,-2.17346 0.81505,-1.22257 2.03762,-0.13584 1.90178,-1.22257 2.30931,0.81505 0.6792,-0.67921 2.17346,-0.61129 -0.54336,-1.15465 0.27168,-1.76594 z" },
+{ id: 10, d: "m 123.34394,156.48922 3.66771,0.13585 2.98851,-4.61861 2.44515,-1.49426 1.22257,-1.63009 1.35841,0.54336 c 0,0 -1.76594,-0.81504 3.12435,-0.13584 4.89029,0.67921 4.89029,0.67921 4.89029,0.67921 l -1.22257,-4.48276 3.66772,-3.12435 2.58098,1.22257 3.9394,-3.66772 -0.40752,-3.66772 -3.12436,-2.44514 2.44515,-3.80356 3.39603,-1.35841 0.81505,-5.5695 3.53188,2.30931 -2.71683,3.39603 1.90178,2.71683 1.35841,2.03762 3.80356,-1.76594 3.9394,3.9394 -0.54337,3.26019 2.3093,2.17346 -1.22257,1.76594 -4.48276,-0.27168 -0.95089,1.35841 0.95089,5.02613 2.17346,0.54337 -2.17346,6.38454 -1.08673,3.39603 -2.98851,0.54337 -1.08673,2.3093 -5.5695,0.54336 -0.13584,4.48277 1.35842,0.81505 -0.54337,4.89029 -3.80356,-3.80356 -2.44514,6.38454 -1.90178,1.76594 -3.26019,-2.85267 -2.17347,0.95089 -1.63009,-4.21108 h -1.08673 l -1.90178,-1.49426 -2.17346,-0.40752 1.08673,-3.39603 -0.27169,-1.08674 0.81505,-0.6792 -3.12435,-3.66772 -2.44514,1.08673 v -1.90178 h -5.5695 z" },
+{ id: 11, d: "m 109.35228,153.63655 1.35841,-3.53187 -0.6792,-7.06375 1.76593,-1.08673 1.90178,-6.92791 3.26019,1.76594 0.95089,0.13584 2.98851,-4.07524 -1.35841,-0.95089 -0.13584,-4.6186 4.75444,-0.40753 c 0,0 1.76594,-0.67921 1.22258,-1.22257 -0.54337,-0.54337 -0.54337,-0.54337 -0.54337,-0.54337 l -0.40752,-2.71682 3.66771,-1.22257 1.08674,1.63009 -0.40753,-3.39603 -1.22257,-0.40753 0.13584,-3.39603 3.39603,0.13584 2.85267,-1.22257 1.76594,2.03762 h 2.3093 l 4.61861,2.85267 4.6186,-0.54337 1.08673,-1.22257 5.5695,3.26019 0.54336,3.12435 0.13585,4.34693 -4.34693,2.03762 -1.49425,2.71682 -0.81505,-0.81504 -4.34692,0.27168 0.27168,2.85267 -2.85267,0.6792 -2.3093,-0.13584 -3.66772,1.6301 v 3.39603 l 2.58099,1.90178 1.08673,6.11286 h -5.02613 l -2.98851,2.85267 -1.49425,0.40752 -1.49426,3.9394 -3.39603,0.13584 -0.67921,3.26019 4.75445,0.27169 1.90177,1.76593 1.35842,-1.22257 2.98851,3.53188 h -1.35842 v 2.3093 l -0.95088,2.85267 0.6792,1.49425 -3.80355,0.13584 -3.53188,-3.26019 -6.38454,1.22257 -3.80356,-1.49425 -0.54337,-1.6301 -1.08673,1.22257 -8.558,-2.58098 v -4.21108 l -1.22257,0.13584 -0.13585,-4.34692 2.44515,-0.67921 v -1.76594 z" },
+{ id: 12, d: "m 138.03008,202.48253 3.26584,0.86449 -0.38421,3.74612 1.05659,1.92109 -0.57632,1.72897 3.26584,2.30531 2.1132,2.40136 2.3053,-1.72898 0.76844,1.82503 1.92108,-1.63292 2.59347,0.19211 4.51456,3.84217 -2.1132,1.92109 c 0,0 0.67238,2.11319 -1.0566,2.11319 -1.72898,0 -1.72898,0 -1.72898,0 l -1.82503,2.01714 -1.15265,2.88163 -1.24871,-0.57632 -3.65006,2.49741 -2.20925,-0.0961 -1.24871,-1.72897 -1.92108,2.11319 -1.82504,-1.15265 -0.0961,-2.97768 -2.20925,-0.76844 1.53687,-3.26585 -3.84217,-0.86449 -1.34476,-3.16979 -2.30531,0.0961 0.48027,-3.36191 -2.97768,0.19211 2.11319,-4.51455 1.44082,-0.38422 0.96054,-2.78557 z" },
+{ id: 13, d: "m 139.95116,203.44308 1.34476,4.22639 1.53687,2.20925 -2.3053,0.96054 1.0566,1.0566 h 2.11319 l 0.0961,0.76843 1.34476,0.67238 2.59346,2.68952 0.86449,-1.92108 1.44082,0.96054 2.20925,-1.24871 -0.38422,-0.96054 0.86449,-0.76843 v -0.48028 l 1.53687,-0.48027 0.86449,-1.92108 3.3619,-0.38422 3.3619,-2.30531 -1.34476,-2.01714 -1.34476,1.82504 -2.78558,-1.44082 0.38422,-2.68952 -1.34476,-1.63292 2.49741,-1.0566 2.40136,-0.96055 0.096,-1.44081 0.76844,-0.67238 -1.92109,-2.59347 v -1.34476 l -2.49741,-1.15265 -4.70666,-0.57633 v 0.86449 l -3.3619,2.01714 h -4.13034 l -1.0566,1.15266 -3.16979,-0.0961 -0.67238,2.97769 -2.59347,0.76843 -1.82503,2.3053 1.44081,1.15266 4.2264,0.76843 z" },
+{ id: 14, d: "m 158.96992,217.75517 -2.3053,1.82503 -0.48028,2.20925 -2.78557,0.48027 -0.96054,2.88163 -1.34477,0.28817 v 1.44081 l -1.92108,-0.48027 -0.48027,1.15265 -5.4751,1.0566 -1.0566,-1.92109 -1.53687,2.49742 1.63293,4.51455 0.67238,-0.38422 1.05659,2.1132 2.97769,-0.76844 0.86449,4.61061 -1.63293,3.55401 2.68952,1.0566 1.92109,-2.3053 1.53687,0.19211 3.07374,2.01714 0.76843,-4.61061 1.63293,-1.44082 3.93823,-0.96054 -0.48028,-2.20925 2.01714,0.67238 1.24871,-0.67238 3.26585,0.96054 0.76843,-0.67238 1.44082,0.28817 1.92108,-1.0566 2.30531,2.3053 1.72898,0.28816 1.63292,2.40137 1.0566,-0.28817 1.44081,-2.1132 2.40136,-0.57632 -1.82503,-2.30531 2.49741,-0.38421 1.24871,0.96054 1.92108,-2.01714 3.55401,0.86449 0.57633,-2.59347 -1.53687,-2.97768 -0.86449,-0.38422 0.76844,-2.40136 -0.67238,-1.72898 -0.57633,-1.72897 -2.68952,-2.01715 -4.32245,1.15266 -0.76843,-0.38422 -2.59347,1.53687 -1.2487,-0.38422 -4.13034,-2.11319 -1.92109,-0.28817 -1.2487,1.34476 -2.49742,-1.15265 -3.65006,0.67238 -0.96054,-1.0566 -1.0566,0.28817 z" },
+{ id: 15, d: "m 152.15006,214.58538 h 3.07374 l 3.65007,3.07374 c 0,0 0.1921,-0.19211 2.3053,1.34476 2.11319,1.53687 2.11319,1.53687 2.11319,1.53687 l 1.44082,-0.86449 1.53687,-0.67238 2.01714,1.92108 2.01714,-2.78557 4.80272,2.3053 1.92108,1.44082 2.78558,-1.53687 5.76326,-0.67238 3.07374,-1.44082 -1.34476,-1.72898 h -2.20925 l -0.38422,-0.96054 2.1132,-1.24871 -0.48028,-0.28816 -3.26584,-1.15265 v -2.20925 l 0.38421,-0.76843 -0.67238,-0.96055 1.15266,-2.59346 -1.0566,-1.44082 -0.48027,-4.61061 2.01714,-2.59346 -0.76844,-2.30531 -10.56597,3.3619 -3.26585,3.93823 -6.7238,0.48027 -0.96055,-0.86449 v -1.15265 l -1.53687,-3.07374 -3.45795,1.53687 -1.34476,0.96055 0.96054,1.63292 -0.096,2.88163 2.20925,1.63292 1.34476,-2.01714 1.2487,1.72898 -2.68952,2.20925 -4.22639,1.15265 -0.38422,1.24871 -1.34476,0.19211 v 1.82503 l -1.2487,-0.38422 z" },
+{ id: 16, d: "m 176.64392,90.67529 -0.86449,-3.361902 2.59346,-1.921087 0.67239,-1.632923 h 1.34476 l -1.0566,-1.248707 v -3.746119 l 0.48027,-0.67238 -5.18693,-3.938228 -0.76844,0.384218 -0.48027,1.34476 -1.15265,0.576326 -0.76844,0.768435 -1.92108,-0.192109 -2.20925,1.632924 -1.92109,1.056598 -1.53687,0.288163 -1.0566,-0.09606 -1.05659,0.576326 -2.49742,2.785576 -1.82503,0.09605 -3.3619,0.480272 -0.28816,-0.768435 -3.1698,0.576326 -1.63292,-1.056597 V 80.68563 l -2.49741,1.921087 0.76843,1.056597 -2.01714,-0.384217 -3.26585,2.401358 1.15265,3.073739 v 3.073739 l -2.78557,-1.632924 -2.40136,1.632924 0.67238,2.977684 -1.63292,1.728978 2.3053,4.226385 -1.2487,0.48028 -1.53687,2.68952 0.48027,2.01714 -2.49742,2.97768 2.68953,0.57633 -3.74612,2.49741 1.63292,3.93823 4.22639,0.48027 3.65007,3.65007 1.72897,-1.72898 2.97769,0.67238 0.96054,-2.59347 4.80272,4.22639 v 2.30531 l 1.53687,1.2487 2.88163,1.24871 -0.96055,4.03428 1.34477,0.86449 -0.57633,2.3053 1.72898,0.19211 3.84217,-0.76843 3.55401,3.93822 1.63292,-3.3619 -1.53687,-1.82503 v -3.16979 l -3.26584,0.86449 -1.63293,-5.4751 2.1132,-0.48027 v -1.92109 l -3.74612,-0.38422 -0.38422,-2.20925 1.34476,-0.28816 0.48028,-3.84217 4.22639,-3.1698 1.15265,-3.65006 0.96054,-1.34476 h 1.34476 v -1.0566 l -0.67238,-2.40136 2.1132,-3.746114 h 2.20925 l 1.2487,-1.728978 -0.86449,-0.960544 -0.76843,-1.728978 0.86449,-0.67238 2.97768,-0.288163 -0.86449,-1.056597 z" },
+{ id: 17, d: "m 168.5791,132.30947 -1.35841,3.26019 -1.08673,1.22257 0.40752,2.71683 1.6301,1.22257 v 2.58098 l -2.85267,0.27169 -1.90178,-1.76594 -2.03762,2.17346 2.58099,4.21108 -0.40753,1.90178 0.81505,-0.27168 0.95089,1.35841 -2.44514,3.80356 0.40752,1.76594 h 1.76594 v 2.98851 l 1.08673,0.27168 h 1.90178 l 1.49425,2.44514 0.27169,2.03762 3.39603,-0.27168 v -1.35841 l 1.08673,0.54336 0.67921,-0.40752 3.39603,1.76593 1.6301,-3.12435 1.76593,4.48277 4.89029,0.40752 2.17346,2.44515 h 1.76594 l 0.40752,-1.35842 3.80356,-0.6792 0.95089,1.08673 h 1.08673 l 1.35841,-2.3093 0.40753,-6.92791 0.67921,-1.49426 h -1.49426 l 1.35841,-3.12435 -2.3093,-1.49425 1.90178,-0.81505 1.35841,-2.58099 -2.03762,-2.71682 h -3.53187 l -1.6301,-2.44515 -3.53187,-1.49425 -2.17346,-3.12435 0.6792,-1.35842 -4.34692,-4.21108 -1.08673,-0.95089 -1.08673,0.40752 -1.08673,-1.76593 -3.53188,0.27168 -0.95089,0.95089 -1.35841,-0.81505 h -2.03762 l -0.54336,-0.67921 z" },
+{ id: 18, d: "m 176.59374,75.663625 5.43366,-4.346921 0.40752,1.630095 2.58098,-1.222571 0.27169,-1.494255 4.07524,-1.222571 2.58098,5.16197 -0.40752,4.346922 1.08673,4.754448 2.85267,1.086729 1.76594,1.222573 1.76593,-0.271682 -1.63009,2.445144 2.85266,1.358414 0.67921,3.26019 0.95089,1.494256 4.89029,-1.765938 1.35841,1.630098 -1.35841,0.13584 1.76594,3.531875 2.03762,-1.630095 1.08673,0.679206 v 4.482768 l 0.40752,0.13584 -0.54336,3.39603 1.90177,1.6301 1.22258,2.85267 0.6792,1.90177 3.66772,0.81505 0.81505,1.22257 h 2.85267 l 2.85267,-0.40752 2.58098,2.85267 h 1.49425 l -2.71682,3.12435 2.03762,2.03762 h -3.2602 l -0.95088,1.76593 0.6792,0.81505 h -0.27168 l -0.67921,1.6301 -6.2487,-1.90178 -0.95089,4.34692 -3.12435,-2.44514 -1.76593,2.44514 -1.6301,0.13585 -0.81505,0.95088 -0.67921,-1.63009 c 0,0 1.35842,0.95089 -1.08673,0.95089 -2.44514,0 -2.44514,0 -2.44514,0 l -2.03762,0.81505 -1.22257,-1.08673 -3.66772,2.17346 0.13584,2.58098 0.40753,1.6301 -0.95089,1.22257 2.17346,0.67921 0.13584,1.08673 -2.71683,1.90178 1.6301,2.03762 -3.9394,3.53187 -2.17346,-1.6301 -0.67921,2.03762 -1.76594,-1.76593 -1.35841,-0.54337 -2.03762,-2.98851 v -1.63009 l -4.21108,-2.58099 1.22257,-1.90178 4.48276,-0.13584 -1.22257,-1.22257 0.81505,-2.85267 3.12435,-1.76594 -2.98851,-2.85266 -3.12435,-2.44515 -0.27168,-1.08673 -2.58099,-0.54337 v -1.49425 l 4.75445,-0.95089 -0.95089,-1.08673 h 1.22257 l 6.52039,-4.21108 -1.76594,-2.17346 2.03762,-1.6301 -3.53188,-1.76593 -2.85266,2.71682 -2.98851,-0.13584 -4.48277,-1.22257 -1.76593,-1.76594 -1.76594,1.6301 -2.44515,-1.22257 -2.17346,-2.71683 -2.3093,-0.27169 -1.22257,0.67921 -0.13584,-1.90178 1.49425,-4.075238 h 3.39603 l 0.54337,-2.716827 h -1.22257 l -0.54337,-1.630095 2.98851,-0.815049 -0.13584,-1.765938 0.81505,-0.271682 -0.67921,-1.765937 0.27168,-3.124351 2.17347,-2.445144 2.03762,-0.13584 -0.40753,-1.086731 -0.40752,-2.852669 V 77.97293 l 0.40752,-0.407525 z" },
+{ id: 19, d: "m 173.46939,116.34811 -0.13584,2.71683 0.54336,0.47544 -0.88296,1.49425 v 0.74713 h 1.22257 l 1.90178,1.69802 0.27168,1.76594 1.22257,-0.95089 1.15465,0.74712 2.17347,-2.3093 h 1.83385 l 0.0679,-1.29049 -0.3396,-0.95089 0.3396,-0.47545 -0.13584,-1.49425 h -1.49425 l -0.61129,-1.15465 -1.9697,0.61128 -0.3396,-1.63009 v -2.37723 l -3.80356,0.74713 0.13584,1.29049 z" },
+{ id: 20, d: "m 187.73273,117.91028 -3.9394,-0.54336 -1.49425,1.22257 -2.03762,-1.29049 -1.15465,0.47544 -0.95089,-1.83386 v -1.9697 l -2.30931,0.47545 h -1.08672 l -0.54337,0.74713 0.0679,0.6792 -0.74713,0.33961 -0.13584,3.19227 0.33961,0.47544 -0.67921,1.49426 1.42633,0.3396 1.08673,1.69802 0.74713,1.69801 2.24138,-0.3396 2.37723,-2.10554 h 2.3093 l -0.54337,-2.78475 2.98851,0.74713 0.74713,0.88297 -0.40753,1.15465 h 1.49426 l 2.3093,1.56218 1.69802,3.12435 -2.10554,1.69801 -0.95089,0.74713 0.20376,0.95089 -0.6792,0.40752 0.81504,1.08673 -4.279,0.88297 -0.88297,1.76594 -0.54336,-1.08673 -1.49426,-0.0679 -0.40752,-1.76594 -2.85267,0.0679 -2.24138,1.35841 -1.35841,-1.22257 -2.24139,0.0679 -0.47544,-1.15465 -4.07524,1.15465 -1.22257,-1.22257 0.61128,-3.53187 -3.53187,0.95089 -1.15466,-2.71683 -0.95088,-2.78475 0.61128,-0.88297 1.90178,0.27169 -0.27168,-1.9697 h -1.08673 l -0.74713,-0.20376 -1.76594,-0.13585 -0.40752,-2.17346 1.9697,-0.3396 -0.40753,-0.54337 0.40753,-0.74712 v -1.2905 l -0.61129,-0.88297 3.80356,-2.92058 0.88297,-0.0679 v -2.03762 l 1.01881,-0.88297 -0.13584,-1.56218 1.15465,-0.95089 h 1.35841 l 0.13584,-1.15465 1.22257,-0.88297 h 1.56218 l 0.67921,1.35841 h 0.40752 l 1.08673,1.83386 1.22257,0.20376 0.88297,1.01882 h 0.61129 l 2.10554,-1.49426 0.54336,1.69802 4.00732,-0.47545 2.37723,1.9697 h 2.3093 l 1.6301,-1.76593 v -1.96971 l 1.29049,0.40753 0.74713,1.6301 h 1.90178 l 0.47544,1.90177 h -1.6301 l 1.08673,2.44515 -2.6489,2.03762 -0.74713,-0.0679 -1.76594,0.74712 -0.54336,1.35842 -1.90178,0.0679 z" },
+{ id: 21, d: "m 73.193401,193.16526 0.960543,-2.01714 2.113196,0.76844 0.384217,-2.30531 v -1.0566 l 1.152652,-0.67238 0.480272,-1.82503 2.689521,0.38422 0.576326,-2.78558 -0.480272,-0.96054 1.825033,-2.1132 -0.960544,-0.86448 0.576326,-0.67238 1.632924,0.57632 0.288163,-1.0566 -0.480272,-2.01714 2.017141,-0.38421 -0.384217,-0.86449 -0.768435,-0.96055 0.288163,-0.48027 1.248707,0.67238 v -2.49741 l 2.593467,-0.48027 -0.384218,-2.59347 2.20925,-2.01714 -1.344761,-2.3053 1.632924,-1.34477 1.632923,1.0566 c 0,0 2.401359,-1.63292 3.554011,-1.34476 1.152652,0.28816 1.248706,0.57633 1.248706,0.57633 l -0.768435,2.3053 1.440815,0.38422 3.650063,-0.57633 1.44082,-1.53687 2.20925,-0.19211 1.05659,0.96055 2.30531,0.28816 2.20925,0.67238 2.40136,0.57633 v 1.2487 c 0,0 0.76843,-2.40135 1.34476,-2.11319 0.57632,0.28816 0.57632,0.28816 0.57632,0.28816 l 0.48027,1.34476 0.57633,0.76844 2.20925,1.15265 v 1.63292 l -1.44081,1.82503 0.48027,2.1132 -0.76844,1.63292 -1.2487,1.15266 -0.48028,1.72897 h -0.96054 l 1.63292,2.59347 -2.59346,1.15265 1.2487,3.65007 1.72898,0.57632 -0.28816,1.72898 -1.24871,0.86449 -2.68952,-0.19211 1.0566,3.45796 -2.78558,-0.67238 v 4.32244 l -0.67238,0.38422 1.15265,1.24871 0.67239,2.97768 -2.40136,0.38422 -1.92109,1.53687 -3.74612,0.96054 -1.2487,0.19211 -0.19211,1.24871 0.48027,1.34476 -0.96055,1.72897 -1.15265,0.57633 1.24871,1.24871 -0.48027,0.67238 h -1.536872 l -2.88163,1.72897 -1.921087,-0.96054 -1.34476,-4.22639 -1.056598,-0.96054 -0.384217,0.096 -1.921087,-1.63292 c 0,0 4.034282,-0.57633 4.034282,-2.01714 0,-1.44082 -0.480272,-2.20925 -0.480272,-2.20925 l 0.288163,-1.63293 -1.152652,-0.96054 -1.921086,2.20925 -3.746119,-0.76843 -0.960543,1.05659 -0.864489,-0.67238 h -0.864489 l -1.344761,-2.20925 -2.593467,-0.28816 -1.344761,-1.82503 z" },
+{ id: 22, d: "m 187.49806,217.08279 v 1.24871 l -2.01714,0.48027 0.38421,1.2487 1.34476,0.86449 1.15266,2.88163 0.28816,1.34476 -0.67238,1.92109 0.96054,0.67238 0.76844,3.16979 v 2.1132 l 2.11319,0.76843 4.03428,-1.44081 1.15266,2.11319 1.82503,-0.096 0.48027,1.0566 1.24871,-1.0566 4.22639,1.24871 2.01714,1.92108 0.48027,2.59347 c 0,0 2.01714,1.82504 3.84217,1.82504 1.82503,0 2.30531,1.82503 2.30531,1.82503 l 3.26584,-0.28817 0.57633,1.44082 2.11319,0.0961 2.59347,0.19211 2.49741,2.59347 2.1132,-0.19211 2.40136,0.96054 0.96054,1.15266 0.0961,-1.72898 -0.38422,-1.72898 0.28816,-1.44081 h -1.34476 l -1.34476,-1.92109 h -1.53687 v -1.0566 l -0.76843,-0.0961 1.05659,-1.0566 -0.96054,-0.38422 0.86449,-3.65007 -1.72898,-6.24353 -1.44081,-1.72898 2.3053,-4.51455 2.59347,-3.84217 4.32244,-5.76326 1.92109,-3.16979 3.07374,-4.80272 1.2487,-0.76844 6.43565,-8.26067 -0.28817,-0.28816 -0.57632,-1.34476 -2.78558,-0.57633 0.38422,-1.15265 -1.44082,-1.24871 v -1.72897 l -3.26585,2.11319 -1.63292,-1.34476 -3.74612,4.99483 -9.60543,-0.38422 -0.38422,0.86449 -1.63292,0.76843 1.0566,1.34476 -1.34477,0.57633 -0.86448,3.26585 -2.30531,1.15265 -1.15265,1.53687 -0.76844,2.20925 -1.2487,1.53687 0.38422,1.34476 -2.40136,1.34476 0.86449,2.20925 h 1.34476 l 0.19211,3.07374 0.0961,1.2487 -2.3053,-0.096 -0.0961,-0.48027 v -0.19211 l -1.92108,0.19211 -1.53687,-2.20925 -1.92109,0.38421 v 0.48027 h -1.53687 l -1.63292,1.72898 -4.13034,-0.57632 -2.59347,-2.01714 -0.48027,2.01714 -1.92109,0.38421 -0.096,-1.82503 -1.82503,-0.096 -1.15265,0.38421 -1.92109,-1.72897 z" },
+{ id: 23, d: "m 184.42432,195.85478 c 2.3053,-2.78557 2.3053,-2.78557 2.3053,-2.78557 l 2.59347,-0.57633 0.57632,-1.15265 v -1.24871 l 2.78558,-1.05659 0.86449,0.096 1.92109,-2.68952 1.92108,-3.3619 1.44082,0.76843 1.15265,-6.81986 1.53687,1.34476 1.63292,-0.48027 1.63293,-1.44081 3.26584,0.48027 0.28817,1.72898 0.57632,0.28816 -0.86449,2.97769 1.0566,0.86448 0.67238,0.76844 1.15265,0.76843 3.45796,0.57633 0.48027,0.86449 2.97769,-0.38422 v 2.59347 l 1.15265,1.0566 -0.96055,0.28816 1.24871,1.0566 -0.76843,0.48027 -2.78558,-0.28817 -0.76843,2.20925 1.34476,1.34477 2.40135,0.48027 3.84218,-0.0961 -1.92109,1.72898 0.76844,0.48027 -0.28817,1.34476 h -1.2487 l 0.76843,1.92109 -1.72898,0.48027 v 3.07374 h -2.49741 l -1.72898,3.3619 -1.34476,3.45796 0.28816,0.57632 -2.49741,1.44082 1.0566,2.11319 h 0.67238 l 0.67238,2.59347 -0.38422,0.48027 0.57633,0.96055 v 1.05659 l -3.07374,-0.67238 0.48027,-1.2487 -1.82503,0.86449 -1.72898,-2.20925 -1.82503,0.28816 -0.48027,1.34476 -0.86449,-0.57633 -1.53687,1.53687 -1.34476,-0.86449 -1.53687,0.38422 -0.57633,-0.48027 -1.05659,0.48027 -2.01715,-2.11319 -1.05659,2.49741 h -1.15265 l -0.76844,-2.01714 -3.16979,0.096 -1.72898,-1.53687 -0.38422,0.86449 -2.3053,0.67238 -0.67238,-1.44081 1.15265,-0.67238 v -0.96055 l -3.07374,-0.96054 -0.67238,-2.20925 1.34476,-1.44081 -1.53687,-0.67238 0.96055,-0.86449 0.57632,-2.20925 h -0.96054 l 0.38422,-0.48028 -0.48028,-3.45795 -0.48027,-0.76844 2.01714,-3.3619 z" },
+{ id: 24, d: "m 189.63451,68.871559 2.03762,5.841177 v 3.9394 l 0.95089,5.297813 h 3.12435 l 1.35841,1.765938 1.08673,-0.271685 0.40753,0.543367 -1.49426,2.037619 2.71683,1.901778 1.08673,2.309304 0.67921,1.222571 3.80355,-0.13584 2.03763,-1.630098 v 1.630098 l -1.35842,2.17346 2.03762,1.630098 3.12435,-2.03762 1.22258,6.792061 -0.81505,2.30931 2.85266,2.71683 0.54337,4.07523 4.75445,1.76594 4.21108,-0.40752 3.39603,2.03762 1.35842,1.76594 1.90178,-0.67921 5.97702,-9.91642 4.48276,-3.12435 3.39603,-0.40752 1.90178,-3.396038 1.76594,-0.815047 v -4.211082 l -0.67921,-0.815048 0.13584,-5.97702 v -2.309302 l -1.35841,-0.950888 0.95089,-4.346925 -1.35841,-1.358413 -4.75445,-9.508892 -3.39603,-9.508895 -2.03763,-8.422163 -0.54336,-3.396033 -1.08673,-0.950889 1.35841,-2.580986 -1.49425,-4.07524 -4.34693,-3.803557 -2.03762,-0.271685 -1.90178,-1.765935 h -2.85266 l 0.27168,-1.630098 -1.08673,-0.407524 -0.27168,-1.358413 -4.21108,-0.13584 -1.08674,1.901777 0.40753,3.260193 h -2.03762 -0.81505 l -3.39603,1.358414 -0.95089,2.173462 2.17346,2.716826 h 1.08673 l 0.67921,1.494256 -0.54337,0.679206 0.67921,2.17346 2.85266,3.12435 0.67921,3.396036 -1.35841,3.803557 -2.44515,1.630095 -2.17346,1.494256 -0.40752,1.222571 h -1.08673 l -8.69385,6.384544 -0.54336,1.22257 -0.81505,-0.135839 -2.3093,0.815046 -1.90178,1.90178 -2.44515,-0.950889 z" },
+{ id: 25, d: "m 116.21227,30.428461 -0.81505,0.339604 -0.81505,1.22257 -1.49425,-0.882967 0.13584,2.784747 0.88297,2.377224 -1.76594,2.24138 -2.64891,0.407525 -1.90178,2.513065 1.01881,1.222571 1.49426,1.765937 0.74713,2.513066 -2.10554,1.494255 0.3396,0.950889 1.29049,0.339603 -3.05643,1.969699 -0.54337,-1.01881 -1.08672,0.339603 -0.13585,1.222574 -0.47544,0.06792 0.3396,0.882967 -1.49425,0.88297 0.3396,1.833857 0.61129,0.271684 -0.88297,2.17346 1.56217,1.01881 0.13585,-0.475443 0.61128,0.611285 2.37722,0.271682 v 1.698017 l 2.24139,0.475445 h 2.78474 l 1.01881,-1.01881 0.67921,2.241381 1.35841,-0.06792 -0.61128,-1.222573 2.71683,-0.407524 0.88296,0.747127 1.42634,-0.882967 -0.74713,2.03762 0.27168,1.630095 3.26019,0.271682 0.67921,0.679207 4.82237,-0.611286 1.9697,-1.765937 0.61128,-2.03762 1.90178,-2.377223 0.40753,-2.513066 1.90178,-0.06792 1.42633,1.01881 0.27168,0.271685 0.54337,-0.06792 -0.20376,-2.03762 1.56217,-2.03762 0.61129,-2.513065 -2.85267,0.06792 -0.74713,0.611285 h -1.76594 v -1.833858 l 1.08674,-0.950889 -2.10555,-0.950889 -0.54336,0.13584 -0.40752,-1.494256 -1.2905,-0.679206 1.2905,-0.407522 -1.42634,-1.630098 0.67921,-1.086731 v -0.815046 l 1.9697,-1.222574 -2.17347,-2.716826 1.15466,-1.222571 3.66771,-1.01881 4.279,-3.124353 0.61129,-2.377223 -3.12435,1.90178 -4.34692,1.833859 -4.95821,0.747125 h -5.63742 l -3.93939,-0.815046 -0.81505,-1.086731 h -1.42634 z" },
+{ id: 26, d: "m 72.328912,25.166235 2.113195,3.55401 1.344761,1.152652 -0.576326,1.152652 0.576326,1.825033 -0.864489,0.960543 0.768435,2.785576 -0.09606,1.34476 -3.169793,1.53687 0.288163,2.401358 1.632924,2.113195 -0.384217,2.689521 -0.864489,1.248707 0.480271,1.632923 1.152652,-1.248706 0.864489,1.440815 v 1.344761 l 2.305304,1.536869 v 1.056598 h -2.593467 l 0.480272,2.977684 1.152652,0.576326 -1.632924,1.152652 0.192109,3.938228 1.344761,3.55401 v 0.67238 l 0.864489,0.192109 0.384217,1.056597 1.921087,0.576326 0.576326,-1.152652 4.610608,0.576326 2.593467,2.113196 0.960543,-5.09088 2.305304,-0.480271 0.192109,1.825032 1.632923,-0.768435 1.536869,0.864489 v -0.480271 l 1.921087,-0.288163 -0.192109,-1.056598 1.248707,-3.169793 1.536869,0.576326 1.440823,-1.440815 -1.056606,-1.248706 1.825036,0.288163 1.34476,1.152652 1.82503,-1.440815 0.57633,-2.305304 0.38422,-0.768435 -0.67238,-0.192109 -0.67238,-1.440815 0.3842,-0.768434 1.63293,0.288163 -1.15264,-1.632924 1.34475,-0.960543 1.44081,-0.672381 0.48028,0.960544 2.59346,-1.825033 -0.67238,-0.67238 -0.19211,-0.09605 V 48.12322 l 1.34476,-1.152652 -0.0961,-1.536869 -1.15265,-2.305304 -1.72898,-0.960543 0.0961,-2.017141 3.55401,-1.728978 2.40136,-1.632924 v -1.152652 l -1.0566,-1.921086 0.19211,-2.593467 1.0566,0.09605 1.92109,-0.960543 0.28817,-3.554011 -0.96054,-2.977684 h -1.34476 v -2.88163 l -2.01715,-0.67238 0.86449,-2.497413 7.01197,4.418499 1.53687,3.169794 0.96054,0.768434 0.0961,-2.593467 -1.92109,-1.728978 -7.58829,-4.706662 -2.40136,-1.440815 h -5.37904 l -3.1698,-0.192109 -6.147479,1.632924 -4.802716,1.152652 -4.898771,0.864489 -5.475097,2.209249 -2.785576,2.977685 -2.113195,0.67238 z" },
+{ id: 27, d: "m 122.52889,207.42973 1.9697,0.54336 1.15465,0.81505 0.74713,-1.01881 0.95089,0.88297 -0.0679,1.49425 0.61128,0.67921 2.30931,-1.01881 -1.42634,2.64891 0.47544,0.74712 -0.6792,0.27169 1.01881,0.27168 1.22257,-0.33961 0.74713,2.71683 -1.22258,0.20376 0.0679,0.95089 0.6792,-0.0679 0.27168,-0.61128 2.37723,0.95089 1.29049,3.05643 2.44515,0.3396 0.6792,1.76594 -2.03762,1.08673 0.61129,0.88297 h 1.9697 v 2.3093 l -0.40753,0.0679 -0.6792,1.01881 -0.88297,0.20376 -0.95089,1.83386 -2.03762,0.27168 -1.49426,0.95089 0.20377,2.17346 -1.2905,1.08674 v 0.6792 l -1.96969,0.33961 -1.2905,-0.54337 -1.22257,0.88297 -1.49426,-0.0679 0.20377,-1.56218 -0.27169,-0.61128 0.33961,-2.17347 -0.74713,-0.3396 -2.71683,-0.27168 0.81505,-1.15465 -0.95089,-0.81505 -0.95089,-4.07524 -0.95089,-0.33961 h -0.47544 l -1.15465,-1.01881 -1.76594,-0.3396 v -1.69802 l -0.81505,-0.74712 -0.67921,-1.22257 0.67921,-2.30931 -0.47544,-0.67921 0.20376,-1.42633 0.95089,0.33961 v -0.9509 h 1.35841 l 0.40753,-1.15464 -0.81505,-0.61129 0.40752,-1.69802 1.2905,-0.27168 0.61128,0.54337 0.3396,-0.20377 0.0679,-0.88297 -0.27169,-0.47544 0.13584,-0.95089 h 2.64891 z" },
+{ id: 28, d: "m 122.75744,189.61125 -2.49742,-1.72898 -3.84217,-0.43224 -2.20925,-0.86449 -0.24013,-1.72898 -0.38422,-1.72898 2.06517,-2.11319 -1.68095,-2.06517 h 1.2487 l 0.5283,-1.15265 1.48884,-1.44082 0.28817,-2.64149 -0.48028,-0.5283 0.76844,-1.00857 0.48027,-1.20068 0.57633,-0.5283 -0.48028,-1.48884 3.6981,-0.91252 h 1.15265 l 0.67238,0.62436 0.67238,-1.63293 3.40993,2.16123 -0.0961,0.48027 1.24871,0.33619 0.33619,0.57632 1.10462,0.28817 2.01715,0.67238 0.76843,-0.76844 -0.57633,-1.39279 1.24871,-0.24013 0.91252,-0.0961 0.048,1.29674 0.96055,0.28816 0.048,0.33619 0.86449,-0.24013 0.38422,0.33619 0.048,0.96054 0.67238,0.28816 V 173.33 l 0.81646,0.57633 v 1.39279 l 1.29673,0.43224 1.48885,-1.10462 0.67238,1.20067 h 1.29673 l 0.76843,1.39279 0.57633,-0.048 0.81646,-1.24871 2.59347,0.76843 -0.33619,1.53687 -0.91252,-0.28816 -0.28816,0.86449 0.5283,0.62435 -1.20068,0.86449 h -1.24871 l 0.33619,1.48884 1.39279,2.30531 -1.44081,1.20068 -0.38422,-1.96912 -0.62435,0.96055 -1.39279,0.48027 -0.19211,1.34476 -2.01714,0.33619 h -0.5283 l -0.96054,1.2487 h -1.82504 l -0.62435,1.0566 0.38422,1.0566 -0.86449,1.00857 -1.77701,-0.5283 -0.86449,-0.24013 -0.48027,0.43224 h -0.7204 l -0.76844,-0.57633 -1.87306,0.96055 -1.63292,0.43224 -0.76844,-1.2487 0.5283,-0.38422 -0.43224,-0.67238 -0.048,-0.48027 -2.97768,-0.5283 -1.77701,-1.39279 -0.48027,1.29673 1.20068,0.81647 z" },
+{ id: 29, d: "m 111.95132,189.99547 c 1.34476,2.64149 1.34476,2.64149 1.34476,2.64149 l -0.81646,0.72041 -2.06517,-1.15265 -0.1921,1.96911 -0.14409,1.0566 0.28817,0.62435 -0.48027,1.29674 1.00857,1.15265 -0.28817,2.11319 1.0566,0.86449 0.62435,0.5283 1.20068,2.25728 3.50599,0.14408 1.29673,0.048 0.76843,-0.86449 1.96912,0.048 0.048,-2.73755 1.53686,-1.10463 -0.7204,-0.43224 0.19211,-0.48027 1.2487,-0.67238 0.91252,0.62435 1.10462,-1.48884 -0.91251,-0.86449 0.28816,-1.53687 1.68095,0.33619 0.57633,-1.20068 1.34476,-0.33619 2.01714,-2.88163 -2.44939,0.5283 -0.48027,-1.24871 0.048,-0.57632 -0.24014,-0.86449 -2.44938,-0.57633 -2.1132,-1.20068 -0.76843,1.48884 1.53687,0.5283 -0.43225,0.76844 -2.06517,-1.39279 -2.11319,-0.19211 -2.40136,-0.57633 v 1.77701 l -1.53687,0.72041 -1.87306,-0.48027 z" },
+{ id: 30, d: "m 101.81759,204.78784 c 4.85075,-1.0566 4.85075,-1.0566 4.85075,-1.0566 l 1.48884,-1.77701 2.06517,-0.57632 h 1.39278 l 1.29674,2.01714 0.67238,0.96054 2.8336,-0.33619 1.53687,-0.096 1.92109,-1.0566 0.7204,0.14408 0.62436,-1.72898 1.82503,1.77701 0.81646,-0.33619 0.72041,1.20068 -0.048,2.01714 0.38422,0.72041 -0.5283,1.2487 -1.72898,-0.5283 -0.5283,1.48885 -2.40136,0.24013 v 1.10463 l 0.67239,0.62435 -0.43225,0.5283 -2.40136,-0.28817 -0.5283,1.48885 1.15266,0.76843 -0.48028,1.48884 -1.2487,-0.14408 v 0.96055 l -0.76844,-0.19211 -1.05659,-1.00857 -0.57633,0.96054 -2.01714,-0.62435 -0.14408,-0.57633 -2.83361,-0.28816 -0.33619,0.91251 -1.29673,-0.67238 0.28816,-1.34476 -1.63292,0.0961 -0.76843,-1.48884 -0.62436,0.28816 -0.62435,0.38422 -1.34476,-0.91252 -0.14408,-1.53687 -1.29674,-0.48027 1.10463,-2.25728 z" },
+{ id: 31, d: "m 120.9324,201.23383 2.01715,1.58489 1.58489,-0.43224 0.048,2.3053 -0.19211,1.68095 0.81646,0.28817 -0.76843,1.34476 1.53687,0.14408 1.39278,0.48027 0.28817,1.63292 2.25727,-0.5283 2.16123,-1.00857 0.91251,-3.02571 -0.048,-0.72041 -3.21782,-3.8902 -1.29674,-0.96054 -1.29673,-0.91252 0.67238,-2.06516 -1.92109,-0.67238 0.43225,-1.24871 -1.53687,-0.67238 -0.38422,1.63292 0.81646,1.53687 -0.86449,0.62436 -1.92108,-0.14409 -0.72041,0.72041 0.48027,0.72041 -0.62435,0.67238 z" },
+{ id: 32, d: "m 126.06076,196.4945 c 1.01881,0.3396 1.01881,0.3396 1.01881,0.3396 l 0.95089,1.15465 -0.88297,1.6301 2.58099,1.35841 1.56218,2.30931 1.49425,1.35841 v 1.08673 l 2.37722,-0.20376 0.81505,-1.83386 1.69802,-1.01881 -2.85267,-1.49425 2.24138,-1.56218 v -1.22257 l 2.10554,-0.13584 v -0.95089 l -0.81505,-0.81505 1.69802,-2.17346 1.76594,0.61128 h 1.49425 l 1.35842,-1.29049 3.32811,0.13584 3.46396,-1.69801 -1.08674,-1.49426 -0.61128,-1.35841 -3.05643,-0.61129 1.69801,-1.90178 2.10554,-0.81505 -2.3093,-1.01881 1.01881,-1.35841 -1.42633,-0.95089 -0.27168,-0.54336 -0.67921,0.0679 -1.76594,-0.13583 1.56218,2.24138 -1.90178,1.15465 v -1.9697 l -1.9697,1.42633 -0.27169,1.15465 -1.96969,0.61129 -0.47545,-0.13584 -1.22257,1.29049 -2.03762,0.0679 -0.0679,1.56218 0.0679,0.88297 -1.08673,0.88297 -1.83386,-1.35842 h -0.61129 l -0.27168,1.01881 -0.74713,-0.0679 -0.40752,-0.6792 -1.83386,0.61128 -1.29049,2.71683 -1.08673,0.13584 -1.69802,1.22257 z" },
+{ id: 33, d: "m 153.20666,172.22542 0.57633,-4.51456 -1.53687,-0.096 -0.48028,-2.68952 1.0566,-1.24871 -0.67238,-1.0566 4.61061,-0.28816 2.01714,-0.28816 v -2.01714 l 1.0566,0.57632 1.0566,-0.48027 1.05659,0.67238 -0.48027,-2.78557 1.92109,-1.44082 1.72898,0.57633 v 1.92108 h 0.67238 l -0.28817,1.92109 1.72898,-0.86449 3.07374,2.30531 -0.28816,1.72897 1.0566,-0.86449 1.34476,1.15266 0.57632,-0.28817 v -1.34476 l 1.53687,0.76844 1.15265,-1.72898 2.20925,2.49741 1.34476,-1.0566 0.57633,-2.01714 0.86449,0.28817 v 1.82503 l 1.34476,1.72898 v 1.44081 l 4.80272,-0.19211 2.49741,2.78558 1.82503,-1.72898 3.26585,-1.15265 1.53687,1.63292 2.11319,-0.28816 -0.19211,-1.44082 1.15266,1.15266 -0.86449,1.53687 2.20925,8.35672 -1.0566,5.09088 -1.15265,1.44082 -2.97769,2.3053 -1.15265,3.07374 h -1.53687 l -1.53687,1.15265 h -0.57632 l -0.48028,1.34476 -5.57115,4.22639 -1.44081,0.38422 h -0.96054 l -2.01715,1.44082 -3.07373,0.48027 -2.68953,0.96054 h -0.67238 l -3.65006,3.93823 -2.1132,0.19211 -0.67238,-0.38422 -2.88163,0.48027 -0.76843,-0.57632 -0.96054,-0.28817 0.1921,-1.15265 -0.76843,-1.0566 -0.67238,-2.01714 h -1.15265 l 0.48027,-1.53687 h 0.76843 l -0.19211,-1.0566 -1.72897,-2.11319 0.48027,-0.96054 -2.20925,-1.15266 -2.3053,0.38422 -0.38422,-0.76843 -3.3619,-0.28817 -0.86449,0.19211 -0.86449,-1.53687 -3.07374,-0.76843 1.53687,-1.34476 0.19211,-0.86449 2.20925,-0.19211 v -1.0566 l -2.20925,-0.48027 1.0566,-1.15265 -2.01715,-1.15265 -1.92108,-0.19211 -0.57633,-2.20925 0.96054,0.096 1.15266,-0.67238 -0.0961,-1.72898 0.67238,0.19211 0.76844,-1.53687 -2.59347,-0.38421 2.1132,-2.1132 0.28816,-2.40136 0.76843,-2.68952 0.76844,0.86449 h 0.67238 z" },
+{ id: 34, d: "m 179.42949,34.57956 -0.57632,1.632923 -0.96055,0.576326 0.86449,1.152652 -2.01714,-0.768434 c 0,0 1.34476,-0.384218 -0.28816,0.576326 -1.63293,0.960543 -1.44082,2.593466 -1.44082,2.593466 l 0.19211,1.632924 -0.48027,1.632924 2.68952,1.056597 -1.2487,0.768435 0.38421,1.536869 -1.2487,-1.248706 -0.96055,1.248706 -0.67238,-0.384217 -3.16979,0.864489 -0.86449,-0.288163 -0.67238,-1.921087 -1.92109,2.689522 -0.96054,0.288163 -0.38422,0.960543 -2.3053,-1.440815 -0.67238,0.384217 -0.86449,-2.497412 -0.96054,-0.480272 -1.82504,-0.480272 -0.096,1.248707 0.86449,0.768434 -3.45796,2.689522 -1.2487,-0.384218 0.19211,1.632924 h -1.34477 l -1.05659,1.632924 1.53687,1.728978 -0.67238,1.248706 0.48027,2.497413 -0.96055,1.152652 1.44082,0.960543 -0.96054,1.440815 0.67238,2.401358 -0.96055,1.056598 2.1132,2.88163 1.44081,0.480271 -0.67238,0.864489 1.0566,0.480272 -2.01714,1.921087 1.24871,1.440815 -1.15266,3.746119 1.15266,1.152652 0.57632,2.209249 1.63293,0.09606 0.48027,0.864489 1.05659,-0.864489 0.86449,1.056597 -2.59346,2.88163 -2.78558,-0.67238 -1.53687,0.288163 -0.76843,-0.768435 -3.07374,1.056598 -0.57633,-0.768435 -1.0566,-0.384217 0.19211,-1.536869 -2.20925,1.152652 0.38422,2.113195 -1.82503,-0.768435 -0.67238,-3.073738 -1.0566,-0.09605 v -1.440815 l 0.48027,-1.34476 -1.0566,-0.288163 0.19211,-1.248707 -3.65006,0.192109 -0.76844,-1.536869 -2.49741,1.34476 0.57633,-1.728978 -1.53687,-1.248706 h -1.82503 l -0.0961,1.248706 -1.34476,-1.34476 0.48027,-0.672381 -1.63292,-3.650064 1.0566,-0.480272 -2.40136,-2.977684 1.15265,-1.440815 h 0.96054 l 0.76844,-3.361902 1.72898,-1.536869 0.096,-3.073739 3.74612,2.113196 0.67238,-2.017141 1.92109,-4.322445 -2.97769,-0.576326 -1.0566,1.248706 -0.76843,-0.192109 -0.48027,-2.017141 0.86449,-1.056597 -1.92109,-0.960544 -0.86449,0.09605 -0.28816,-2.017141 -0.48027,-0.09605 -0.28817,-3.457956 2.01714,-1.440815 -1.92108,-2.881629 1.44081,-1.728978 3.07374,-0.768435 4.4185,-3.169793 0.76844,-2.113195 21.13195,2.88163 z" },
+{ id: 35, d: "m 179.23738,34.387451 -0.1921,1.440815 -0.96055,0.67238 0.67238,1.728978 -1.44081,-0.288163 -0.86449,-1.152652 v 1.056598 l -0.96055,0.480272 -0.67238,2.01714 0.76844,0.576326 -0.67238,2.689522 2.40136,1.248706 -1.34476,2.401358 -1.0566,-1.152652 -0.38422,0.576326 -1.0566,-0.09605 -0.48027,0.480272 -1.53687,-0.09605 -1.53687,0.576326 -0.86449,-2.689521 -1.2487,1.632924 v 0.960543 l -2.01714,1.344761 -2.78558,-0.576326 -1.2487,-2.593467 -2.1132,-1.248707 -1.0566,1.825033 0.76844,0.480271 -3.1698,2.88163 -0.67238,-0.768434 -1.15265,0.480271 0.96055,1.728978 -1.53687,-0.384217 -1.15266,1.632924 1.63293,1.536869 0.19211,1.056598 -0.96055,0.864489 0.96055,1.825032 v 0.288163 l -1.44082,0.960543 0.38422,1.440815 0.67238,1.248707 v 2.209249 l -0.67238,1.248707 2.40136,3.073738 h 0.96054 l -0.57633,1.152652 1.15266,0.192109 -1.82504,1.728978 0.0961,1.248706 0.86449,0.384217 -1.15265,3.554011 1.53686,1.632923 v 2.305304 l 1.72898,-0.192108 0.28817,1.34476 1.34476,-1.152652 0.96054,1.056598 0.96054,-1.344761 2.97769,0.384218 2.20925,-1.825033 0.96054,-1.632923 1.72898,-0.288163 1.44081,0.768434 0.76844,-0.960543 1.53687,-0.384217 v -1.825033 l 3.07374,1.53687 1.82503,-1.728978 3.16979,-2.305304 0.57633,0.960543 3.26584,-1.536869 0.28817,-1.248707 3.84217,-0.576326 4.13034,-0.09605 2.01714,0.67238 2.68952,-2.209249 1.72898,0.960543 0.57632,-1.344761 5.95537,-4.994825 2.1132,-2.305304 1.34476,1.248707 0.19211,-2.017141 2.59346,-1.440815 0.38422,0.576326 0.57633,-1.728978 1.92108,-0.384218 0.57633,-3.073738 1.44081,-1.825033 -0.86449,-2.401358 -1.72897,-0.768435 -0.67238,-2.689521 -1.72898,-0.576326 -0.19211,-1.440815 0.86449,-0.576326 -1.63292,-1.921087 -0.86449,0.576326 -1.82504,-2.977684 1.44082,-1.152652 2.78557,-2.209249 0.76844,0.768434 2.20925,-1.056597 0.096,-3.073739 -24.49385,2.689521 -7.58829,0.480272 z" },
+{ id: 36, d: "m 109.88616,153.59088 1.2487,-3.55401 -0.67238,-4.22639 -0.0961,-2.20925 1.15265,-1.44082 0.57633,-1.92109 v -1.72897 l 1.44081,-2.88163 -1.24871,-0.67238 -0.48027,-1.15266 -1.34476,0.0961 -1.63292,-1.44082 0.57632,-0.67238 -1.44081,-3.45795 -3.3619,2.40136 -4.706665,-0.76844 0.960545,-2.88163 -1.632925,-0.57632 -5.186934,0.67238 -0.864489,-2.40136 -2.88163,-0.28817 -1.921086,3.45796 -1.344761,1.53687 h -2.20925 l -0.288163,0.86449 -2.977684,0.28816 -2.497413,2.40136 -1.825032,-0.48027 0.384217,-1.53687 -3.073738,-2.1132 h -1.056598 l 1.152652,-1.72897 -0.864489,-0.0961 v -1.92109 l -1.728978,-0.76843 v -2.01714 l -1.825032,-0.57633 0.192108,-1.2487 -1.248706,0.96054 -0.576326,-0.48027 -3.457956,2.68952 0.672381,1.24871 h -0.864489 l -2.017141,1.2487 -0.480272,3.55401 -0.960543,0.28817 H 59.64974 l -1.056597,1.44081 -3.746119,0.19211 -1.248707,1.34476 2.88163,0.96054 1.440815,-1.34476 2.593467,2.59347 0.384218,2.88163 3.650064,0.0961 2.305304,1.44082 1.056598,2.11319 -1.056598,0.86449 0.384217,1.15266 3.361902,0.57632 v 1.63292 l 0.960543,0.96055 1.248707,-0.0961 1.632923,1.24871 2.593467,-0.28816 0.480272,0.38421 0.384217,-0.96054 3.457956,-0.19211 0.384218,-2.20925 1.728978,-0.86449 2.497412,1.34476 h 2.20925 l 2.305304,2.30531 -0.288163,2.20925 -1.152652,0.38422 1.344761,3.74611 1.632923,-0.76843 1.921087,1.82503 1.056597,-1.0566 v 1.15266 l -0.67238,0.76843 0.480272,1.34476 0.960543,0.96055 -1.344761,1.82503 1.248707,2.97768 h 2.305304 l -1.344761,2.97769 1.728978,0.96054 4.610604,-1.24871 0.19211,-1.53687 1.0566,0.57633 1.82503,-1.34476 -0.38421,-3.16979 h -1.63293 l 0.19211,-2.30531 -0.67238,-1.44081 h 1.34476 v -1.0566 l 1.92109,-0.19211 v -1.24871 l -0.67238,-0.96054 0.76843,-0.38422 1.72898,1.24871 z" },
+{ id: 37, d: "m 71.944695,122.08506 -0.768435,1.53687 2.017141,1.72897 0.09605,1.34476 1.440815,0.57633 -0.960543,2.1132 1.728978,-0.19211 2.497413,1.82503 -0.864489,1.44081 2.305304,0.0961 2.785575,-2.68952 2.113196,0.28816 0.864489,-1.15265 1.728978,0.48027 2.305304,-1.44082 -0.480272,-1.2487 0.864489,-1.0566 0.67238,-1.72898 0.768435,0.38422 h 2.113195 l 0.768435,3.26585 3.265847,-1.15265 0.576326,0.1921 2.593474,-0.28816 0.38421,1.44082 -0.57632,2.40135 c 0,0 2.40136,0.96055 3.93823,0.76844 1.53687,-0.19211 3.74611,-2.78558 3.74611,-2.78558 l 0.67239,0.86449 -0.0961,1.44082 1.34476,0.96054 v 1.82503 l 1.0566,0.86449 0.96054,-0.0961 0.48027,1.44081 2.1132,1.0566 2.01714,-0.19211 1.92109,0.86449 2.68952,-4.22639 -1.44082,-1.44081 0.38422,-2.1132 -0.28816,-1.92109 0.38422,-0.28816 1.72897,0.28816 1.44082,-0.96054 1.63292,0.38422 0.86449,-1.53687 -1.82503,-0.86449 0.67238,-2.1132 2.78557,-1.2487 1.34477,0.86449 0.38421,-2.78558 -1.82503,-0.0961 0.57633,-2.30531 -2.20925,-1.15265 0.19211,-1.24871 -1.15266,-0.1921 -2.11319,1.92108 -2.1132,0.28816 -0.76843,-2.68952 -2.59347,-2.01714 -1.44081,-0.096 -1.24871,-2.1132 -1.0566,1.24871 h -1.72898 l -0.096,-2.68952 -3.55401,2.59346 -1.0566,-1.34476 -2.49741,-0.38421 V 107.869 h -2.97769 v -1.15265 l -2.401358,-2.11319 -2.497412,-0.76844 -2.593467,1.53687 v -1.44081 l -1.632924,-0.48027 0.67238,-1.53687 -2.689521,0.38421 -0.960543,-1.53687 -0.960543,-0.864485 -0.768435,1.921085 -1.056598,0.86449 -0.960543,-0.67238 -0.192109,1.44082 -2.017141,0.86448 -1.248706,1.92109 -1.728978,0.48027 2.689521,1.34476 h 1.921087 l 0.480272,0.38422 -0.768435,1.72898 1.248706,0.19211 0.768435,2.01714 -1.536869,1.44081 0.67238,1.53687 -3.938228,2.88163 -2.785575,1.34476 1.536869,1.15266 -0.576326,0.96054 -2.401358,1.53687 -1.344761,-1.34476 -1.152652,0.76843 -1.056598,-0.96054 z" },
+{ id: 38, d: "m 66.630176,118.31781 -0.339603,4.00732 -0.815046,1.63009 0.135839,0.88297 -0.815046,0.20376 -0.543367,0.61129 -1.358413,0.13584 -0.339603,2.37723 0.475445,0.61128 -0.950888,1.6301 -0.815049,-0.74713 -2.03762,0.0679 -1.086731,2.03762 -3.328114,-0.20376 -0.611286,0.20376 0.339603,-2.10554 -0.475443,-0.3396 -1.426334,0.40752 -2.173462,-1.42633 -0.135842,-0.95089 1.01881,-1.08673 -1.494253,-1.08674 -0.543367,0.13585 -2.445144,-1.56218 1.630097,-0.95089 -0.407524,-1.49425 0.06792,-3.05643 0.950889,-1.49426 -0.203764,-2.58098 1.086731,-1.22258 -2.852668,-2.10554 0.950891,-0.81504 v 0.95088 l 1.562174,-0.88297 -0.882967,-2.6489 0.135839,-0.67921 -0.882967,-1.15465 v -0.74712 l -1.086731,-0.33961 0.611285,-1.42633 -0.882967,-1.01881 0.882967,-0.33961 v -1.49425 l 2.988511,-0.271683 0.407525,-2.037622 -0.339604,-1.698016 -0.407524,-0.339604 -0.06792,-0.882967 h 0.950888 l 0.950889,-1.01881 -0.13584,-4.279003 v -2.92059 l 1.664058,0.373565 2.309301,1.086731 2.309302,-1.086731 2.207422,-0.135842 1.562176,-1.392373 -0.441483,-1.664057 1.22257,-0.611285 0.271682,-1.222573 0.645248,0.679206 1.765937,-0.882967 1.086731,-1.052772 -0.10188,-0.543364 1.15465,-0.611286 0.849008,0.849008 0.271684,-1.188611 0.611286,-1.731978 1.222571,-0.509405 -1.630096,-1.969699 h -1.154652 l -0.13584,-0.747128 -1.018809,-0.271682 -2.105541,-2.852668 0.747127,-0.611286 -0.407524,-0.611288 0.475443,-1.01881 3.056432,0.611288 2.17346,-1.630098 0.815049,0.06792 0.882967,-4.279003 1.630098,-0.815047 0.679207,0.611286 1.358413,-1.290492 0.203761,1.154649 -0.271682,0.611288 1.154652,1.630096 v 1.426334 l 1.154649,-0.407525 c 0,0 0.135843,2.241384 0.135843,1.833859 0,-0.407524 1.154652,-0.679206 1.154652,-0.679206 l 1.15465,-0.950892 1.833858,0.747128 2.852669,-0.06792 0.882967,1.154649 1.358414,0.815049 -0.611286,1.494256 -2.037619,1.358413 0.06792,1.086731 -1.154653,1.01881 2.377223,0.882967 0.475446,1.562177 1.765938,1.562174 -0.611286,1.969699 -2.377223,0.06792 0.407522,0.815049 0.407525,1.765937 1.154652,0.679207 -0.950889,0.407524 -0.135842,1.426335 -0.747128,0.747125 0.611285,1.01881 -0.20376,1.562176 -1.154653,0.543365 0.815049,1.290494 1.765938,-0.475445 2.784747,2.173462 -0.06792,1.562174 0.543367,0.950891 -0.815049,3.05643 -1.969698,-0.339604 -0.543367,1.222571 1.01881,0.88297 -0.679207,1.833859 -0.815049,1.2905 -0.747125,-0.81505 -0.88297,0.13584 v 1.35841 l -1.901778,0.47545 -1.290494,2.24138 -1.426334,0.3396 -0.271683,-2.51306 -1.833858,-0.27168 0.339603,-1.15466 -0.950889,-0.61128 -2.445144,1.01881 -0.747128,0.6792 1.154653,1.2905 -2.241381,1.29049 -1.90178,0.13584 -1.494256,1.35842 -1.698016,-0.13585 -1.154652,3.39604 -1.358413,0.47544 0.747127,0.67921 -0.882967,1.49425 -1.222574,-0.61128 -0.475443,0.54336 -0.950891,0.13584 0.88297,1.69802 0.06792,2.44514 0.611286,0.47545 z" },
+{ id: 39, d: "m 66.358494,122.52889 -0.475443,-3.26019 1.01881,-1.42634 -2.241383,0.61129 -1.154653,-1.56218 0.88297,-1.35841 -1.358413,-1.29049 1.901778,-1.01881 0.950891,0.61128 0.950889,-1.35841 -0.679207,-0.47545 2.173462,-4.14316 h 1.698017 l 2.377223,-1.63009 1.562174,-0.0679 1.765937,-0.81505 -1.358413,-1.42634 3.803558,-1.76593 0.611285,0.81505 -0.679207,1.01881 2.309305,0.40752 v 2.64891 l 1.765937,0.88297 1.426335,-0.13585 1.358413,0.27169 0.271682,0.54336 -0.339603,1.56218 0.815049,-0.0679 -0.135843,1.56218 1.154653,0.61129 -1.086732,0.95089 v 1.22257 l 0.339604,0.88297 -1.358413,0.88297 -1.290495,0.74712 -1.969699,1.2905 0.135843,1.08673 -2.241383,0.61128 1.562176,0.74713 -0.679206,1.08673 -2.513066,1.76594 -1.630098,-1.42634 -1.154649,0.74713 -0.543367,-1.35841 -3.328112,0.67921 -0.543364,-1.08673 -1.018812,-0.27169 -0.407522,0.61129 -0.679207,-0.40753 z" },
+{ id: 40, d: "m 35.732212,89.714746 -0.384218,-2.305304 -2.017141,-1.632923 0.09605,-1.921087 h 1.632923 l 0.960544,-1.344761 1.440815,-2.113195 -0.960544,-0.67238 -1.632923,-0.768435 0.864489,-1.536869 3.842173,1.152652 h 1.248706 l -0.768435,-2.88163 3.265848,-1.53687 0.384217,-3.361901 h 0.67238 l 2.593467,-2.305304 -0.192108,-0.384218 0.384217,-0.480271 -0.67238,-1.536869 2.305304,-2.785576 v -1.825032 l -2.689522,-1.056598 -0.576326,-2.113195 -2.017141,-2.305304 -0.384217,-3.361902 -2.20925,-1.152652 -0.288163,-0.864489 0.672381,-0.576326 -1.152652,-1.536869 0.576326,-2.401359 0.67238,-1.440815 -1.344761,-0.864489 -0.864488,0.288163 0.384217,-3.073738 c 0,0 2.113195,0.192108 4.034282,-0.480272 1.921086,-0.67238 4.034282,-0.864489 4.034282,-0.864489 l 4.22639,-1.921086 4.802717,-0.192109 3.169793,-1.921087 2.88163,-3.169793 3.361902,-4.034282 2.593466,-2.497412 4.226391,-0.384217 1.344761,3.361901 1.248706,1.152652 0.09605,2.017141 0.384218,1.152652 -0.864489,1.248706 0.384217,1.152652 0.67238,0.480272 -0.288163,2.113195 -3.169793,1.056598 V 41.0152 l 1.248707,2.017141 0.192108,3.073738 -0.960543,1.152652 0.192109,2.305304 1.056597,-1.34476 1.440815,1.825032 v 0.864489 l 2.20925,1.728978 -0.09605,0.67238 -2.785576,0.480272 1.056598,3.169793 0.480271,0.192109 -1.440815,1.825032 0.384218,3.361902 -1.056598,1.536869 -0.576326,-0.864489 -1.632924,0.768435 -0.768434,4.610607 -0.960544,-0.384217 -1.728978,1.152652 -3.746118,0.384217 -0.480272,0.960544 0.67238,2.497412 2.497413,1.921087 0.768434,0.384217 1.921087,1.632924 -1.825032,1.440815 -0.192109,2.20925 -1.440815,-0.960544 -0.864489,0.288163 -0.288163,1.632924 -2.209249,1.152652 -0.672381,-0.67238 -1.536869,2.305304 0.192109,1.825032 -1.440815,1.152652 -2.017141,-0.09605 -2.497413,0.768434 -3.650065,-0.864489 0.864489,-3.265847 -2.113195,-0.480272 -2.017141,1.440815 -1.825032,3.169793 -2.017141,0.192109 -1.248707,0.768435 -1.248706,-0.480272 -0.576326,-1.248706 -3.746119,0.960543 -1.440815,1.921087 z" },
+{ id: 41, d: "m 10.662031,49.467981 1.056598,1.632924 1.248706,4.130336 -0.576326,1.248706 v 4.514554 l 0.768435,1.248706 -0.480272,3.842174 1.728978,3.746118 0.480271,5.955369 0.864489,0.384217 -2.209249,2.977685 0.288163,2.113195 -1.921087,4.034282 -4.7066621,2.977684 0.4802717,2.689522 -0.864489,2.401358 1.9210866,0.288163 2.5934668,2.593467 1.344761,1.152652 2.017141,3.457957 1.921086,1.24871 1.921087,-1.34477 1.440815,1.34477 2.113195,-1.53687 0.864489,-3.361906 1.632924,-1.344761 0.192109,-2.209249 1.056598,0.288163 0.192108,-0.576326 -0.576326,-0.672381 0.576326,-0.960543 2.017141,1.825032 h 0.67238 l 1.440815,0.864489 6.435641,-2.401358 -1.248707,-1.440815 v -0.768434 l 0.288163,-1.632924 -2.113195,-1.921087 0.288163,-2.305304 h 1.248706 l 1.440815,-1.536869 0.672381,-2.017141 -1.440815,-0.768435 -0.768435,-0.864489 0.960543,-0.960543 4.226391,0.67238 h 0.960543 l -0.768435,-2.497412 2.88163,-1.825033 0.672381,-3.55401 0.864489,0.192109 2.401358,-3.265848 -0.384217,-1.440814 2.017141,-2.401359 v -1.921086 l -2.593467,-1.825033 -0.864489,-1.632923 -1.921087,-3.169793 -0.384217,-2.305304 -2.305304,-1.825033 0.768434,-1.34476 -0.864489,-0.384218 -0.09605,-3.169793 1.056598,-1.440815 -1.056598,-0.480271 h -1.632923 l 0.864488,-3.073739 -20.747735,6.243532 -2.113196,2.017141 -2.305304,0.576326 -1.921086,-0.864489 z" }
+];
+function drawMap() {
+  const container = document.getElementById('map-container');
+  const tooltip = document.getElementById('map-tooltip');
+  
+  if (container.querySelector('svg')) return;
+
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  
+  // --- ZMIANA TUTAJ: Zwiększony viewBox i przesunięty start (-5 -5) ---
+  // To daje margines z lewej i u góry, oraz więcej miejsca z prawej i u dołu
+  svg.setAttribute("viewBox", "-5 -5 250 245"); 
+  
+  svg.style.width = "100%";
+  svg.style.height = "auto";
+  // Dodatkowo: overflow visible zapobiega ucinaniu grubych obramowań na krawędziach
+  svg.style.overflow = "visible"; 
+  svg.style.filter = "drop-shadow(0 4px 6px rgba(0,0,0,0.3))";
+
+  okrPaths.forEach(item => {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", item.d);
+    path.setAttribute("id", item.id);
+    
+    path.style.fill = "#2a3766"; 
+    path.style.stroke = "#0b0d17";
+    path.style.strokeWidth = "0.8"; // Trochę wyraźniejsze granice
+    path.style.transition = "fill 0.3s ease, opacity 0.2s";
+    path.style.cursor = "pointer";
+
+    svg.appendChild(path);
+  });
+
+  container.insertBefore(svg, tooltip);
+}
+
+const procenty = {
+
+  "1": {"KO": 0.024846782030482493, "PiS": 0.022510409283718207, "RozwojPlus": 0.020200451326114432, "Konfederacja": 0.021391597957216804, "KoronaPolska": 0.02152838797847161, "PL2050": 0.018890571943328282, "PSL": 0.018390604, "Razem": 0.01752355098247645, "Lewica": 0.020190242959619513, "BS": 0.041759962, "NF": 0.01933258, "MN": 0, "WiR": 0.018706287, "RDiP": 0.024057628, "PPS": 0.0235667328981603, "Inni": 0.019871936352478168},
+
+  "2": {"KO": 0.017256918541370875, "PiS": 0.01224675589224818, "RozwojPlus": 0.01719086202494733, "Konfederacja": 0.012578002974843993, "KoronaPolska": 0.01367830698632169, "PL2050": 0.012142187963573433, "PSL": 0.012238634, "Razem": 0.010302970989697029, "Lewica": 0.012812273974375451, "BS": 0.01448184, "NF": 0.012269022, "MN": 0, "WiR": 0.011320655, "RDiP": 0.014709521, "PPS": 0.0176479810958275, "Inni": 0.012474247892903524},
+
+  "3": {"KO": 0.04234322641908338, "PiS": 0.02518070662551387, "RozwojPlus": 0.037971157114375945, "Konfederacja": 0.03243951293512097, "KoronaPolska": 0.02748534297251465, "PL2050": 0.03704664688886005, "PSL": 0.028604704, "Razem": 0.05715802994284198, "Lewica": 0.04696266190607467, "BS": 0.055882749, "NF": 0.049360872, "MN": 0, "WiR": 0.034088044, "RDiP": 0.035935223, "PPS": 0.045629615332933, "Inni": 0.04064690179560064},
+
+  "4": {"KO": 0.028671065041450457, "PiS": 0.018706099760722274, "RozwojPlus": 0.02749212578723615, "Konfederacja": 0.023186289953627415, "KoronaPolska": 0.020216152979783845, "PL2050": 0.026579806920260574, "PSL": 0.024620944000000002, "Razem": 0.021462334978537667, "Lewica": 0.02702200894595598, "BS": 0.022203992, "NF": 0.025242999, "MN": 0, "WiR": 0.021838379, "RDiP": 0.0256798, "PPS": 0.0304299921669585, "Inni": 0.025442381197552516},
+
+  "5": {"KO": 0.02652590212450641, "PiS": 0.021254061662354874, "RozwojPlus": 0.030447268124549242, "Konfederacja": 0.025639046948721905, "KoronaPolska": 0.019769622980230377, "PL2050": 0.023981995928054004, "PSL": 0.028134489999999998, "Razem": 0.021621859978378143, "Lewica": 0.02612372694775254, "BS": 0.019344028, "NF": 0.022862025, "MN": 0, "WiR": 0.020484678, "RDiP": 0.031701081, "PPS": 0.0275556930663331, "Inni": 0.022202334005753867},
+
+  "6": {"KO": 0.021556675807125378, "PiS": 0.04071279101287448, "RozwojPlus": 0.034624909475190334, "Konfederacja": 0.03408123093183753, "KoronaPolska": 0.04116364995883635, "PL2050": 0.02842166891473499, "PSL": 0.037617145, "Razem": 0.026080147973919856, "Lewica": 0.021661254956677492, "BS": 0.025792038, "NF": 0.026811642, "MN": 0, "WiR": 0.039171057, "RDiP": 0.032663386, "PPS": 0.0165705323247308, "Inni": 0.031858919281514964},
+
+  "7": {"KO": 0.013123186998645486, "PiS": 0.029768111015024093, "RozwojPlus": 0.027573366743538365, "Konfederacja": 0.024795275950409444, "KoronaPolska": 0.03676753996323246, "PL2050": 0.017202964948391103, "PSL": 0.031513067, "Razem": 0.012196273987803728, "Lewica": 0.012853268974293461, "BS": 0.023742439, "NF": 0.015247575, "MN": 0, "WiR": 0.024758126, "RDiP": 0.026257183, "PPS": 0.0103616198807347, "Inni": 0.012962805763594269},
+
+  "8": {"KO": 0.029809991744776405, "PiS": 0.018636579523836225, "RozwojPlus": 0.01811505825284061, "Konfederacja": 0.022206426955587142, "KoronaPolska": 0.020881522979118473, "PL2050": 0.022833769931498684, "PSL": 0.020861407, "Razem": 0.01923214198076786, "Lewica": 0.0211355489577289, "BS": 0.02980646, "NF": 0.021101971, "MN": 0, "WiR": 0.017286228, "RDiP": 0.021418163, "PPS": 0.0318355259397829, "Inni": 0.02062799150021703},
+
+  "9": {"KO": 0.027230982961973734, "PiS": 0.014120403091337393, "RozwojPlus": 0.02101075124509068, "Konfederacja": 0.014494660971010678, "KoronaPolska": 0.015414544984585452, "PL2050": 0.020546510938360463, "PSL": 0.01604171, "Razem": 0.02667311797332688, "Lewica": 0.029820548940358894, "BS": 0.014023049, "NF": 0.026643573, "MN": 0, "WiR": 0.019356594, "RDiP": 0.019026147, "PPS": 0.0388974952323284, "Inni": 0.02277963706076982},
+
+  "10": {"KO": 0.012909353672706937, "PiS": 0.02553676305195339, "RozwojPlus": 0.02138561256638279, "Konfederacja": 0.02015712295968575, "KoronaPolska": 0.021008642978991354, "PL2050": 0.015381534953855391, "PSL": 0.021534074, "Razem": 0.013355974986644027, "Lewica": 0.014792110970415776, "BS": 0.021436016, "NF": 0.014925443, "MN": 0, "WiR": 0.022209983, "RDiP": 0.01935608, "PPS": 0.0097513288666206, "Inni": 0.01776663392707569},
+
+  "11": {"KO": 0.021195191789207892, "PiS": 0.029538693881011466, "RozwojPlus": 0.02563748365904972, "Konfederacja": 0.024625419950749156, "KoronaPolska": 0.02443445497556554, "PL2050": 0.023403796929788605, "PSL": 0.030442023000000002, "Razem": 0.019479823980520176, "Lewica": 0.024092041951815916, "BS": 0.021575648, "NF": 0.022059029, "MN": 0, "WiR": 0.025992382, "RDiP": 0.02735696, "PPS": 0.0167489723806936, "Inni": 0.023837584631773955},
+
+  "12": {"KO": 0.013359948460673253, "PiS": 0.020735399850617856, "RozwojPlus": 0.02001240773744262, "Konfederacja": 0.020261861959476272, "KoronaPolska": 0.017880517982119478, "PL2050": 0.016342816950971548, "PSL": 0.018386251, "Razem": 0.013934250986065749, "Lewica": 0.012202164975595668, "BS": 0.016174879, "NF": 0.013828327, "MN": 0, "WiR": 0.018175424, "RDiP": 0.015561849, "PPS": 0.0094599744861868, "Inni": 0.0161366796593584},
+
+  "13": {"KO": 0.03663883624879873, "PiS": 0.031826254512827196, "RozwojPlus": 0.03075194433896048, "Konfederacja": 0.03314443493371112, "KoronaPolska": 0.028096002971903993, "PL2050": 0.04229232587312301, "PSL": 0.041925266, "Razem": 0.06359253293640749, "Lewica": 0.04453910891092178, "BS": 0.028464995, "NF": 0.048781968, "MN": 0, "WiR": 0.040259327, "RDiP": 0.02884166, "PPS": 0.0383977071941586, "Inni": 0.042352329169134215},
+
+  "14": {"KO": 0.010426122706617547, "PiS": 0.03320493964796662, "RozwojPlus": 0.02679823931593057, "Konfederacja": 0.02541440894917118, "KoronaPolska": 0.027622922972377076, "PL2050": 0.013775651958673042, "PSL": 0.019341918, "Razem": 0.011826848988173154, "Lewica": 0.008043541983912916, "BS": 0.026537573, "NF": 0.011316632, "MN": 0, "WiR": 0.018434219, "RDiP": 0.017266504, "PPS": 0.0073231523268574, "Inni": 0.015027092594901054},
+
+  "15": {"KO": 0.012076623283253441, "PiS": 0.02735006562299827, "RozwojPlus": 0.023269313491404903, "Konfederacja": 0.02310945795378108, "KoronaPolska": 0.02328956797671043, "PL2050": 0.019155154942534534, "PSL": 0.03459776, "Razem": 0.015126485984873515, "Lewica": 0.011239978977520042, "BS": 0.01387843, "NF": 0.014547288, "MN": 0, "WiR": 0.022123718, "RDiP": 0.016551648, "PPS": 0.0087107153603274, "Inni": 0.017733531687682567},
+
+  "16": {"KO": 0.015771955855081263, "PiS": 0.02679243807325702, "RozwojPlus": 0.02275774268466321, "Konfederacja": 0.021351975957296047, "KoronaPolska": 0.02208675197791325, "PL2050": 0.017731108946806667, "PSL": 0.029090156999999995, "Razem": 0.014027656985972345, "Lewica": 0.016446396967107205, "BS": 0.022400973, "NF": 0.015649072, "MN": 0, "WiR": 0.023922016, "RDiP": 0.020290891, "PPS": 0.0119552813404591, "Inni": 0.014271037447162188},
+
+  "17": {"KO": 0.011967511373211852, "PiS": 0.026419791772097245, "RozwojPlus": 0.021903023030751426, "Konfederacja": 0.020474440959051116, "KoronaPolska": 0.021056111978943887, "PL2050": 0.014146476957560565, "PSL": 0.022711787, "Razem": 0.012235104987764896, "Lewica": 0.012864120974271755, "BS": 0.016638657, "NF": 0.012558474, "MN": 0, "WiR": 0.020378505, "RDiP": 0.017293998, "PPS": 0.0089233844341271, "Inni": 0.016042669299481917},
+
+  "18": {"KO": 0.015240543452672761, "PiS": 0.03316501137948483, "RozwojPlus": 0.031, "Konfederacja": 0.030031889939936215, "KoronaPolska": 0.03320173396679826, "PL2050": 0.022564079932307756, "PSL": 0.031471706, "Razem": 0.0169925019830075, "Lewica": 0.016308940967382116, "BS": 0.025046502, "NF": 0.017815292, "MN": 0, "WiR": 0.0327078, "RDiP": 0.028291771, "PPS": 0.0109216309064988, "Inni": 0.024294395535399055},
+
+  "19": {"KO": 0.10279480202182983, "PiS": 0.04861138250398015, "RozwojPlus": 0.05156185966218977, "Konfederacja": 0.062409041875181905, "KoronaPolska": 0.07242800592757198, "PL2050": 0.07618032877145901, "PSL": 0.046773263, "Razem": 0.1285809038714191, "Lewica": 0.13233923473532153, "BS": 0.058470929, "NF": 0.11865657, "MN": 0, "WiR": 0.084360775, "RDiP": 0.065684199, "PPS": 0.1226490453637809, "Inni": 0.09457309794614557},
+
+  "20": {"KO": 0.03779093443455888, "PiS": 0.03322404046944651, "RozwojPlus": 0.030856716659156076, "Konfederacja": 0.033278459933443076, "KoronaPolska": 0.029783162970216832, "PL2050": 0.039473858881578415, "PSL": 0.028134489999999998, "Razem": 0.03710202796289798, "Lewica": 0.03881180792237638, "BS": 0.041318625, "NF": 0.040611957, "MN": 0, "WiR": 0.046848664, "RDiP": 0.029584009, "PPS": 0.0257775853171958, "Inni": 0.043337451813473454},
+
+  "21": {"KO": 0.02410755290522266, "PiS": 0.018966275494034228, "RozwojPlus": 0.018077586318644166, "Konfederacja": 0.021934587956130822, "KoronaPolska": 0.021521951978478043, "PL2050": 0.024041245927876258, "PSL": 0.022087011, "Razem": 0.017824757982175244, "Lewica": 0.017890881964218234, "BS": 0.018753086, "NF": 0.018562265, "MN": 1, "WiR": 0.018719558, "RDiP": 0.025734789, "PPS": 0.0250799632320376, "Inni": 0.020343312241436203},
+
+  "22": {"KO": 0.01223159146547357, "PiS": 0.03209773488868834, "RozwojPlus": 0.026223515722281356, "Konfederacja": 0.024455562951088868, "KoronaPolska": 0.030858858969141135, "PL2050": 0.01527937995416186, "PSL": 0.025169527, "Razem": 0.011286354988713646, "Lewica": 0.010561142978877712, "BS": 0.022852284, "NF": 0.012726543, "MN": 0, "WiR": 0.021579583, "RDiP": 0.024882461, "PPS": 0.0088675508330184, "Inni": 0.016655722773042596},
+
+  "23": {"KO": 0.018387877310878598, "PiS": 0.047254417465434476, "RozwojPlus": 0.03918819098883631, "Konfederacja": 0.039290970921418054, "KoronaPolska": 0.04715037295284962, "PL2050": 0.026574699920275894, "PSL": 0.034232038, "Razem": 0.022649322977350676, "Lewica": 0.01764732096470536, "BS": 0.025687314, "NF": 0.023179488, "MN": 0, "WiR": 0.037113963, "RDiP": 0.030986225, "PPS": 0.0128412194662731, "Inni": 0.02965166195878172},
+
+  "24": {"KO": 0.021199907505141145, "PiS": 0.03519854419509266, "RozwojPlus": 0.03060892820181467, "Konfederacja": 0.03289878093420243, "KoronaPolska": 0.03464350396535649, "PL2050": 0.03303398390089804, "PSL": 0.025428581000000002, "Razem": 0.02128077097871923, "Lewica": 0.019744115960511763, "BS": 0.017655977, "NF": 0.023188825, "MN": 0, "WiR": 0.029794689, "RDiP": 0.048967584, "PPS": 0.0167525816589174, "Inni": 0.029122026128491726},
+
+  "25": {"KO": 0.0371469952933295, "PiS": 0.02106384937584877, "RozwojPlus": 0.021532737043273322, "Konfederacja": 0.025812003948375985, "KoronaPolska": 0.020482461979517533, "PL2050": 0.03370105889889682, "PSL": 0.022293819, "Razem": 0.042379978957620024, "Lewica": 0.03716234492567531, "BS": 0.022119216, "NF": 0.037824816, "MN": 0, "WiR": 0.024678496, "RDiP": 0.025624811, "PPS": 0.043719244827876, "Inni": 0.028253631586612826},
+
+  "26": {"KO": 0.03772280046986826, "PiS": 0.02378866832711799, "RozwojPlus": 0.03557591907308825, "Konfederacja": 0.03315063693369872, "KoronaPolska": 0.028928721971071273, "PL2050": 0.03772802388681592, "PSL": 0.026469148, "Razem": 0.031969958968030045, "Lewica": 0.03291570293416859, "BS": 0.027637176, "NF": 0.036200151, "MN": 0, "WiR": 0.029058116, "RDiP": 0.030793764, "PPS": 0.034941220178793, "Inni": 0.03371396877710549},
+
+  "27": {"KO": 0.01971039171381259, "PiS": 0.02200961407838386, "RozwojPlus": 0.01991348219554073, "Konfederacja": 0.023066045953867905, "KoronaPolska": 0.020065699979934296, "PL2050": 0.023137170930588487, "PSL": 0.016757916, "Razem": 0.017932856982067147, "Lewica": 0.016460865967078266, "BS": 0.019157021, "NF": 0.017763938, "MN": 0, "WiR": 0.021022177, "RDiP": 0.02108823, "PPS": 0.0146760629536946, "Inni": 0.02014205062592606},
+
+  "28": {"KO": 0.014457571996859707, "PiS": 0.0157072523936639, "RozwojPlus": 0.014006293769867562, "Konfederacja": 0.014315845971368306, "KoronaPolska": 0.015015483984984515, "PL2050": 0.014100506957698477, "PSL": 0.015998171, "Razem": 0.012496431987503569, "Lewica": 0.013377768973244459, "BS": 0.016892987, "NF": 0.013464178, "MN": 0, "WiR": 0.013709538, "RDiP": 0.014984466, "PPS": 0.0122394960320749, "Inni": 0.01452526264570129},
+
+  "29": {"KO": 0.019941299183647343, "PiS": 0.014798330126289033, "RozwojPlus": 0.014286945820376075, "Konfederacja": 0.01712485496575029, "KoronaPolska": 0.014803079985196917, "PL2050": 0.01999895794000312, "PSL": 0.01425446, "Razem": 0.018691647981308353, "Lewica": 0.018306864963386266, "BS": 0.018396525, "NF": 0.019215866, "MN": 0, "WiR": 0.015673732, "RDiP": 0.016111737, "PPS": 0.0229122037264767, "Inni": 0.01827111205542685},
+
+  "30": {"KO": 0.0161833614175334, "PiS": 0.01837097769046402, "RozwojPlus": 0.018464140620492432, "Konfederacja": 0.02096471695807056, "KoronaPolska": 0.016572304983427693, "PL2050": 0.018173440945479673, "PSL": 0.012721909999999998, "Razem": 0.014994248985005752, "Lewica": 0.014966943970066109, "BS": 0.021560688, "NF": 0.014066425, "MN": 0, "WiR": 0.016635921, "RDiP": 0.017596437, "PPS": 0.0142489536104427, "Inni": 0.01662791689195237},
+
+  "31": {"KO": 0.02716349944086005, "PiS": 0.016722526970646474, "RozwojPlus": 0.03147057612346959, "Konfederacja": 0.021424672957150653, "KoronaPolska": 0.017750179982249818, "PL2050": 0.02681782891954651, "PSL": 0.018131551, "Razem": 0.028725944971274054, "Lewica": 0.027457282945085433, "BS": 0.023657662, "NF": 0.027871409, "MN": 0, "WiR": 0.020239154, "RDiP": 0.021280691, "PPS": 0.0338504333062559, "Inni": 0.025550956542761936},
+
+  "32": {"KO": 0.0200252064050803, "PiS": 0.014636029060883047, "RozwojPlus": 0.013729133216498055, "Konfederacja": 0.014169417971661161, "KoronaPolska": 0.014435396985564602, "PL2050": 0.015816716952549846, "PSL": 0.014927127999999998, "Razem": 0.016872858983127143, "Lewica": 0.021737216956525564, "BS": 0.013711371, "NF": 0.018132756, "MN": 0, "WiR": 0.013901976, "RDiP": 0.017486459, "PPS": 0.0247194240879181, "Inni": 0.016862280746855637},
+
+  "33": {"KO": 0.022817885902927115, "PiS": 0.04166454636331467, "RozwojPlus": 0.03475208601549924, "Konfederacja": 0.029350396941299203, "KoronaPolska": 0.03775231996224768, "PL2050": 0.025278347924164953, "PSL": 0.042436842, "Razem": 0.02072663397927337, "Lewica": 0.02204468295591063, "BS": 0.047277923, "NF": 0.023324214, "MN": 0, "WiR": 0.031201476, "RDiP": 0.030821259, "PPS": 0.0178742139589292, "Inni": 0.026450013364679087},
+
+  "34": {"KO": 0.014720351201967453, "PiS": 0.013299215255289584, "RozwojPlus": 0.012290107042622598, "Konfederacja": 0.014339963971320068, "KoronaPolska": 0.01254548798745451, "PL2050": 0.013690863958927407, "PSL": 0.015046858, "Razem": 0.01007207998992792, "Lewica": 0.013188466973623065, "BS": 0.010776604, "NF": 0.01152205, "MN": 0, "WiR": 0.012362473, "RDiP": 0.013719722, "PPS": 0.015533457783799, "Inni": 0.01214322549897238},
+
+  "35": {"KO": 0.020278228956533025, "PiS": 0.016063933229169738, "RozwojPlus": 0.016922751862062324, "Konfederacja": 0.01885477396229045, "KoronaPolska": 0.017339049982660948, "PL2050": 0.01849829594450511, "PSL": 0.01910681, "Razem": 0.016281988983718014, "Lewica": 0.018856685962286627, "BS": 0.019269226, "NF": 0.016410051, "MN": 0, "WiR": 0.018142245, "RDiP": 0.020648319, "PPS": 0.021615618956238, "Inni": 0.01800232187155471},
+
+  "36": {"KO": 0.02367744708993183, "PiS": 0.024597113544452317, "RozwojPlus": 0.022873633521679825, "Konfederacja": 0.027853039944293917, "KoronaPolska": 0.0249356959750643, "PL2050": 0.027393985917818036, "PSL": 0.031049383000000003, "Razem": 0.020485247979514756, "Lewica": 0.023954586952090823, "BS": 0.032250021, "NF": 0.022717299, "MN": 0, "WiR": 0.023902109, "RDiP": 0.024525034, "PPS": 0.0206160373004005, "Inni": 0.027285513886961398},
+
+  "37": {"KO": 0.016873807274518246, "PiS": 0.021687426655529682, "RozwojPlus": 0.019255947288934656, "Konfederacja": 0.020492356959015284, "KoronaPolska": 0.018612666981387332, "PL2050": 0.020325854939022434, "PSL": 0.020373777, "Razem": 0.0158390989841609, "Lewica": 0.019553607960892783, "BS": 0.024562777, "NF": 0.016550108, "MN": 0, "WiR": 0.017730826, "RDiP": 0.020400869, "PPS": 0.0137679927853842, "Inni": 0.01786858882440646},
+
+  "38": {"KO": 0.021176328925474993, "PiS": 0.015486076669520676, "RozwojPlus": 0.015375994239717422, "Konfederacja": 0.020190886959618223, "KoronaPolska": 0.018590943981409053, "PL2050": 0.023141256930576223, "PSL": 0.023573847, "Razem": 0.01614975098385025, "Lewica": 0.019894834960210325, "BS": 0.01964324, "NF": 0.018473562, "MN": 0, "WiR": 0.016091786, "RDiP": 0.018366281, "PPS": 0.0194711749791012, "Inni": 0.018100304500158333},
+
+  "39": {"KO": 0.03895864326616705, "PiS": 0.013355457845479719, "RozwojPlus": 0.02283108751543552, "Konfederacja": 0.02062500295874999, "KoronaPolska": 0.016235194983764804, "PL2050": 0.036185476891443566, "PSL": 0.021079098, "Razem": 0.04957432195042568, "Lewica": 0.041747802916504394, "BS": 0.023630234, "NF": 0.041111495, "MN": 0, "WiR": 0.023941924, "RDiP": 0.02084078, "PPS": 0.0576893977625545, "Inni": 0.032637192102883565},
+
+  "40": {"KO": 0.01915100272728103, "PiS": 0.012883255764529448, "RozwojPlus": 0.012192623287019578, "Konfederacja": 0.013557176972885644, "KoronaPolska": 0.013303381986696618, "PL2050": 0.014477459956567617, "PSL": 0.014924951, "Razem": 0.010099366989900634, "Lewica": 0.01561201896877596, "BS": 0.013125415, "NF": 0.012763891, "MN": 0, "WiR": 0.011599358, "RDiP": 0.014737016, "PPS": 0.020043122425784, "Inni": 0.01800232187155471},
+
+  "41": {"KO": 0.03253169457946504, "PiS": 0.02080805597289715, "RozwojPlus": 0.01986802689303197, "Konfederacja": 0.021057741957884513, "KoronaPolska": 0.020664291979335704, "PL2050": 0.024512182926463445, "PSL": 0.021505774, "Razem": 0.02516183297483817, "Lewica": 0.02665787294668425, "BS": 0.022403467, "NF": 0.02530836, "MN": 0, "WiR": 0.020478042, "RDiP": 0.022875368, "PPS": 0.0354266642193355, "Inni": 0.025550956542761936}
+
+};
+
+// --- DANE HISTORYCZNE ROZKŁADU POPARCIA (2023) ---
+procenty["1"]["BS2023"] = 0.041759962;procenty["1"]["TD - PL2050 i PSL2023"] = 0.017346102;procenty["1"]["Lewica2023"] = 0.025666777;procenty["1"]["PiS2023"] = 0.022856477;procenty["1"]["Konfederacja2023"] = 0.020531691;procenty["1"]["KO2023"] = 0.025573951;procenty["1"]["PJJ2023"] = 0.021350104;
+procenty["2"]["BS2023"] = 0.01448184;procenty["2"]["TD - PL2050 i PSL2023"] = 0.012606609;procenty["2"]["Lewica2023"] = 0.013881522;procenty["2"]["PiS2023"] = 0.014107978;procenty["2"]["Konfederacja2023"] = 0.012587859;procenty["2"]["KO2023"] = 0.018129539;procenty["2"]["PJJ2023"] = 0.014434675;
+procenty["3"]["BS2023"] = 0.055882749;procenty["3"]["TD - PL2050 i PSL2023"] = 0.03427686;procenty["3"]["Lewica2023"] = 0.047384694;procenty["3"]["PiS2023"] = 0.027077994;procenty["3"]["Konfederacja2023"] = 0.034983365;procenty["3"]["KO2023"] = 0.043248697;procenty["3"]["PJJ2023"] = 0.031857112;
+procenty["4"]["BS2023"] = 0.022203992;procenty["4"]["TD - PL2050 i PSL2023"] = 0.02585488;procenty["4"]["Lewica2023"] = 0.028487621;procenty["4"]["PiS2023"] = 0.021280736;procenty["4"]["Konfederacja2023"] = 0.022144757;procenty["4"]["KO2023"] = 0.0281947;procenty["4"]["PJJ2023"] = 0.022346973;
+procenty["5"]["BS2023"] = 0.019344028;procenty["5"]["TD - PL2050 i PSL2023"] = 0.027102843;procenty["5"]["Lewica2023"] = 0.03252954;procenty["5"]["PiS2023"] = 0.023967347;procenty["5"]["Konfederacja2023"] = 0.022122784;procenty["5"]["KO2023"] = 0.023941677;procenty["5"]["PJJ2023"] = 0.019111419;
+procenty["6"]["BS2023"] = 0.025792038;procenty["6"]["TD - PL2050 i PSL2023"] = 0.033077761;procenty["6"]["Lewica2023"] = 0.019947628;procenty["6"]["PiS2023"] = 0.038588226;procenty["6"]["Konfederacja2023"] = 0.035108094;procenty["6"]["KO2023"] = 0.019867855;procenty["6"]["PJJ2023"] = 0.042415387;
+procenty["7"]["BS2023"] = 0.023742439;procenty["7"]["TD - PL2050 i PSL2023"] = 0.019152466;procenty["7"]["Lewica2023"] = 0.013819662;procenty["7"]["PiS2023"] = 0.030347655;procenty["7"]["Konfederacja2023"] = 0.023002991;procenty["7"]["KO2023"] = 0.011992183;procenty["7"]["PJJ2023"] = 0.03682722;
+procenty["8"]["BS2023"] = 0.02980646;procenty["8"]["TD - PL2050 i PSL2023"] = 0.025053445;procenty["8"]["Lewica2023"] = 0.025772209;procenty["8"]["PiS2023"] = 0.018784549;procenty["8"]["Konfederacja2023"] = 0.021760879;procenty["8"]["KO2023"] = 0.029428144;procenty["8"]["PJJ2023"] = 0.016502468;
+procenty["9"]["BS2023"] = 0.014023049;procenty["9"]["TD - PL2050 i PSL2023"] = 0.017450581;procenty["9"]["Lewica2023"] = 0.02999971;procenty["9"]["PiS2023"] = 0.016023471;procenty["9"]["Konfederacja2023"] = 0.016433108;procenty["9"]["KO2023"] = 0.028287167;procenty["9"]["PJJ2023"] = 0.015628071;
+procenty["10"]["BS2023"] = 0.021436016;procenty["10"]["TD - PL2050 i PSL2023"] = 0.01751359;procenty["10"]["Lewica2023"] = 0.013630852;procenty["10"]["PiS2023"] = 0.024202661;procenty["10"]["Konfederacja2023"] = 0.019547437;procenty["10"]["KO2023"] = 0.012985032;procenty["10"]["PJJ2023"] = 0.015542625;
+procenty["11"]["BS2023"] = 0.021575648;procenty["11"]["TD - PL2050 i PSL2023"] = 0.024854131;procenty["11"]["Lewica2023"] = 0.022155783;procenty["11"]["PiS2023"] = 0.028927526;procenty["11"]["Konfederacja2023"] = 0.02351289;procenty["11"]["KO2023"] = 0.020822089;procenty["11"]["PJJ2023"] = 0.022065002;
+procenty["12"]["BS2023"] = 0.016174879;procenty["12"]["TD - PL2050 i PSL2023"] = 0.017547667;procenty["12"]["Lewica2023"] = 0.01185357;procenty["12"]["PiS2023"] = 0.020456876;procenty["12"]["Konfederacja2023"] = 0.01858257;procenty["12"]["KO2023"] = 0.013335743;procenty["12"]["PJJ2023"] = 0.023050479;
+procenty["13"]["BS2023"] = 0.028464995;procenty["13"]["TD - PL2050 i PSL2023"] = 0.041049999;procenty["13"]["Lewica2023"] = 0.04498773;procenty["13"]["PiS2023"] = 0.030419375;procenty["13"]["Konfederacja2023"] = 0.037764224;procenty["13"]["KO2023"] = 0.035116139;procenty["13"]["PJJ2023"] = 0.031660586;
+procenty["14"]["BS2023"] = 0.026537573;procenty["14"]["TD - PL2050 i PSL2023"] = 0.015908791;procenty["14"]["Lewica2023"] = 0.007312463;procenty["14"]["PiS2023"] = 0.030047296;procenty["14"]["Konfederacja2023"] = 0.024106157;procenty["14"]["KO2023"] = 0.010378613;procenty["14"]["PJJ2023"] = 0.050914414;
+procenty["15"]["BS2023"] = 0.01387843;procenty["15"]["TD - PL2050 i PSL2023"] = 0.024184179;procenty["15"]["Lewica2023"] = 0.008688458;procenty["15"]["PiS2023"] = 0.025708252;procenty["15"]["Konfederacja2023"] = 0.02083608;procenty["15"]["KO2023"] = 0.010361417;procenty["15"]["PJJ2023"] = 0.026431291;
+procenty["16"]["BS2023"] = 0.022400973;procenty["16"]["TD - PL2050 i PSL2023"] = 0.024279657;procenty["16"]["Lewica2023"] = 0.01551787;procenty["16"]["PiS2023"] = 0.025549238;procenty["16"]["Konfederacja2023"] = 0.01866206;procenty["16"]["KO2023"] = 0.014955497;procenty["16"]["PJJ2023"] = 0.016998055;
+procenty["17"]["BS2023"] = 0.016638657;procenty["17"]["TD - PL2050 i PSL2023"] = 0.017581421;procenty["17"]["Lewica2023"] = 0.011228509;procenty["17"]["PiS2023"] = 0.024921036;procenty["17"]["Konfederacja2023"] = 0.018478522;procenty["17"]["KO2023"] = 0.012369592;procenty["17"]["PJJ2023"] = 0.017040778;
+procenty["18"]["BS2023"] = 0.025046502;procenty["18"]["TD - PL2050 i PSL2023"] = 0.026901279;procenty["18"]["Lewica2023"] = 0.014066028;procenty["18"]["PiS2023"] = 0.034320247;procenty["18"]["Konfederacja2023"] = 0.028628687;procenty["18"]["KO2023"] = 0.015220377;procenty["18"]["PJJ2023"] = 0.029134233;
+procenty["19"]["BS2023"] = 0.058470929;procenty["19"]["TD - PL2050 i PSL2023"] = 0.07301546;procenty["19"]["Lewica2023"] = 0.124069805;procenty["19"]["PiS2023"] = 0.045201754;procenty["19"]["Konfederacja2023"] = 0.080278461;procenty["19"]["KO2023"] = 0.111817929;procenty["19"]["PJJ2023"] = 0.064392095;
+procenty["20"]["BS2023"] = 0.041318625;procenty["20"]["TD - PL2050 i PSL2023"] = 0.035389803;procenty["20"]["Lewica2023"] = 0.027732921;procenty["20"]["PiS2023"] = 0.030350665;procenty["20"]["Konfederacja2023"] = 0.033329585;procenty["20"]["KO2023"] = 0.03883759;procenty["20"]["PJJ2023"] = 0.032990695;
+procenty["21"]["BS2023"] = 0.018753086;procenty["21"]["TD - PL2050 i PSL2023"] = 0.019659752;procenty["21"]["Lewica2023"] = 0.018699658;procenty["21"]["PiS2023"] = 0.019634193;procenty["21"]["Konfederacja2023"] = 0.02013101;procenty["21"]["KO2023"] = 0.024322103;procenty["21"]["PJJ2023"] = 0.023748288;
+procenty["22"]["BS2023"] = 0.022852284;procenty["22"]["TD - PL2050 i PSL2023"] = 0.019589992;procenty["22"]["Lewica2023"] = 0.010623889;procenty["22"]["PiS2023"] = 0.031644369;procenty["22"]["Konfederacja2023"] = 0.024609594;procenty["22"]["KO2023"] = 0.010567167;procenty["22"]["PJJ2023"] = 0;
+procenty["23"]["BS2023"] = 0.025687314;procenty["23"]["TD - PL2050 i PSL2023"] = 0.026899671;procenty["23"]["Lewica2023"] = 0.017658785;procenty["23"]["PiS2023"] = 0.045503814;procenty["23"]["Konfederacja2023"] = 0.041266308;procenty["23"]["KO2023"] = 0.017989405;procenty["23"]["PJJ2023"] = 0.046052538;
+procenty["24"]["BS2023"] = 0.017655977;procenty["24"]["TD - PL2050 i PSL2023"] = 0.036936737;procenty["24"]["Lewica2023"] = 0.015856759;procenty["24"]["PiS2023"] = 0.033802112;procenty["24"]["Konfederacja2023"] = 0.038548137;procenty["24"]["KO2023"] = 0.019152708;procenty["24"]["PJJ2023"] = 0.028476299;
+procenty["25"]["BS2023"] = 0.022119216;procenty["25"]["TD - PL2050 i PSL2023"] = 0.029125237;procenty["25"]["Lewica2023"] = 0.031181516;procenty["25"]["PiS2023"] = 0.020327309;procenty["25"]["Konfederacja2023"] = 0.024820275;procenty["25"]["KO2023"] = 0.038768052;procenty["25"]["PJJ2023"] = 0.023118835;
+procenty["26"]["BS2023"] = 0.027637176;procenty["26"]["TD - PL2050 i PSL2023"] = 0.029830551;procenty["26"]["Lewica2023"] = 0.030600564;procenty["26"]["PiS2023"] = 0.026137;procenty["26"]["Konfederacja2023"] = 0.031797948;procenty["26"]["KO2023"] = 0.039054654;procenty["26"]["PJJ2023"] = 0.040769128;
+procenty["27"]["BS2023"] = 0.019157021;procenty["27"]["TD - PL2050 i PSL2023"] = 0.020824453;procenty["27"]["Lewica2023"] = 0.018612515;procenty["27"]["PiS2023"] = 0.021398917;procenty["27"]["Konfederacja2023"] = 0.022560303;procenty["27"]["KO2023"] = 0.019259203;procenty["27"]["PJJ2023"] = 0.031187785;
+procenty["28"]["BS2023"] = 0.016892987;procenty["28"]["TD - PL2050 i PSL2023"] = 0.015333674;procenty["28"]["Lewica2023"] = 0.016404898;procenty["28"]["PiS2023"] = 0.015411366;procenty["28"]["Konfederacja2023"] = 0.01373691;procenty["28"]["KO2023"] = 0.014226472;procenty["28"]["PJJ2023"] = 0.016080934;
+procenty["29"]["BS2023"] = 0.018396525;procenty["29"]["TD - PL2050 i PSL2023"] = 0.016614106;procenty["29"]["Lewica2023"] = 0.019189163;procenty["29"]["PiS2023"] = 0.015289783;procenty["29"]["Konfederacja2023"] = 0.017406376;procenty["29"]["KO2023"] = 0.02107445;procenty["29"]["PJJ2023"] = 0.026214828;
+procenty["30"]["BS2023"] = 0.021560688;procenty["30"]["TD - PL2050 i PSL2023"] = 0.015278059;procenty["30"]["Lewica2023"] = 0.014048815;procenty["30"]["PiS2023"] = 0.019007038;procenty["30"]["Konfederacja2023"] = 0.01972839;procenty["30"]["KO2023"] = 0.017257062;procenty["30"]["PJJ2023"] = 0.026055329;
+procenty["31"]["BS2023"] = 0.023657662;procenty["31"]["TD - PL2050 i PSL2023"] = 0.022446933;procenty["31"]["Lewica2023"] = 0.02394221;procenty["31"]["PiS2023"] = 0.021261759;procenty["31"]["Konfederacja2023"] = 0.022774215;procenty["31"]["KO2023"] = 0.029202634;procenty["31"]["PJJ2023"] = 0.031475453;
+procenty["32"]["BS2023"] = 0.013711371;procenty["32"]["TD - PL2050 i PSL2023"] = 0.011965589;procenty["32"]["Lewica2023"] = 0.043918886;procenty["32"]["PiS2023"] = 0.014708958;procenty["32"]["Konfederacja2023"] = 0.013902353;procenty["32"]["KO2023"] = 0.017274409;procenty["32"]["PJJ2023"] = 0.014733736;
+procenty["33"]["BS2023"] = 0.047277923;procenty["33"]["TD - PL2050 i PSL2023"] = 0.029246111;procenty["33"]["Lewica2023"] = 0.024232148;procenty["33"]["PiS2023"] = 0.040606194;procenty["33"]["Konfederacja2023"] = 0.027916508;procenty["33"]["KO2023"] = 0.020807457;procenty["33"]["PJJ2023"] = 0.025890134;
+procenty["34"]["BS2023"] = 0.010776604;procenty["34"]["TD - PL2050 i PSL2023"] = 0.01482028;procenty["34"]["Lewica2023"] = 0.013054742;procenty["34"]["PiS2023"] = 0.013790736;procenty["34"]["Konfederacja2023"] = 0.01266024;procenty["34"]["KO2023"] = 0.014391947;procenty["34"]["PJJ2023"] = 0.009510138;
+procenty["35"]["BS2023"] = 0.019269226;procenty["35"]["TD - PL2050 i PSL2023"] = 0.020255122;procenty["35"]["Lewica2023"] = 0.017014897;procenty["35"]["PiS2023"] = 0.016546841;procenty["35"]["Konfederacja2023"] = 0.017525934;procenty["35"]["KO2023"] = 0.019509905;procenty["35"]["PJJ2023"] = 0.016525254;
+procenty["36"]["BS2023"] = 0.032250021;procenty["36"]["TD - PL2050 i PSL2023"] = 0.028170137;procenty["36"]["Lewica2023"] = 0.024863665;procenty["36"]["PiS2023"] = 0.025444276;procenty["36"]["Konfederacja2023"] = 0.024453199;procenty["36"]["KO2023"] = 0.023379183;procenty["36"]["PJJ2023"] = 0.023466316;
+procenty["37"]["BS2023"] = 0.024562777;procenty["37"]["TD - PL2050 i PSL2023"] = 0.022419607;procenty["37"]["Lewica2023"] = 0.021388174;procenty["37"]["PiS2023"] = 0.021226947;procenty["37"]["Konfederacja2023"] = 0.018875972;procenty["37"]["KO2023"] = 0.015171806;procenty["37"]["PJJ2023"] = 0.0164512;
+procenty["38"]["BS2023"] = 0.01964324;procenty["38"]["TD - PL2050 i PSL2023"] = 0.023466327;procenty["38"]["Lewica2023"] = 0.017416722;procenty["38"]["PiS2023"] = 0.015744444;procenty["38"]["Konfederacja2023"] = 0.018334406;procenty["38"]["KO2023"] = 0.021738612;procenty["38"]["PJJ2023"] = 0.02050134;
+procenty["39"]["BS2023"] = 0.023630234;procenty["39"]["TD - PL2050 i PSL2023"] = 0.031693815;procenty["39"]["Lewica2023"] = 0.039453626;procenty["39"]["PiS2023"] = 0.015268712;procenty["39"]["Konfederacja2023"] = 0.022736732;procenty["39"]["KO2023"] = 0.039638417;procenty["39"]["PJJ2023"] = 0;
+procenty["40"]["BS2023"] = 0.013125415;procenty["40"]["TD - PL2050 i PSL2023"] = 0.012786956;procenty["40"]["Lewica2023"] = 0.015116045;procenty["40"]["PiS2023"] = 0.013221428;procenty["40"]["Konfederacja2023"] = 0.012523879;procenty["40"]["KO2023"] = 0.01879883;procenty["40"]["PJJ2023"] = 0.011338682;
+procenty["41"]["BS2023"] = 0.022403467;procenty["41"]["TD - PL2050 i PSL2023"] = 0.022489367;procenty["41"]["Lewica2023"] = 0.027988971;procenty["41"]["PiS2023"] = 0.020884446;procenty["41"]["Konfederacja2023"] = 0.021289108;procenty["41"]["KO2023"] = 0.033551593;procenty["41"]["PJJ2023"] = 0.017710105;
+function updateMap(currentAverages) {
+  // Sprawdź czy mamy dane okręgów
+  if (typeof procenty === 'undefined') {
+    console.warn("Brak zmiennej 'procenty'. Skopiuj ją z sejm.html!");
+    return;
+  }
+  
+  const mapTooltip = document.getElementById('map-tooltip');
+  
+  for (let i = 1; i <= 41; i++) {
+    let districtId = i.toString();
+    if (!procenty[districtId]) continue;
+
+    // Oblicz wyniki w okręgu
+    let districtVotes = {};
+    let totalDistrictWeight = 0;
+
+    // Iterujemy po partiach dostępnych w średniej
+    for (let partyKey in currentAverages) {
+      let nationalSupport = currentAverages[partyKey]; // np. 30.5
+      // Pobierz mnożnik z sejm.html (jeśli partia tam istnieje)
+      // Uwaga: klucze muszą się zgadzać. W sondaze.html masz 'KoronaPolska', w sejm 'KoronaPolska' - OK.
+      let multiplier = procenty[districtId][partyKey] || 0;
+      
+      // Obliczamy "wagę" głosów w okręgu
+      let localVote = nationalSupport * multiplier;
+      districtVotes[partyKey] = localVote;
+      totalDistrictWeight += localVote;
+    }
+
+    // Znajdź zwycięzcę
+    let winner = null;
+    let maxVote = -1;
+    
+    // Przygotuj dane do tooltipa (procenty w okręgu)
+    let tooltipData = [];
+
+    for (let partyKey in districtVotes) {
+      let vote = districtVotes[partyKey];
+      // Przelicz na % w skali okręgu
+      let localPercent = totalDistrictWeight > 0 ? (vote / totalDistrictWeight) * 100 : 0;
+      
+      if (vote > maxVote) {
+        maxVote = vote;
+        winner = partyKey;
+      }
+      
+      // Znajdź kolor i etykietę partii
+      let pObj = partyOrder.find(p => p.key === partyKey);
+      if (pObj && localPercent > 0) {
+        tooltipData.push({
+          label: pObj.label,
+          val: localPercent,
+          color: pObj.color
+        });
+      }
+    }
+
+    // Sortuj wyniki w dymku malejąco
+    tooltipData.sort((a, b) => b.val - a.val);
+
+    // Kolorowanie mapy (SVG)
+    // Zakładamy, że ścieżki w SVG mają ID="1", "2"... lub "PL-XX" (musisz sprawdzić SVG)
+    // W pliku sejm.html zazwyczaj ID to po prostu numer okręgu.
+    let path = document.getElementById(districtId); 
+    if (!path) {
+        // Fallback: czasem ID są np. 'o1', 'okreg1' - zależy od SVG
+        path = document.getElementById('o' + districtId) || document.getElementById('okreg' + districtId);
+    }
+
+    if (path) {
+      let winnerObj = partyOrder.find(p => p.key === winner);
+      if (winnerObj) {
+        path.style.fill = winnerObj.color;
+        path.style.cursor = 'pointer';
+        path.style.transition = 'fill 0.3s';
+        
+       // --- Obsługa dymka (ZMIENIONA) ---
+        path.onmouseenter = (e) => {
+          path.style.opacity = 0.8;
+          mapTooltip.style.opacity = 1;
+          
+          let html = '';
+          
+          // ZMIANA: Usunęliśmy .slice(0, 5). Teraz pętla leci przez wszystkie partie.
+          tooltipData.forEach(d => { 
+             // Opcjonalnie: Warunek, żeby pokazywać tylko te > 0% (żeby nie zaśmiecać listy zerami)
+             if (d.val > 0) {
+                 html += `<div style="display:flex; justify-content:space-between; width:130px;">
+                            <span><span style="color:${d.color}">●</span> ${d.label}</span>
+                            <b>${d.val.toFixed(1)}%</b>
+                          </div>`;
+             }
+          });
+          
+          mapTooltip.innerHTML = `
+            <div style="font-size:13px; margin-bottom:4px; border-bottom:1px solid #444; padding-bottom:2px;">
+              Okręg ${districtId} – <b>${okregiNames[districtId]}</b>
+            </div>
+            ${html}
+          `;
+        };
+        
+        path.onmousemove = (e) => {
+           mapTooltip.style.left = e.clientX + 'px';
+           mapTooltip.style.top = e.clientY + 'px';
+        };
+
+        path.onmouseleave = () => {
+          path.style.opacity = 1;
+          mapTooltip.style.opacity = 0;
+        };
+      }
+    }
+  }
+}
+
+function drawSenatMap() {
+  const container = document.getElementById('map-senat-container');
+  if (!container || container.querySelector('svg')) return;
+  if (typeof senatMapPaths === 'undefined') return;
+  
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "-5 -5 250 245"); 
+  svg.style.width = "100%";
+  svg.style.height = "auto";
+  svg.style.overflow = "visible"; 
+  svg.style.filter = "drop-shadow(0 4px 6px rgba(0,0,0,0.3))";
+
+  senatMapPaths.forEach(pathData => {
+    const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", pathData.d);
+    p.setAttribute("id", "senat" + pathData.id);
+    p.style.fill = "#1b243b"; 
+    p.style.stroke = "rgba(0,0,0,0.8)";
+    p.style.strokeWidth = "0.7";
+    svg.appendChild(p);
+  });
+  
+  container.appendChild(svg);
+}
+
+function updateSenatMap(currentAverages) {
+  if (typeof procentySenat === 'undefined') return;
+  const mapTooltip = document.getElementById('map-senat-tooltip');
+  if (!mapTooltip) return;
+
+  const variant = document.getElementById('senat-variant-select') ? document.getElementById('senat-variant-select').value : "1";
+  let paktParties = ['KO', 'Lewica', 'PL2050', 'PSL'];
+  let prawicaParties = [];
+  if (variant === "2") prawicaParties = ['PiS', 'RozwojPlus'];
+  if (variant === "3") prawicaParties = ['PiS', 'RozwojPlus', 'Konfederacja'];
+  if (variant === "4" || variant === "5") prawicaParties = ['PiS', 'RozwojPlus', 'Konfederacja', 'KoronaPolska'];
+  if (variant === "5") paktParties.push('Razem');
+
+  for (let i = 1; i <= 100; i++) {
+    if (!procentySenat[i]) continue;
+    let districtVotes = {};
+    let totalWeight = 0;
+    
+    let paktVotes = 0;
+    paktParties.forEach(p => {
+       let vote = (currentAverages[p] || 0) * (procentySenat[i][p] || 0);
+       paktVotes += vote;
+       totalWeight += vote;
+    });
+    if (paktVotes > 0) districtVotes['Pakt_Senacki'] = paktVotes;
+
+    if (prawicaParties.length > 0) {
+       let prawicaVotes = 0;
+       prawicaParties.forEach(p => {
+          let vote = (currentAverages[p] || 0) * (procentySenat[i][p] || 0);
+          prawicaVotes += vote;
+          totalWeight += vote;
+       });
+       if (prawicaVotes > 0) districtVotes['Prawica'] = prawicaVotes;
+    }
+
+    ['PiS', 'RozwojPlus', 'Konfederacja', 'KoronaPolska', 'Razem', 'Inni'].forEach(p => {
+       if (prawicaParties.includes(p) || paktParties.includes(p)) return;
+       let vote = (currentAverages[p] || 0) * (procentySenat[i][p] || 0);
+       if (vote > 0) districtVotes[p] = vote;
+       totalWeight += vote;
+    });
+
+    let winner = null;
+    let maxVote = -1;
+    let tooltipData = [];
+    
+    const senColorMap = {}; const senNameMap = {};
+    const SENAT_PARTY_ORDER = [
+      { key: 'Razem', fullName: 'Razem', color: '#8c276f' },
+      { key: 'Pakt_Senacki', fullName: 'Pakt Senacki', color: '#e9394b' },
+      { key: 'Prawica', fullName: 'Blok Prawicy', color: '#004494' },
+      { key: 'KoronaPolska', fullName: 'Konfederacja Korony Polskiej', color: '#d25f17' },
+      { key: 'Konfederacja', fullName: 'Konfederacja', color: '#545454' },
+      { key: 'PiS', fullName: 'PiS', color: '#004494' },
+      { key: 'RozwojPlus', fullName: 'Rozwój+', color: '#165ea2' },
+      { key: 'Inni', fullName: 'Inni', color: '#7f8c8d' },
+    ];
+    SENAT_PARTY_ORDER.forEach(p => { senColorMap[p.key] = p.color; senNameMap[p.key] = p.fullName; });
+
+    for (let p in districtVotes) {
+       let vote = districtVotes[p];
+       let pct = totalWeight > 0 ? (vote / totalWeight) * 100 : 0;
+       if (vote > maxVote) { maxVote = vote; winner = p; }
+       if (pct > 0) tooltipData.push({ label: senNameMap[p] || p, val: pct, color: senColorMap[p] || '#444' });
+    }
+    tooltipData.sort((a,b) => b.val - a.val);
+
+    let path = document.getElementById('senat' + i);
+    if (path && winner) {
+       path.style.fill = senColorMap[winner] || '#444';
+       path.style.cursor = 'pointer';
+       path.style.transition = 'fill 0.3s';
+
+       path.onmouseenter = (e) => {
+          path.style.opacity = 0.8;
+          mapTooltip.style.opacity = 1;
+          let html = '';
+          tooltipData.forEach(d => {
+             html += `<div style="display:flex; justify-content:space-between; width:140px;">
+                        <span><span style="color:${d.color}">●</span> ${d.label}</span>
+                        <b>${d.val.toFixed(1)}%</b>
+                      </div>`;
+          });
+          mapTooltip.innerHTML = `<div style="font-size:13px; margin-bottom:4px; border-bottom:1px solid #444; padding-bottom:2px;">
+            Okręg Senacki ${i}
+          </div>${html}`;
+       };
+       path.onmousemove = (e) => {
+          mapTooltip.style.left = e.clientX + 'px';
+          mapTooltip.style.top = e.clientY + 'px';
+       };
+       path.onmouseleave = () => {
+          path.style.opacity = 1;
+          mapTooltip.style.opacity = 0;
+       };
+    }
+  }
+}
+
+  /* =========================================
+     WYKRES PARLAMENTU (PÓŁKOLE 460 KROPEK)
+     ========================================= */
+
+  // Układ partii od lewicy do prawicy (kolejność miejsc w sejmie)
+  const PARLIAMENT_PARTY_ORDER = [
+    { key: 'Razem',        fullName: 'Razem',                          color: '#8c276f' },
+    { key: 'Lewica',       fullName: 'Lewica',                         color: '#d31c3f' },
+    { key: 'K15X',         fullName: 'K15X',                           color: '#ff5757' },
+    { key: 'KO',           fullName: 'Koalicja Obywatelska',           color: '#ff5757' },
+    { key: 'TD',           fullName: 'Trzecia Droga',                  color: '#ffd000' },
+    { key: 'PL2050',       fullName: 'Polska 2050',                    color: '#FFBF01' },
+    { key: 'PSL',          fullName: 'PSL',                            color: '#39b54a' },
+    { key: 'KoronaPolska', fullName: 'Konfederacja Korony Polskiej',   color: '#d25f17' },
+    { key: 'Konfederacja', fullName: 'Konfederacja',                   color: '#545454' },
+    { key: 'RozwojPlus',   fullName: 'Rozwój+',                        color: '#165ea2' },
+    { key: 'PiS',          fullName: 'PiS',                            color: '#004494' },
+    { key: 'Prawica',      fullName: 'Prawica',                        color: '#004494' },
+    { key: 'Inni',         fullName: 'Inni',                           color: '#7f8c8d' },
+  ];
+
+  // Rowki półkola: 10 rzędów dla gęstszego, prostokątnego układu (łącznie 460 miejsc)
+  const PARLIAMENT_ROWS = [71, 66, 60, 54, 49, 43, 38, 32, 26, 21];
+  // Suma = 460 ✓
+
+  function buildParliamentChart(seatsData) {
+    const card = document.getElementById('parliament-card');
+    if (!card) return;
+
+    // Obliczamy miejsca dla każdej partii
+    let partySeats = {};
+    PARLIAMENT_PARTY_ORDER.forEach(p => partySeats[p.key] = seatsData[p.key] || 0);
+
+    // Sprawdź łączną sumę
+    const totalSeats = Object.values(partySeats).reduce((a, b) => a + b, 0);
+    if (totalSeats === 0) { card.style.display = 'none'; return; }
+    card.style.display = '';
+
+    // Tworzymy listę 460 partii
+    let seatList = [];
+    PARLIAMENT_PARTY_ORDER.forEach(p => {
+      for (let i = 0; i < (partySeats[p.key] || 0); i++) {
+        seatList.push(p.key);
+      }
+    });
+    while (seatList.length < 460) seatList.push(null);
+    seatList = seatList.slice(0, 460);
+
+    // Budujemy SVG
+    const svgG = document.getElementById('parliament-dots');
+    svgG.innerHTML = '';
+
+    const cx = 350, cy = 360; 
+    const R_OUTER = 340;  
+    const R_INNER = 100;  // Zmieniony by rozstaw był węższy
+
+    const rowCount = PARLIAMENT_ROWS.length;
+    const rowRadii = [];
+    for (let r = 0; r < rowCount; r++) {
+      rowRadii.push(R_OUTER - r * ((R_OUTER - R_INNER) / (rowCount - 1)));
+    }
+
+    const allSeats = [];
+    for (let r = 0; r < rowCount; r++) {
+      const radius = rowRadii[r];
+      const seatsInRow = PARLIAMENT_ROWS[r];
+      for (let s = 0; s < seatsInRow; s++) {
+        const angle = Math.PI - (s / (seatsInRow - 1)) * Math.PI;
+        allSeats.push({
+          x: cx + radius * Math.cos(angle),
+          y: cy - radius * Math.sin(angle),
+          angle: angle,
+          r: radius
+        });
+      }
+    }
+
+    // Sortowanie "kawałkami tortu" (od lewej do prawej po kącie)
+    allSeats.sort((a, b) => {
+      if (Math.abs(a.angle - b.angle) > 1e-5) {
+        return b.angle - a.angle; 
+      }
+      return b.r - a.r; 
+    });
+
+    // Przypisujemy posortowanym miejscom partie z naszej listy
+    allSeats.forEach((seat, i) => {
+      seat.partyKey = seatList[i];
+    });
+
+    const partyColorMap = {};
+    const partyNameMap = {};
+    PARLIAMENT_PARTY_ORDER.forEach(p => {
+      partyColorMap[p.key] = p.color;
+      partyNameMap[p.key] = p.fullName;
+    });
+
+    const tooltip = document.getElementById('parliament-tooltip');
+
+    // Dodaj styl dla mrugania (tylko raz)
+    if (!document.getElementById('parliament-pulse-style')) {
+      const style = document.createElement('style');
+      style.id = 'parliament-pulse-style';
+      style.innerHTML = `@keyframes parliamentPulse { 0% { filter: brightness(1); } 100% { filter: brightness(1.6); } }`;
+      document.head.appendChild(style);
+    }
+
+    // Renderujemy jako kropki
+    allSeats.forEach((dot) => {
+      if (!dot.partyKey) return;
+      
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', dot.x.toFixed(2));
+      circle.setAttribute('cy', dot.y.toFixed(2));
+      circle.setAttribute('r', 6);
+      circle.setAttribute('fill', partyColorMap[dot.partyKey] || '#444');
+      circle.setAttribute('data-party', dot.partyKey);
+      circle.style.cursor = 'pointer';
+      circle.style.transition = 'opacity 0.15s, filter 0.15s';
+      
+      circle.addEventListener('mouseenter', function(e) {
+        const pk = this.getAttribute('data-party');
+        const seats = partySeats[pk] || 0;
+        const name = partyNameMap[pk] || pk;
+        tooltip.innerHTML = `<span style="color:${partyColorMap[pk]}">●</span> ${name}: <b>${seats}</b> mandatów`;
+        tooltip.style.opacity = '1';
+
+        // Podświetl wszystkie z tej samej partii
+        svgG.querySelectorAll('circle').forEach(c => {
+          if (c.getAttribute('data-party') === pk) {
+            c.style.opacity = '1';
+            c.style.animation = 'parliamentPulse 0.8s infinite alternate';
+          } else {
+            c.style.opacity = '0.2';
+            c.style.filter = '';
+            c.style.animation = 'none';
+          }
+        });
+      });
+
+      circle.addEventListener('mousemove', function(e) {
+        tooltip.style.left = (e.clientX + 14) + 'px';
+        tooltip.style.top  = (e.clientY - 36) + 'px';
+      });
+
+      circle.addEventListener('mouseleave', function() {
+        tooltip.style.opacity = '0';
+        svgG.querySelectorAll('circle').forEach(c => {
+          c.style.opacity = '1';
+          c.style.filter = '';
+          c.style.animation = 'none';
+        });
+      });
+
+      svgG.appendChild(circle);
+    });
+
+    // Legenda
+    const legend = document.getElementById('parliament-legend');
+    legend.innerHTML = '';
+    PARLIAMENT_PARTY_ORDER.forEach(p => {
+      const seats = partySeats[p.key] || 0;
+      if (seats === 0) return;
+      const item = document.createElement('div');
+      item.style.cssText = 'display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; cursor:pointer; padding:4px 8px; border-radius:6px; transition:background 0.15s;';
+      item.innerHTML = `<span style="width:12px;height:12px;border-radius:50%;background:${p.color};flex-shrink:0;display:inline-block;"></span>${p.fullName}: <b>${seats}</b>`;
+      item.addEventListener('mouseenter', () => {
+        svgG.querySelectorAll('circle').forEach(c => {
+          if (c.getAttribute('data-party') === p.key) {
+            c.style.opacity = '1';
+            c.style.animation = 'parliamentPulse 0.8s infinite alternate';
+          } else {
+            c.style.opacity = '0.2';
+            c.style.filter = '';
+            c.style.animation = 'none';
+          }
+        });
+        item.style.background = 'rgba(255,255,255,0.07)';
+      });
+      item.addEventListener('mouseleave', () => {
+        svgG.querySelectorAll('circle').forEach(c => {
+          c.style.opacity = '1';
+          c.style.filter = '';
+          c.style.animation = 'none';
+        });
+        item.style.background = '';
+      });
+      legend.appendChild(item);
+    });
+  }
+
+  // --- SENAT ---
+  const SENAT_PARTY_ORDER = [
+    { key: 'Razem',        fullName: 'Razem',                          color: '#8c276f' },
+    { key: 'Pakt_Senacki', fullName: 'Pakt Senacki',                   color: '#e9394b' }, // miks KO i Lewicy
+    { key: 'Prawica',      fullName: 'Blok Prawicy',                   color: '#004494' },
+    { key: 'KoronaPolska', fullName: 'Konfederacja Korony Polskiej',   color: '#d25f17' },
+    { key: 'Konfederacja', fullName: 'Konfederacja',                   color: '#545454' },
+    { key: 'PiS',          fullName: 'PiS',                            color: '#004494' },
+    { key: 'RozwojPlus',   fullName: 'Rozwój+',                        color: '#165ea2' },
+    { key: 'Inni',         fullName: 'Inni',                           color: '#7f8c8d' },
+  ];
+  const SENAT_ROWS = [23, 20, 18, 15, 13, 11]; // Suma = 100, 6 rzędów
+
+  function calcSenatSeats(avgs) {
+    if (typeof procentySenat === 'undefined') return {};
+    const alloc = {};
+    
+    const variant = document.getElementById('senat-variant-select') ? document.getElementById('senat-variant-select').value : "1";
+    let paktParties = ['KO', 'Lewica', 'PL2050', 'PSL'];
+    let prawicaParties = [];
+    if (variant === "2") prawicaParties = ['PiS', 'RozwojPlus'];
+    if (variant === "3") prawicaParties = ['PiS', 'RozwojPlus', 'Konfederacja'];
+    if (variant === "4" || variant === "5") prawicaParties = ['PiS', 'RozwojPlus', 'Konfederacja', 'KoronaPolska'];
+    if (variant === "5") paktParties.push('Razem');
+    
+    for (let i = 1; i <= 100; i++) {
+        let maxVotes = -1;
+        let winner = null;
+        
+        let paktVotes = 0;
+        paktParties.forEach(p => { paktVotes += (avgs[p] || 0) * (procentySenat[i][p] || 0); });
+        
+        if (paktVotes > maxVotes) {
+            maxVotes = paktVotes;
+            winner = 'Pakt_Senacki';
+        }
+        
+        if (prawicaParties.length > 0) {
+            let prawicaVotes = 0;
+            prawicaParties.forEach(p => { prawicaVotes += (avgs[p] || 0) * (procentySenat[i][p] || 0); });
+            if (prawicaVotes > maxVotes) {
+                maxVotes = prawicaVotes;
+                winner = 'Prawica';
+            }
+        }
+        
+        ['PiS', 'RozwojPlus', 'Konfederacja', 'KoronaPolska', 'Razem', 'Inni'].forEach(p => {
+            if (prawicaParties.includes(p) || paktParties.includes(p)) return;
+            let v = (avgs[p] || 0) * (procentySenat[i][p] || 0);
+            if (v > maxVotes) {
+                maxVotes = v;
+                winner = p;
+            }
+        });
+        
+        if (winner) alloc[winner] = (alloc[winner] || 0) + 1;
+    }
+    return alloc;
+  }
+
+  function buildSenatChart(senatSeatsData) {
+    const svgG = document.getElementById('senat-dots');
+    const legend = document.getElementById('senat-legend');
+    if (!svgG || !legend) return;
+    svgG.innerHTML = '';
+    legend.innerHTML = '';
+
+    let seatList = [];
+    SENAT_PARTY_ORDER.forEach(p => {
+      for (let i = 0; i < (senatSeatsData[p.key] || 0); i++) seatList.push(p.key);
+    });
+    while (seatList.length < 100) seatList.push(null);
+    seatList = seatList.slice(0, 100);
+
+    const cx = 350, cy = 350; // Zmniejszone cy żeby kropki nie ucinały się na dole
+    const R_OUTER = 330, R_INNER = 150; // Bardziej proporcjonalne odległości (5 rzędów)
+    const rowCount = SENAT_ROWS.length;
+    const rowRadii = [];
+    for (let r = 0; r < rowCount; r++) {
+      rowRadii.push(R_OUTER - r * ((R_OUTER - R_INNER) / (rowCount - 1)));
+    }
+
+    const allSeats = [];
+    for (let r = 0; r < rowCount; r++) {
+      const radius = rowRadii[r];
+      const seatsInRow = SENAT_ROWS[r];
+      for (let s = 0; s < seatsInRow; s++) {
+        const angle = Math.PI - (s / (seatsInRow - 1)) * Math.PI;
+        allSeats.push({ x: cx + radius * Math.cos(angle), y: cy - radius * Math.sin(angle), angle: angle, r: radius });
+      }
+    }
+
+    allSeats.sort((a, b) => {
+      if (Math.abs(a.angle - b.angle) > 1e-5) return b.angle - a.angle; 
+      return b.r - a.r; 
+    });
+
+    allSeats.forEach((seat, i) => { seat.partyKey = seatList[i]; });
+
+    const partyColorMap = {}; const partyNameMap = {};
+    SENAT_PARTY_ORDER.forEach(p => { partyColorMap[p.key] = p.color; partyNameMap[p.key] = p.fullName; });
+
+    const tooltip = document.getElementById('parliament-tooltip');
+
+    allSeats.forEach((dot) => {
+      if (!dot.partyKey) return;
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', dot.x.toFixed(2)); circle.setAttribute('cy', dot.y.toFixed(2));
+      circle.setAttribute('r', 13); // Wrócono do r=13 przy gęstszym układzie
+      circle.setAttribute('fill', partyColorMap[dot.partyKey] || '#444');
+      circle.setAttribute('data-party', dot.partyKey);
+      circle.style.cursor = 'pointer'; circle.style.transition = 'opacity 0.15s, filter 0.15s';
+      
+      circle.addEventListener('mouseenter', function(e) {
+        const pk = this.getAttribute('data-party');
+        tooltip.innerHTML = `<span style="color:${partyColorMap[pk]}">●</span> ${partyNameMap[pk]}: <b>${senatSeatsData[pk]}</b> mandatów`;
+        tooltip.style.opacity = '1';
+        svgG.querySelectorAll('circle').forEach(c => {
+          if (c.getAttribute('data-party') === pk) {
+            c.style.opacity = '1'; c.style.animation = 'parliamentPulse 0.8s infinite alternate';
+          } else {
+            c.style.opacity = '0.2'; c.style.filter = ''; c.style.animation = 'none';
+          }
+        });
+      });
+      circle.addEventListener('mousemove', function(e) {
+        tooltip.style.left = (e.clientX + 14) + 'px'; tooltip.style.top  = (e.clientY - 36) + 'px';
+      });
+      circle.addEventListener('mouseleave', function() {
+        tooltip.style.opacity = '0';
+        svgG.querySelectorAll('circle').forEach(c => { c.style.opacity = '1'; c.style.filter = ''; c.style.animation = 'none'; });
+      });
+      svgG.appendChild(circle);
+    });
+
+    SENAT_PARTY_ORDER.forEach(p => {
+      const seats = senatSeatsData[p.key] || 0;
+      if (seats === 0) return;
+      const item = document.createElement('div');
+      item.style.cssText = 'display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; cursor:pointer; padding:4px 8px; border-radius:6px; transition:background 0.15s;';
+      item.innerHTML = `<span style="width:12px;height:12px;border-radius:50%;background:${p.color};flex-shrink:0;display:inline-block;"></span>${p.fullName}: <b>${seats}</b>`;
+      item.addEventListener('mouseenter', () => {
+        svgG.querySelectorAll('circle').forEach(c => {
+          if (c.getAttribute('data-party') === p.key) { c.style.opacity = '1'; c.style.animation = 'parliamentPulse 0.8s infinite alternate'; }
+          else { c.style.opacity = '0.2'; c.style.filter = ''; c.style.animation = 'none'; }
+        });
+        item.style.background = 'rgba(255,255,255,0.07)';
+      });
+      item.addEventListener('mouseleave', () => {
+        svgG.querySelectorAll('circle').forEach(c => { c.style.opacity = '1'; c.style.filter = ''; c.style.animation = 'none'; });
+        item.style.background = '';
+      });
+      legend.appendChild(item);
+    });
+  }
+
+  // Aktualizujemy buildParliamentChart po przeliczeniu mandatów
+  // Hookujemy go do renderAverageBubbles
+  const _origRenderAverageBubbles = renderAverageBubbles;
+  renderAverageBubbles = function() {
+    _origRenderAverageBubbles.apply(this, arguments);
+    // Tylko dla obecnej kadencji
+    if (currentTermId !== 'term_current') {
+      const card = document.getElementById('parliament-card');
+      if (card) card.style.display = 'none';
+      return;
+    }
+    // Oblicz mandaty ponownie (ten sam kod co w renderAverageBubbles)
+    const allSurveys2 = termsData[currentTermId].surveys;
+    const surveysWithDates2 = allSurveys2.map(s => {
+      const det = parseDetails(s.title);
+      const d = parsePollDate(det.dateStr);
+      if (!d) return null;
+      return { ...s, dateObj: new Date(d.year, d.month, d.day), values: s.data };
+    }).filter(s => s !== null);
+    surveysWithDates2.sort((a, b) => b.dateObj - a.dateObj);
+    if (surveysWithDates2.length === 0) return;
+    const latestDate2 = surveysWithDates2[0].dateObj;
+    const range30 = 30 * 24 * 60 * 60 * 1000;
+    const currentPolls2 = surveysWithDates2.filter(s => {
+      const diff = latestDate2.getTime() - s.dateObj.getTime();
+      return diff >= 0 && diff <= range30;
+    });
+    const avgForSeats2 = calculateAverage(currentPolls2, 'decided');
+    const seats2 = calculateSeatsDhondt(avgForSeats2);
+    
+    if (currentAggMode === 'parties') {
+        buildParliamentChart(seats2);
+    } else {
+        let k15xParties = ['KO', 'Lewica', 'PSL', 'PL2050', 'TD'];
+        if (currentAggMode === 'blocks_razem') { k15xParties.push('Razem'); }
+        
+        const blocks = [
+          { id: 'K15X', parties: k15xParties },
+          { id: 'Prawica', parties: ['PiS', 'RozwojPlus', 'Konfederacja', 'KoronaPolska'] }
+        ];
+        if (currentAggMode === 'blocks') {
+           blocks.push({ id: 'Razem', parties: ['Razem'] });
+        }
+        blocks.push({ id: 'Inni', parties: ['Inni'] });
+
+        let blockSeats = {};
+        blocks.forEach(block => {
+          let sumSeats = 0;
+          block.parties.forEach(pk => {
+            if (seats2[pk]) { sumSeats += seats2[pk]; }
+          });
+          blockSeats[block.id] = sumSeats;
+        });
+        
+        buildParliamentChart(blockSeats);
+    }
+
+    const senatSeats = calcSenatSeats(avgForSeats2);
+    buildSenatChart(senatSeats);
+  };
+
+  // Globalne API w przeglądarce dla KKP
+  window.getKKPAverage = function() {
+    try {
+      const allSurveys = termsData['term_current'].surveys;
+      const surveysWithDates = allSurveys.map(s => {
+        const det = parseDetails(s.title);
+        const d = parsePollDate(det.dateStr);
+        if (!d) return null;
+        return { ...s, dateObj: new Date(d.year, d.month, d.day), values: s.data };
+      }).filter(Boolean).sort((a, b) => b.dateObj - a.dateObj);
+
+      if (surveysWithDates.length === 0) return null;
+      const latestDate = surveysWithDates[0].dateObj;
+      const range30 = 30 * 24 * 60 * 60 * 1000;
+      const currentPolls = surveysWithDates.filter(s => (latestDate.getTime() - s.dateObj.getTime()) <= range30);
+      const avgDecided = calculateAverage(currentPolls, 'decided');
+      const avgAll = calculateAverage(currentPolls, 'all');
+
+      return {
+        party: 'KKP',
+        support_decided: Number((avgDecided['KoronaPolska'] || 0).toFixed(2)),
+        support_all: Number((avgAll['KoronaPolska'] || 0).toFixed(2)),
+        polls_count: currentPolls.length,
+        latest_poll: surveysWithDates[0].title
+      };
+    } catch(e) {
+      console.error('Błąd getKKPAverage:', e);
+      return null;
+    }
+  };
+
+  </script>
+<footer id="sejm-footer"><div><a class="sejm-footer-brand" href="index.html">Sejm Tracker</a><span>Wersja w stylistyce CCU Tracker · 0szysza</span></div><p>Kod, modele i zestawienia: <a href="https://dawidstats.pl/" target="_blank" rel="noopener">DawidStats</a>. Przeniesiono za zgodą autora.<br>Dane historyczne: PKW. Prognozy i symulacje są wynikami modelu.</p><a href="https://x.com/DawidStats" target="_blank" rel="noopener">Autor oryginału ↗</a></footer>
+</body>
+</html>

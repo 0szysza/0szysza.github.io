@@ -1,0 +1,230 @@
+/* The presentation layer is shared with the CCU Tracker visual language.
+   Calculator logic, party colors, model data and stored scenario formats stay in the original pages. */
+:root{color-scheme:dark;--bg:#0b0d17;--panel:#15192d;--text:#e2e8f0;--muted:#94a3b8;--accent:#34bfe5;--border:#262d4a;--ccu-page-width:1280px;--ccu-header-height:110px}
+html{background:#0b0d17;scrollbar-color:#3b456e #0b0d17;scroll-padding-top:120px}
+body.sejm-app{margin:0;min-width:0!important;width:100%;background:#0b0d17!important;color:#e2e8f0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;font-size:13px;line-height:1.55;min-height:100vh}
+body.sejm-app button,body.sejm-app input,body.sejm-app select,body.sejm-app textarea{font-family:inherit}
+body.sejm-app button,body.sejm-app summary,body.sejm-app a{touch-action:manipulation}
+body.sejm-app :focus-visible{outline:2px solid #34bfe5;outline-offset:3px}
+body.sejm-app input,body.sejm-app select,body.sejm-app textarea{accent-color:#34bfe5}
+body.sejm-app input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=color]),body.sejm-app select,body.sejm-app textarea{border:1px solid #334155;background:#111528;color:#e2e8f0;border-radius:9px;box-shadow:none}
+body.sejm-app input:focus,body.sejm-app select:focus,body.sejm-app textarea:focus{border-color:#34bfe5;box-shadow:0 0 0 2px #34bfe51a;outline:none}
+body.sejm-app button{border-radius:9px;line-height:1.35;transition:background .15s,border-color .15s,color .15s;box-shadow:none}
+body.sejm-app button.secondary,body.sejm-app .scen-btn,body.sejm-app .poll-action-btn,body.sejm-app .year-btn{background:#1b2338;border-color:#334155;color:#cbd5e1;box-shadow:none}
+body.sejm-app button.secondary:hover,body.sejm-app .scen-btn:hover,body.sejm-app .poll-action-btn:hover{background:#243149;border-color:#52617d;color:#f8fafc}
+body.sejm-app #calcBtn,body.sejm-app #confirmYearBtn{background:#34bfe5;color:#08121d;border:1px solid #34bfe5;font-weight:800;box-shadow:none;min-height:38px}
+body.sejm-app .toggle-btn.active,body.sejm-app .scen-seg-btn.active{background:#263149!important;color:#f8fafc!important;box-shadow:inset 0 0 0 1px #3b4b65!important}
+body.sejm-app .card,body.sejm-app .calculators-list,body.sejm-app .current-parliament-section,body.sejm-app .party-poll-section{background:#15192d;border:1px solid #262d4a;border-radius:16px;box-shadow:none}
+body.sejm-app h1,body.sejm-app h2,body.sejm-app h3{font-family:inherit;letter-spacing:-.025em;color:#f8fafc}
+body.sejm-app .small,body.sejm-app .hint{color:#94a3b8}
+body.sejm-app .result-tile{background:#111528;border-color:#293149;border-radius:12px;box-shadow:none;min-width:0}
+body.sejm-app .result-tile.active{border-color:#34bfe5;background:#162b3d;box-shadow:none;color:#34bfe5}
+body.sejm-app .result-tile.active i,body.sejm-app .result-tile.active span{color:#34bfe5!important;text-shadow:none!important}
+body.sejm-app .result-pane{background:#111528;border-color:#293149;border-radius:12px}
+body.sejm-app .result-pane>h3{color:#e2e8f0!important}
+body.sejm-app #achievementsBtn{background:#1c2540!important;color:#fbbf24!important;border:1px solid #334155!important;text-transform:none!important;letter-spacing:0!important;box-shadow:none!important;animation:none!important}
+body.sejm-app #electionNightBtn{background:#1c2540!important;border:1px solid #34bfe5!important;color:#34bfe5!important;box-shadow:none!important;animation:none!important;text-transform:none!important;letter-spacing:0!important}
+body.sejm-app #addPartyBtn,body.sejm-app #multiPartyModeBtn{box-shadow:none!important;border-color:#334155!important;color:#34d399!important}
+body.sejm-app .party-input-wrapper{background:#111528;border-color:#293149;border-radius:12px}
+body.sejm-app .table th{color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+body.sejm-app .table td{border-color:#262d4a}
+body.sejm-app .table tbody tr:hover{background:#1a2336}
+body.sejm-app #scenariusze-panel{border-color:#293149;background:#111528;border-radius:12px}
+body.sejm-app .buycoffee-banner{box-shadow:none!important;background:#111528!important;border-color:#293149!important}
+body.sejm-app .wrap{margin:18px auto;max-width:1600px;padding-left:20px;padding-right:20px;gap:12px}
+body.sejm-app .wrap>.card{padding:16px}
+body.sejm-app .wrap>.card>h2:first-child{font-size:16px;font-weight:800;margin-bottom:14px}
+body.sejm-app .wrap .left>.row input[type=number]{min-width:108px;width:108px}
+body.sejm-app .wrap .left .actions{gap:8px}
+body.sejm-app .wrap .left .actions button{min-height:40px}
+body.sejm-app .main-container{padding-top:18px;gap:14px}
+body.sejm-app .map-container{background:#111528;border-color:#293149;box-shadow:none;border-radius:14px}
+body.sejm-app .sidebar,body.sejm-app .left-panel,body.sejm-app .right-panel{border-color:#262d4a;box-shadow:none}
+
+/* Shared page chrome. All selectors are namespaced to avoid touching the source's dialogs. */
+#sejm-header{position:relative;z-index:9;display:block!important;width:100%;padding:0!important;margin:0!important;background:#141729!important;border:0!important;border-bottom:1px solid #262d4a!important;box-shadow:none!important;backdrop-filter:none!important;color:#e2e8f0;font-family:Inter,system-ui,sans-serif}
+#sejm-header:has(.sejm-tools-menu[open]){z-index:99}
+#sejm-header .sejm-topbar{display:flex;align-items:center;gap:14px;max-width:var(--ccu-page-width);height:66px;margin:auto;padding:0 24px}
+#sejm-header a{text-decoration:none}
+#sejm-header .sejm-back{display:grid;place-items:center;width:32px;height:34px;margin-left:-8px;border-radius:8px;color:#94a3b8;flex:none}
+#sejm-header .sejm-back:hover{color:#fff;background:#263149}
+#sejm-header .sejm-back svg{width:21px;height:21px}
+#sejm-header .sejm-brand{display:flex;align-items:center;gap:10px;color:#fff;white-space:nowrap}
+#sejm-header .sejm-brand>svg{display:block;width:37px;height:37px;flex:none}
+#sejm-header .sejm-brand strong{display:block;font-size:22px;line-height:1.2;font-weight:800;letter-spacing:-.05em}
+#sejm-header .sejm-brand small{display:block;margin-top:3px;font-size:10px;line-height:1.3;color:#94a3b8;font-weight:400;letter-spacing:0}
+#sejm-header .sejm-header-tools{display:flex;align-items:center;gap:22px;margin-left:auto}
+#sejm-header .sejm-source{display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8}
+#sejm-header .sejm-source:hover{color:#34bfe5}
+#sejm-header .sejm-source svg{width:13px;height:13px}
+#sejm-header .sejm-tools-menu{position:relative}
+#sejm-header .sejm-tools-menu summary{display:flex;align-items:center;gap:12px;list-style:none;cursor:pointer;border:1px solid #334155;border-radius:9px;padding:8px 12px;background:#20293d;font-size:11px;font-weight:700}
+#sejm-header .sejm-tools-menu summary::-webkit-details-marker{display:none}
+#sejm-header .sejm-tools-menu summary>svg{width:13px;height:13px;color:#94a3b8}
+#sejm-header .sejm-tools-menu>div{position:absolute;right:0;top:calc(100% + 8px);width:238px;padding:6px;background:#15192d;border:1px solid #334155;border-radius:12px;box-shadow:0 16px 35px #0008}
+#sejm-header .sejm-tools-menu>div>a{display:block;padding:11px;border-radius:8px;font-size:12px;font-weight:700;color:#e2e8f0}
+#sejm-header .sejm-tools-menu>div>a:hover{background:#243149}
+#sejm-header .sejm-tools-menu small{display:block;margin-top:3px;font-weight:400;color:#94a3b8;font-size:10px}
+#sejm-header .sejm-navigation{display:flex;gap:4px;align-items:center;max-width:var(--ccu-page-width);height:44px;margin:auto;padding:0 24px 8px;overflow-x:auto;scrollbar-width:none;white-space:nowrap}
+#sejm-header .sejm-navigation::-webkit-scrollbar{display:none}
+#sejm-header .sejm-navigation>a{display:flex;align-items:center;justify-content:center;min-height:33px;padding:7px 11px;color:#94a3b8;border:1px solid transparent;border-radius:8px;font-size:11px;font-weight:700;line-height:1.2;flex:none}
+#sejm-header .sejm-navigation>a:hover{color:#e2e8f0;background:#1c2438}
+#sejm-header .sejm-navigation>a.is-active{background:#202b3e;border-color:#3b4b65;color:#fff}
+.sejm-intro{max-width:var(--ccu-page-width);margin:26px auto 0;padding:0 24px}
+.sejm-intro>p{font-size:10px;font-weight:800;letter-spacing:.16em;color:#34bfe5;margin:0 0 5px}
+.sejm-intro>h1{font-size:30px;font-weight:800;line-height:1.3;margin:0 0 6px}
+.sejm-intro>span{color:#94a3b8;font-size:13px}
+#sejm-footer{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;max-width:1600px;margin:32px auto 0;padding:22px 24px 26px;border-top:1px solid #262d4a;color:#64748b;font-size:10px;line-height:1.7;font-family:Inter,system-ui,sans-serif}
+#sejm-footer>div{display:flex;flex-direction:column;gap:3px}
+#sejm-footer a{color:#94a3b8;text-decoration:none}
+#sejm-footer a:hover{color:#34bfe5}
+#sejm-footer .sejm-footer-brand{font-size:12px;font-weight:800;color:#cbd5e1;letter-spacing:-.02em}
+#sejm-footer p{margin:0;text-align:center}
+
+/* Overview and polling dashboards. Party accents remain meaningful. */
+body[data-page=index] .container{max-width:var(--ccu-page-width);margin:18px auto 0;padding:0 24px}
+body[data-page=index] .average-section{background:#15192d;border:1px solid #262d4a;border-radius:16px;padding:20px;margin-bottom:14px}
+body[data-page=index] .average-section h2{font-size:13px;letter-spacing:.03em;color:#cbd5e1;text-align:left;margin-bottom:14px}
+body[data-page=index] .average-section .toggle-group{display:flex;width:max-content;margin:0 0 14px;background:#0b0f1c;border-color:#283047;border-radius:10px;padding:3px}
+body[data-page=index] .average-section .toggle-btn{font-size:11px;font-weight:700;padding:7px 10px}
+body[data-page=index] .average-grid{gap:9px;padding:0;min-height:0;align-items:stretch;overflow:visible;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));height:auto}
+body[data-page=index] .poll-item{width:auto;min-width:0;max-width:none;min-height:115px;padding:13px 9px;background:#111528;border:1px solid #293149;border-top:3px solid var(--party-color);border-radius:11px;box-shadow:none;animation:none!important;opacity:1!important;transform:none!important;flex:none}
+body[data-page=index] .poll-item::before{display:none}
+body[data-page=index] .party-name{font-size:9px;line-height:1.4;letter-spacing:.02em;min-height:27px}
+body[data-page=index] .party-pct{font-size:26px;font-weight:800;letter-spacing:-.045em;margin:5px 0}
+body[data-page=index] .party-change{font-size:9px;padding:3px 6px;border-radius:6px}
+body[data-page=index] .see-more{font-size:11px;margin-top:14px}
+body[data-page=index] .split-layout{display:grid;grid-template-columns:248px minmax(0,1fr);gap:14px;align-items:start;margin-top:0;padding-top:0;border-top:0}
+body[data-page=index] .calculators-list{padding:16px}
+body[data-page=index] .calculators-list h3{font-size:10px;font-weight:800;color:#94a3b8;letter-spacing:.08em;margin-bottom:12px;border-color:#293149}
+body[data-page=index] .calc-link{border:1px solid #293149;background:#111528;border-radius:10px;margin-bottom:8px;min-height:46px;font-size:11px;padding:11px}
+body[data-page=index] .calc-link:hover{border-color:#34bfe5;background:#182438;transform:none}
+body[data-page=index] .calc-link i{font-size:15px;color:#34bfe5}
+body[data-page=index] .current-parliament-section{padding:20px}
+body[data-page=index] .current-parliament-section::before{display:none}
+body[data-page=index] .current-parliament-badge{border:1px solid #334155;background:#202b3e;color:#34bfe5;border-radius:6px;font-size:9px}
+body[data-page=index] .current-parliament-title{font-size:13px;font-weight:700}
+body[data-page=index] .current-parliament-subtitle{font-size:10px;color:#64748b}
+body[data-page=index] .parliament-chamber h3{font-size:12px;letter-spacing:.1em;font-weight:800}
+body[data-page=index] .parliament-legend-item{font-size:9px;background:#111528;border:1px solid #293149;box-shadow:none}
+body[data-page=index] .party-poll-section{margin-top:14px;padding:20px;background:#15192d;box-shadow:none}
+body[data-page=index] .party-poll-section::after{display:none}
+body[data-page=index] .poll-header{gap:16px}
+body[data-page=index] .poll-header h2{font-size:19px;font-weight:800;letter-spacing:-.03em;margin:8px 0}
+body[data-page=index] .poll-header p{color:#94a3b8;font-size:11px;max-width:650px}
+body[data-page=index] .poll-badge{background:#111528;border:1px solid #293149;border-radius:7px;color:#94a3b8;font-size:9px;letter-spacing:.08em}
+body[data-page=index] .poll-party-card{background:#111528;box-shadow:none;border-color:#293149;border-radius:12px}
+body[data-page=index] .poll-row{background:#111528;box-shadow:none;border-color:#293149;border-radius:11px}
+body[data-page=index] .poll-controls{gap:6px}
+body[data-page=index] .poll-action-btn{font-size:10px;min-height:36px;padding:8px 10px}
+body[data-page=index] .poll-footer{border-color:#293149}
+body[data-page=sondaze] .container{width:100%;min-width:0;max-width:var(--ccu-page-width)}
+body[data-page=sondaze] h1{background:none;-webkit-text-fill-color:initial;color:#f8fafc}
+body[data-page=sondaze] .section-title{color:#e2e8f0;background:none;-webkit-text-fill-color:initial;font-size:22px;letter-spacing:-.03em}
+body[data-page=sondaze] .poll-item{box-shadow:none;border-color:#293149;background:#111528;border-radius:12px}
+
+/* Dialogs retain their existing display/visibility behavior. */
+body.sejm-app .modal-content,body.sejm-app .modal-box,body.sejm-app .scen-modal-content{background:#15192d;border-color:#334155;border-radius:16px;box-shadow:0 30px 90px #0008}
+@media(min-width:901px){body.sejm-app .wrap>.left{max-height:calc(100vh - 145px)}body.sejm-app .wrap>.right{max-height:calc(100vh - 145px)}}
+@media(max-width:1050px){#sejm-header .sejm-navigation{padding-left:20px;padding-right:20px}#sejm-header .sejm-navigation>a{padding-inline:9px;font-size:10px}body[data-page=index] .average-grid{grid-template-columns:repeat(4,minmax(0,1fr))}body[data-page=index] .split-layout{grid-template-columns:205px minmax(0,1fr)}}
+@media(max-width:900px){
+ :root{--ccu-header-height:106px}
+ body.sejm-app .wrap{display:flex;flex-direction:column;padding:0 14px;margin:14px auto;gap:14px;height:auto;max-height:none;min-width:0}
+ body.sejm-app .wrap>.left,body.sejm-app .wrap>.right{width:100%!important;max-width:none!important;min-width:0!important;max-height:none!important;height:auto!important;overflow:visible;flex:auto!important}
+ body.sejm-app .wrap>.resizer{display:none}
+ body.sejm-app .main-container{display:flex;flex-direction:column;height:auto;min-height:0;padding:14px;gap:14px}
+ body.sejm-app .main-container>.sidebar,body.sejm-app .main-container>.control-panel,body.sejm-app .main-container>.panel-left,body.sejm-app .main-container>.map-panel{width:100%;max-width:none;min-width:0;max-height:none;height:auto}
+ body[data-page=index] .split-layout{grid-template-columns:minmax(0,1fr)}
+ body[data-page=index] .left-col,body[data-page=index] .trust-section{min-width:0;width:100%}
+ body[data-page=index] .calculators-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ body[data-page=index] .calculators-list h3,body[data-page=index] .calculators-list>div{grid-column:1/-1}
+ body[data-page=index] .calc-link{margin:0}
+ body[data-page=index] .poll-vote-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ body[data-page=index] .poll-header{flex-wrap:wrap}
+ #sejm-footer{flex-wrap:wrap}
+ #sejm-footer p{text-align:left}
+}
+@media(max-width:600px){
+ html{scroll-padding-top:106px}
+ #sejm-header .sejm-topbar{height:62px;padding:0 16px;gap:8px}
+ #sejm-header .sejm-back{width:28px;margin-left:-7px}
+ #sejm-header .sejm-brand{gap:7px}
+ #sejm-header .sejm-brand>svg{width:30px;height:30px}
+ #sejm-header .sejm-brand strong{font-size:19px}
+ #sejm-header .sejm-brand small{font-size:8px}
+ #sejm-header .sejm-header-tools{gap:0}
+ #sejm-header .sejm-source{display:none}
+ #sejm-header .sejm-tools-menu summary{font-size:10px;padding:8px;gap:5px}
+ #sejm-header .sejm-navigation{height:44px;padding:0 12px 5px;gap:4px}
+ #sejm-header .sejm-navigation>a{font-size:11px;min-height:36px;padding:8px 10px}
+ .sejm-intro{margin-top:20px;padding:0 16px}
+ .sejm-intro>h1{font-size:25px}
+ .sejm-intro>span{display:block;font-size:11px;line-height:1.7}
+ body[data-page=index] .container{padding:0 14px}
+ body[data-page=index] .average-section{padding:16px}
+ body[data-page=index] .average-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+ body[data-page=index] .poll-item{min-height:108px;padding:11px 5px}
+ body[data-page=index] .party-name{font-size:8px}
+ body[data-page=index] .party-pct{font-size:22px}
+ body[data-page=index] .see-more{font-size:10px;line-height:2}
+ body[data-page=index] .calculators-list{grid-template-columns:repeat(2,minmax(0,1fr));padding:14px}
+ body[data-page=index] .calc-link{font-size:10px;padding:10px 8px;gap:7px}
+ body[data-page=index] .calc-link span{min-width:0;white-space:normal;overflow-wrap:anywhere}
+ body[data-page=index] .current-parliament-section{padding:15px}
+ body[data-page=index] .parliament-chambers{grid-template-columns:1fr;gap:20px}
+ body[data-page=index] .current-parliament-header{flex-wrap:wrap;gap:8px}
+ body[data-page=index] .party-poll-section{padding:16px}
+ body[data-page=index] .poll-header h2{font-size:18px}
+ body[data-page=index] .poll-vote-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ body[data-page=index] .poll-party-card{padding:12px}
+ body[data-page=index] .poll-row{grid-template-columns:18px minmax(75px,1fr) 65px;gap:6px;min-width:0;padding:9px}
+ body[data-page=index] .poll-bubble-track{grid-column:2/-1;grid-row:2}
+ body[data-page=index] .poll-row-name{font-size:10px}
+ body[data-page=index] .poll-row-party{min-width:0}
+ body[data-page=index] .poll-row-score{grid-column:3;grid-row:1}
+ body[data-page=index] .poll-footer{gap:12px;flex-wrap:wrap}
+ body.sejm-app input[type=text],body.sejm-app input[type=number],body.sejm-app select,body.sejm-app textarea{font-size:16px;min-width:0;max-width:100%}
+ body.sejm-app .table input[type=number]{font-size:14px}
+ body.sejm-app #partyTable .percent{width:65px;min-width:50px}
+ body.sejm-app #partyTable .lista{width:85px;max-width:85px;min-width:75px;font-size:11px;padding:6px 4px}
+ body.sejm-app #partyTable{display:block;width:100%;max-width:100%;overflow-x:auto}
+ body.sejm-app .wrap .left>.row input[type=number]{min-width:112px;width:112px}
+ body.sejm-app .wrap>.card{padding:14px}
+ body.sejm-app .result-tile{min-width:0;min-height:78px;padding:10px 5px}
+ body.sejm-app .result-tile i{font-size:22px}
+ body.sejm-app .result-tile span{font-size:10px}
+ body.sejm-app .result-pane{padding:12px;min-width:0;overflow-x:auto}
+ body.sejm-app .modal-content,body.sejm-app .modal-box,body.sejm-app .scen-modal-content{max-width:calc(100vw - 24px)!important;max-height:90dvh;overflow:auto;padding:16px}
+ body[data-page=sondaze] .card{min-width:0;max-width:100%;overflow-x:auto}
+ body[data-page=sondaze] .toggle-container{max-width:100%;flex-wrap:wrap}
+ body[data-page=sondaze] .toggle-container .toggle-btn{font-size:10px;padding:8px}
+ body[data-page=sondaze] .polls-list{display:block;max-width:100%;overflow-x:auto}
+ body[data-page=sondaze] .average-grid{padding:10px 0;gap:8px}
+ body[data-page=sondaze] .chart-body{width:100%!important;min-width:0!important}
+ body[data-page=sondaze] #supportChart{max-width:100%}
+ body[data-page=sondaze] .poll-item{flex-basis:95px;min-width:85px;padding:14px 5px}
+ body[data-page=wybory] .election-types{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+ body[data-page=wybory] .type-btn{font-size:11px;padding:9px 7px}
+ body[data-page=wybory] .maps-grid,body[data-page=wybory] .maps-grid.cols-2,body[data-page=wybory] .maps-grid.cols-3{grid-template-columns:minmax(0,1fr);padding:14px;gap:14px}
+ body[data-page=wybory] .map-card{width:100%;min-width:0;padding:12px}
+ body[data-page=wybory] .national-summary{min-width:0;max-width:100%;overflow-x:auto}
+ body[data-page=wybory] .summary-results{min-width:280px}
+ body[data-page=prezydent] .main-container>.panel{min-width:0;width:100%;padding:14px;box-shadow:none}
+ body[data-page=prezydent] .candidate-tile:not(.candidate-tile-add){display:grid;grid-template-columns:48px minmax(0,1fr) 55px 26px 24px;gap:5px;min-height:74px;padding:6px}
+ body[data-page=prezydent] .candidate-cutout-wrap{grid-column:1;grid-row:1/3;width:48px;margin:0;height:61px}
+ body[data-page=prezydent] .candidate-identity{grid-column:2/4;grid-row:1;width:auto;max-width:none;min-width:0}
+ body[data-page=prezydent] .candidate-name{font-size:11px}
+ body[data-page=prezydent] .candidate-party{font-size:8px}
+ body[data-page=prezydent] .candidate-slider-wrap{grid-column:2;grid-row:2;width:auto;min-width:0}
+ body[data-page=prezydent] .candidate-input-wrap{grid-column:3;grid-row:2;width:55px;min-width:0}
+ body[data-page=prezydent] .candidate-input{width:100%;min-width:0;font-size:14px!important}
+ body[data-page=prezydent] .cand-options-btn{grid-column:4;grid-row:1/3;width:26px;margin:0}
+ body[data-page=prezydent] .cand-remove-btn{grid-column:5;grid-row:1/3;width:24px;margin:0}
+ body[data-page=prezydent] #btn-election-night-r1,body[data-page=prezydent] #btn-election-night-r2{min-width:0!important;max-width:100%;white-space:normal;font-size:10px;padding:10px 8px}
+ body[data-page=prezydent] .sim-actions-grid{grid-template-columns:minmax(0,1fr)}
+ body[data-page=prezydent] .btn-scenarios-trigger,body[data-page=prezydent] .btn-flows-trigger{min-width:0;max-width:100%;font-size:11px;white-space:normal}
+ body[data-page=prezydent] .round-select-btn{min-width:0;flex:1;padding:10px 6px;font-size:11px;white-space:normal;flex-wrap:wrap}
+ body[data-page=prezydent] .btn-rnd-support{min-width:0;max-width:100%;white-space:normal;font-size:10px;padding:9px 6px}
+ #sejm-footer{padding:20px 16px;gap:14px;font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){body.sejm-app *,body.sejm-app *::before,body.sejm-app *::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}

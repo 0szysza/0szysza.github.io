@@ -1,0 +1,342 @@
+{
+  "source": "https://dawidstats.pl/",
+  "snapshot": "2026-10-18",
+  "files": [
+    {
+      "file": "assets/election-night/music/breaking-news-5.mp3",
+      "sourceSha256": "7a0a237923bdec46bad74b881703c7e7d77308f97b495458b343bf682fa62480"
+    },
+    {
+      "file": "assets/election-night/music/breaking-news-6.mp3",
+      "sourceSha256": "e382ecc5a868e017089fae4d9532f35bc46fe4f5f8b41b1f0cfa81c7e99c9a9e"
+    },
+    {
+      "file": "assets/election-night/music/CC-BY-4.0.txt",
+      "sourceSha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411"
+    },
+    {
+      "file": "assets/election-night/music/CREDITS.html",
+      "sourceSha256": "eb7532797811cf3c8e87725693ccfdbd7039f2da2d1f499e07666f5fccee2621"
+    },
+    {
+      "file": "data.js",
+      "sourceSha256": "cfbf540cc7177cbd2c5f8b25190212a656ee8b66707f8c0821bfc680f45ccf5f"
+    },
+    {
+      "file": "europarlament.html",
+      "sourceSha256": "8e7e8e4372c6495ae422099c779939e493aeec00c6d39579ec7a9cf34b148358"
+    },
+    {
+      "file": "europarlament_2004_data.js",
+      "sourceSha256": "7d3e724b6b360156065ebd93312c2ccec285e2128de04a335c26c1ef6b0db68f"
+    },
+    {
+      "file": "europarlament_2009_data.js",
+      "sourceSha256": "5d7d9764fbab80f2d2ec34697114003ef5846d847f6c0a8eda0e8f67d22e8733"
+    },
+    {
+      "file": "europarlament_2015_data.js",
+      "sourceSha256": "230098f61d8d8004fac97afdd5c2eaa6f38b65cd5cbc32f6e220bc35c321eb52"
+    },
+    {
+      "file": "europarlament_2019_data.js",
+      "sourceSha256": "d00edbd0edeab672bfc8ed981f9babe4d515e2d30fdf91d3f2391d1288bd3206"
+    },
+    {
+      "file": "europarlament_2024_data.js",
+      "sourceSha256": "7a3d1f31a243a85487fd34ff6be5d96620a73b0cafca817e2ca240c1f52c0f83"
+    },
+    {
+      "file": "export.js",
+      "sourceSha256": "7eca40e25526ef35b631fe13892a1f2e774df23a4426346cbfa7673dcc737909"
+    },
+    {
+      "file": "extra_parties_utf8.js",
+      "sourceSha256": "a02c5c53e0cc17f92c8a176e40bb8f79e6ace07cfd8b1d67b6190652ef0cfc5b"
+    },
+    {
+      "file": "index.html",
+      "sourceSha256": "7631eb7f407e12464232eb56a82a5df0fe7bfa923b5f282254889730f51b9403"
+    },
+    {
+      "file": "panel-wyborczy.html",
+      "sourceSha256": "898b23da1334010258caddf4440bf7d81a32f6c36f581e618c9ade0de880d32c"
+    },
+    {
+      "file": "powiat_to_okreg.js",
+      "sourceSha256": "6cb3452da53a2a2a7d8945abd920161e65971a6635151c02b9acbcda71c5a1a0"
+    },
+    {
+      "file": "prezydent-export-photos.js",
+      "sourceSha256": "f04bc2cc043a6c20322fc9be885088041a140d5a6ee84341101f6a36d85db124"
+    },
+    {
+      "file": "prezydent-export.css",
+      "sourceSha256": "82da6b13ede06adc4c4f309da14f51356b5b2fc0e37f5eef0e15c470f67c8470"
+    },
+    {
+      "file": "prezydent-export.js",
+      "sourceSha256": "5900c3343281e3bf1f7c4c96ca81f33c6aa4185a1e49a306f7e49049e171401a"
+    },
+    {
+      "file": "prezydent-night-audio.js",
+      "sourceSha256": "9718977050c5c25c26622407cb364fc843e7a5a903b1b5b93607776999f9d059"
+    },
+    {
+      "file": "prezydent-night-data.js",
+      "sourceSha256": "2ab191e9901868c6b4ce4cf6d29dbe2ba3bca2331c66c6364d606861a48a4942"
+    },
+    {
+      "file": "prezydent-night-model.js",
+      "sourceSha256": "1ea7005e1d751cf1d8671f839975576df5d22237fbacbafb7a6877dc6ad28aa5"
+    },
+    {
+      "file": "prezydent-night.css",
+      "sourceSha256": "9a6bee6b43695264b2872bf935d5b9097864dae3212f0b4e64d58fc4c96647e7"
+    },
+    {
+      "file": "prezydent-night.js",
+      "sourceSha256": "be55fe5841d2988ae63bc7a4f1cf547042be78f4fca73d70796a9e8b3d5dad5e"
+    },
+    {
+      "file": "prezydent.html",
+      "sourceSha256": "886c022225c06b66688c96610c81008ac4a2f89e41904b166b1ccbf37cb134c5"
+    },
+    {
+      "file": "prezydent_2005_data.js",
+      "sourceSha256": "481cf98121675ffa56042a62b992cd0b5f259be8d9710037d36166e75ae639ce"
+    },
+    {
+      "file": "prezydent_2005_tura_2_data.js",
+      "sourceSha256": "1b7fc6df51c8fc58a14272ec6b4c0f40bdadd2c1ff6fbc3dd82d611e3fc9523d"
+    },
+    {
+      "file": "prezydent_2010_data.js",
+      "sourceSha256": "f6769908f798add25bb12d272c2676204806ced89086b7f1d536e464f2b88494"
+    },
+    {
+      "file": "prezydent_2010_tura_2_data.js",
+      "sourceSha256": "453c8dd435b4f636dfb2bc13739b5def1ba1cd52aa36ebee352befc87e99c6f5"
+    },
+    {
+      "file": "prezydent_2015_data.js",
+      "sourceSha256": "572e5797f16b82ea1bd433fd042f8503ec2d8e8d1276db5013e597b168c0c798"
+    },
+    {
+      "file": "prezydent_2015_tura_2_data.js",
+      "sourceSha256": "89dc359a37c546ab1ac7f04afb045f26614e6b2f67791877da9bc6951f29feaf"
+    },
+    {
+      "file": "prezydent_2020_data.js",
+      "sourceSha256": "d4c7c7bc2df4353d6a501c969b46806396974f96fc70476d245a7b3412232b4d"
+    },
+    {
+      "file": "prezydent_2020_tura_2_data.js",
+      "sourceSha256": "fe5ab1588042d6ff0180778c935b9e820b749ed29e0f4151ed8589d2a5727a9d"
+    },
+    {
+      "file": "prezydent_2025_data.js",
+      "sourceSha256": "5c298f14136894b1ab0f185e3cca8bb224fcb9a0b7933b9ded02db1cda650427"
+    },
+    {
+      "file": "prezydent_2025_tura_2_data.js",
+      "sourceSha256": "4b75b07d4b8d123e35ad9815bb60b5e224ed7c257d600916245c0a4f0fd14f7b"
+    },
+    {
+      "file": "prezydent_calc_data.js",
+      "sourceSha256": "0fcea2995b6a9eeefbd86691d874dc864548154e77d228a26c679c681d5452d1"
+    },
+    {
+      "file": "sejm.html",
+      "sourceSha256": "a974946273e9d7fc15a8330cd7d26489e7c12c0798e1d7783fd85b8fbfc738ba"
+    },
+    {
+      "file": "sejm_2001_data.js",
+      "sourceSha256": "3431207ccf528b7c2d877993a44f4c43ea4442847cfb701c2ee9c2a72f5b12a2"
+    },
+    {
+      "file": "sejm_2005_data.js",
+      "sourceSha256": "326b6e8bcb0178ab33a3bfc4b03cf0c81f8ebfd88b405aff803c0274534d248e"
+    },
+    {
+      "file": "sejm_2007_data.js",
+      "sourceSha256": "5b51ec0c37e2fc78e940c0e7f4fbfb0ac4463ca411b88e940ff391bd0d655d5f"
+    },
+    {
+      "file": "sejm_2011_data.js",
+      "sourceSha256": "ffd83ef9d102ef7167f165ff98ec7eece428a9d5f488a120fce5aa4aa492a46d"
+    },
+    {
+      "file": "sejm_2015_data.js",
+      "sourceSha256": "227b5f22b8f013c787083a7a033b91bede56551fae0e2ee6ee327515f73bb2fe"
+    },
+    {
+      "file": "sejm_2019_data.js",
+      "sourceSha256": "e74895e8df28ccf7c8f9825423f65e62e39b55fcac4afd89dfc38431ce246299"
+    },
+    {
+      "file": "sejm_2023_data.js",
+      "sourceSha256": "8b4f32676e39cbed5797bd86877dc572c6c4e34959f3c026055f43cb1fb60b6d"
+    },
+    {
+      "file": "sejmiki.html",
+      "sourceSha256": "90c7de08b1b3de8a8d0f7f6b12605fb5b212b67882aeb9eaec9d6bce0ab817b7"
+    },
+    {
+      "file": "sejmiki_2024_data.js",
+      "sourceSha256": "44cbb1841b11c8429b62b033b19fd70d72647ccada61a9fee52ee0822ba4a8bb"
+    },
+    {
+      "file": "senat.html",
+      "sourceSha256": "8c5befae2218935b7a31063cfd616a5a99ba54096a95f9ff1ae9d6fc1427a5b6"
+    },
+    {
+      "file": "senat_2011_data.js",
+      "sourceSha256": "0a46fd6cc10588895a2b47cdd328290799dc56d8d36014e21bd4aec395b09263"
+    },
+    {
+      "file": "senat_2015_data.js",
+      "sourceSha256": "081db2ac4caecee2761098442958916634b174a17d80c97f0bec525fa4eb283a"
+    },
+    {
+      "file": "senat_2019_data.js",
+      "sourceSha256": "9fa2249a1fb679ebf692870dd5bed371974dfb505809a4b1e16a3b92435977b2"
+    },
+    {
+      "file": "senat_2023_data.js",
+      "sourceSha256": "00f8eab7c89211928fc640351baaa9da6a23c23b468ee9a65ff1a0a7b0f726d1"
+    },
+    {
+      "file": "sondaze.html",
+      "sourceSha256": "898d6bace04e3d7ce0d4999f6f700f7671065250ca27dccd1b5490556c42a4e1"
+    },
+    {
+      "file": "wybory.html",
+      "sourceSha256": "430370b86c9a9423270a0ab27f39986348c58aacda2e8cdc02e42a2104646ed6"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Augustyniak.png",
+      "sourceSha256": "d28460856234be922f745f750ecb4abc497eef8cf0c06d5d1c8df0e725588330"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Biejat.png",
+      "sourceSha256": "446213863b579dbe11d8ffdfdc5d77b55a36c35c852be216dec10a3a1cf2ef15"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Bochenski.png",
+      "sourceSha256": "88f98e14fb44f7f530ec9695d9b081f4e670d5e40e8cc99dc6490fe924eae231"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Bosak.png",
+      "sourceSha256": "034a5c240e6ffbd0ac24a8646604d5248009b0b351c6fbb60662e9c5bb7d304e"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Braun.png",
+      "sourceSha256": "f6df6b1c7859d8ecf4fbd1393745bbf0dbeb284c4b8201644f77da2b3635187d"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Brzoska.png",
+      "sourceSha256": "37e71a53868d157daf3812f4faed9b9998d36ee5bd55e104c0a0b8eb0297c621"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Czarnek.png",
+      "sourceSha256": "0007f4c9fc1ce0b2c5aea006ff717c61624319bc4fc91556d1964369eb8c84aa"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Czarzasty.png",
+      "sourceSha256": "f916d157912c29f1728e870a8ce15e7391a312057c8d4e758ae4eaf7a12b6a65"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Dziemianowicz.png",
+      "sourceSha256": "5f2d2f903016d4e31d70849ec596d77af7f2d54b2be0393e6dcb6219c275f8e5"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Fritz.png",
+      "sourceSha256": "82df6777ef78224b46f81861f22197515e9e533b2e0f4a4bae60e9f54ab57d49"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Holownia.png",
+      "sourceSha256": "4161a3c6241bd87a71cc1a7c73fb3c9fc6f324c90b5501007956cfdb60f6a5ce"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Jaki.png",
+      "sourceSha256": "685d16d72e95c82de104c46d0ae2003213cd1477e7b0263a167601da81ec50d9"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Kaczynski.png",
+      "sourceSha256": "3aca8746989d24e5a71e3cca644845142ae77f3bdbd4dca33c03dcc5b09dd122"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Kosiniak.png",
+      "sourceSha256": "bb6fe0f881391956a97ddafa6ac9e0262454b620d604d9c72e8ad42ed665a503"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Maciak.png",
+      "sourceSha256": "7d425cb2446177144a51c1b39ccf6ba4116298e05fa53fec0b0c2ad4e9e34f6a"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Marchewka.png",
+      "sourceSha256": "9aa6d7d0dbd1eb34affc79e778420ea7746655432e5505cd405612dc99640121"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Matysiak.png",
+      "sourceSha256": "d0738a017f68c6a9392cfbe32cdebbb4d003b72183f2e803fb2cf1cbe652301b"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Mentzen.png",
+      "sourceSha256": "a4e0f121396e480a002d69ca452de28e73f3849ebda356a69c3e8ec5a08a2112"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Morawiecki.png",
+      "sourceSha256": "af8f6a3a040ce9cf7b2241fd561860c84198e2b395d86997b94177e685ca1a92"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Motyka.png",
+      "sourceSha256": "a75916356a8d640d55d6dad1fd406f1a8f7afce084111c73d36cb34bcc60147a"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Nawrocki.png",
+      "sourceSha256": "a0ca21186efef1d26355d892ea3038f478e2100d53cad4e26ccd06cdf0c38cd7"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Owca.png",
+      "sourceSha256": "1ac7df1030c32c9d94234e6a0bae83088fb891a61b8cb38b8659f21d93bc63b6"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Pelczynska.png",
+      "sourceSha256": "bf9ef58ddac3ad65fbba6610ad4f3e1df9cfdf675bc290b9dddc04bb03cf6277"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Senyszyn.png",
+      "sourceSha256": "cbb6a23eadfccb566e2253e498c1172b4cc637972cc78c765e8baaee8e39325d"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Sikorski.png",
+      "sourceSha256": "446761a5e0a0988fb96f58357aeb2b28f63ea72f35c1a80b6ed9c839f5c51a18"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Sobkowiak.png",
+      "sourceSha256": "de109b10a3064bc3d48f5a4ec6bb7cc8557bf564e8383c7f328c4cd989207f8e"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Tarczynski.png",
+      "sourceSha256": "39de88055468a87b5da31cc4eafa2d6f6b71a893effa054151ed99fe568becda"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Trzaskowski.png",
+      "sourceSha256": "7bff6db9055c84958287edb76639fd87a71bc0db7aba1da866707f98e37b4c30"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Tusk.png",
+      "sourceSha256": "1a92d6aefdd096dbda7a77a5f8d4027b06866e338ea79c7c4d79163a7f4aa128"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Woch.png",
+      "sourceSha256": "2fe3f9fa0b06e83b84c4479cb818bc8a375c0c7f3f705d474796e2e198b336d7"
+    },
+    {
+      "file": "Zdjęcia do prezydent/Zandberg.png",
+      "sourceSha256": "6dd379ff288f3f9208e029166f1e0e038b38af314589014b233cdf45db625874"
+    }
+  ]
+}

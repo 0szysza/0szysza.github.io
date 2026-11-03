@@ -1,4 +1,4 @@
-import { STORAGE_KEY, MAX_PETS, imageUrl, normalisePet, parseCollection, serialiseCollection, mergeCollection, filterPets } from "./model.mjs?v=20261103-1";
+import { STORAGE_KEY, TAGS, MAX_PETS, imageUrl, normalisePet, normaliseTag, normaliseHex, tagKey, tagLabel, tagDetails, availableTags, parseCollection, serialiseCollection, mergeCollection, filterPets } from "./model.mjs?v=20261103-tags";
 
 const $ = id => document.getElementById(id);
 const nodes = Object.fromEntries(["petGrid", "addPet", "emptyState", "searchPets", "tagFilter", "statusFilters", "petDialog", "petForm", "petName", "petImage", "previewImage", "previewEgg", "previewCaption", "toast", "toastMessage", "undoDelete", "importFile"].map(id => [id, $(id)]));
@@ -9,6 +9,10 @@ let removed = [];
 let toastTimer;
 let previewTimer;
 let unreadableData = null;
+let filterTagSignature = "";
+let formTagOptions = [];
+let formSelectedTags = new Set();
+let formCustomTags = [];
 
 function icon(name) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -25,6 +29,102 @@ function element(tag, className, text) {
   if (className) node.className = className;
   if (text !== undefined) node.textContent = text;
   return node;
+}
+
+function tagDot(tag) {
+  const dot = element("span", "tag-dot");
+  dot.setAttribute("aria-hidden", "true");
+  dot.style.color = tagDetails(tag).color;
+  if (typeof tag === "string") dot.dataset.preset = tag;
+  return dot;
+}
+
+function roleTag(tag) {
+  const badge = element("span", "pet-tag");
+  badge.title = tagLabel(tag) + (typeof tag === "string" ? "" : " — " + tag.color);
+  badge.append(tagDot(tag), element("span", "tag-name", tagLabel(tag)));
+  return badge;
+}
+
+function renderTagFilter() {
+  const tags = availableTags(pets);
+  const signature = JSON.stringify(tags);
+  if (signature === filterTagSignature) return;
+  filterTagSignature = signature;
+  const selected = nodes.tagFilter.value;
+  nodes.tagFilter.replaceChildren(new Option("All tags", "all"));
+  for (const tag of tags) nodes.tagFilter.append(new Option(tagLabel(tag), tagKey(tag)));
+  nodes.tagFilter.value = tags.some(tag => tagKey(tag) === selected) ? selected : "all";
+}
+
+function renderFormTags() {
+  formTagOptions = availableTags(pets, formCustomTags);
+  const host = $("tagChoices");
+  host.replaceChildren();
+  for (const [title, tags] of [["Rarity", formTagOptions.filter(tag => typeof tag === "string" && TAGS.indexOf(tag) < 5)], ["Modifiers", formTagOptions.filter(tag => typeof tag === "string" && TAGS.indexOf(tag) >= 5)], ["Custom", formTagOptions.filter(tag => typeof tag !== "string")]]) {
+    if (!tags.length) continue;
+    const group = element("div", "tag-choice-group");
+    group.setAttribute("role", "group");
+    group.setAttribute("aria-label", title + " tags");
+    group.append(element("p", "tag-group-label", title));
+    const list = element("div", "tag-options-list");
+    for (const tag of tags) {
+      const label = element("label", "tag-option");
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.name = "tags";
+      input.value = tagKey(tag);
+      input.checked = formSelectedTags.has(input.value);
+      input.setAttribute("aria-label", tagLabel(tag));
+      label.append(input, tagDot(tag), element("span", "tag-name", tagLabel(tag)));
+      list.append(label);
+    }
+    group.append(list);
+    host.append(group);
+  }
+}
+
+function setCustomEditor(open) {
+  $("customTagEditor").hidden = !open;
+  $("showCustomTag").setAttribute("aria-expanded", String(open));
+  if (open) $("customTagName").focus();
+  else {
+    $("customTagName").setCustomValidity("");
+    $("customTagHex").setCustomValidity("");
+  }
+}
+
+function updateCustomPreview() {
+  const name = $("customTagName").value;
+  $("customTagNameCount").textContent = `${name.length} / 15`;
+  $("customTagPreviewName").textContent = name.trim() || "Custom tag";
+  try {
+    const colour = normaliseHex($("customTagHex").value);
+    $("customTagColour").value = colour;
+    $("customTagPreviewDot").style.color = colour;
+  } catch { /* Keep the last valid preview while a HEX value is being typed. */ }
+}
+
+function addCustomTag() {
+  const name = $("customTagName");
+  const colour = $("customTagHex");
+  name.setCustomValidity("");
+  colour.setCustomValidity("");
+  if (!name.value.trim() || name.value.trim().length > 15) {
+    name.setCustomValidity("Use 1–15 characters for the tag name.");
+    name.reportValidity();
+    return false;
+  }
+  try { normaliseHex(colour.value); }
+  catch (error) { colour.setCustomValidity(error.message); colour.reportValidity(); return false; }
+  const tag = normaliseTag({ name: name.value, color: colour.value });
+  formCustomTags.push(tag);
+  formSelectedTags.add(tagKey(tag));
+  renderFormTags();
+  setCustomEditor(false);
+  name.value = "";
+  updateCustomPreview();
+  return true;
 }
 
 function hideToast() {
@@ -89,11 +189,7 @@ function petCard(pet) {
   const name = element("span", "pet-name");
   name.append(element("span", "", pet.name), icon("square-pen"));
   const tags = element("span", "pet-tags");
-  for (const tag of pet.tags) {
-    const badge = element("span", "pet-tag");
-    badge.append(icon(tag === "Secret" ? "sparkles" : "infinity"), document.createTextNode(tag));
-    tags.append(badge);
-  }
+  for (const tag of pet.tags) tags.append(roleTag(tag));
   details.append(art, name, tags);
 
   const collect = element("button", "collect-button");
@@ -107,6 +203,7 @@ function petCard(pet) {
 }
 
 function render() {
+  renderTagFilter();
   const collected = pets.filter(pet => pet.collected).length;
   const total = pets.length;
   for (const [id, value] of [["allCount", total], ["wantedCount", total - collected], ["doneCount", collected]]) $(id).textContent = String(value);
@@ -149,6 +246,13 @@ function previewImage() {
 function openPet(pet = null) {
   editingId = pet?.id || null;
   nodes.petForm.reset();
+  formCustomTags = [];
+  formSelectedTags = new Set((pet?.tags || []).map(tagKey));
+  renderFormTags();
+  setCustomEditor(false);
+  $("customTagName").setCustomValidity("");
+  $("customTagHex").setCustomValidity("");
+  updateCustomPreview();
   nodes.petName.setCustomValidity("");
   nodes.petImage.setCustomValidity("");
   $("dialogTitle").textContent = pet ? "Edit pet" : "Add a pet";
@@ -156,7 +260,6 @@ function openPet(pet = null) {
   if (pet) {
     nodes.petName.value = pet.name;
     nodes.petImage.value = pet.image;
-    for (const input of nodes.petForm.querySelectorAll('input[name="tags"]')) input.checked = pet.tags.includes(input.value);
   }
   previewImage();
   nodes.petDialog.showModal();
@@ -178,12 +281,38 @@ nodes.petDialog.addEventListener("click", event => {
 });
 nodes.petName.addEventListener("input", () => nodes.petName.setCustomValidity(""));
 nodes.petImage.addEventListener("input", () => { nodes.petImage.setCustomValidity(""); previewImage(); });
+$("tagChoices").addEventListener("change", event => {
+  const input = event.target;
+  if (input.name !== "tags") return;
+  if (input.checked) formSelectedTags.add(input.value);
+  else formSelectedTags.delete(input.value);
+});
+$("showCustomTag").addEventListener("click", () => setCustomEditor($("customTagEditor").hidden));
+$("cancelCustomTag").addEventListener("click", () => {
+  setCustomEditor(false);
+  $("customTagName").value = "";
+  $("customTagName").setCustomValidity("");
+  $("customTagHex").setCustomValidity("");
+  updateCustomPreview();
+});
+$("addCustomTag").addEventListener("click", addCustomTag);
+$("customTagName").addEventListener("input", () => { $("customTagName").setCustomValidity(""); updateCustomPreview(); });
+$("customTagHex").addEventListener("input", () => { $("customTagHex").setCustomValidity(""); updateCustomPreview(); });
+$("customTagColour").addEventListener("input", () => {
+  $("customTagHex").value = $("customTagColour").value.toUpperCase();
+  $("customTagHex").setCustomValidity("");
+  updateCustomPreview();
+});
+for (const id of ["customTagName", "customTagHex"]) $(id).addEventListener("keydown", event => {
+  if (event.key === "Enter") { event.preventDefault(); addCustomTag(); }
+});
 nodes.petForm.addEventListener("submit", event => {
   event.preventDefault();
   if (!nodes.petName.value.trim()) { nodes.petName.setCustomValidity("Enter a pet name."); nodes.petName.reportValidity(); return; }
   let image;
   try { image = imageUrl(nodes.petImage.value); }
   catch (error) { nodes.petImage.setCustomValidity(error.message); nodes.petImage.reportValidity(); return; }
+  if (!$("customTagEditor").hidden && $("customTagName").value.trim() && !addCustomTag()) return;
   const previous = editingId ? pets.find(pet => pet.id === editingId) : null;
   if (editingId && !previous) { nodes.petDialog.close(); notify("This pet was removed in another tab."); return; }
   if (!previous && pets.length >= MAX_PETS) { notify(`Your collection can hold up to ${MAX_PETS} pets.`); return; }
@@ -191,7 +320,7 @@ nodes.petForm.addEventListener("submit", event => {
     id: previous?.id || crypto.randomUUID(),
     name: nodes.petName.value,
     image,
-    tags: [...nodes.petForm.querySelectorAll('input[name="tags"]:checked')].map(input => input.value),
+    tags: formTagOptions.filter(tag => formSelectedTags.has(tagKey(tag))),
     collected: previous?.collected || false,
     createdAt: previous?.createdAt || new Date().toISOString(),
   });

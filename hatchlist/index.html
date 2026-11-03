@@ -12,13 +12,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=20261103-flat">
+<link rel="stylesheet" href="./styles.css?v=20261103-tags">
 <meta property="og:title" content="Hatchlist">
 <meta property="og:description" content="Add BGSI pets, choose tags and mark them as collected.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://0szysza.github.io/hatchlist/">
 <meta property="og:site_name" content="Hatchlist">
-<script type="module" src="./app.js?v=20261103-flat"></script>
+<script type="module" src="./app.js?v=20261103-tags"></script>
 </head>
 <body>
 <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><symbol id="i-egg" viewBox="0 0 24 24"><path d="M12 2C8 2 4 8 4 14a8 8 0 0 0 16 0c0-6-4-12-8-12" /></symbol>
@@ -82,14 +82,14 @@
       <button type="button" data-status="wanted" aria-pressed="false">To get <span id="wantedCount">0</span></button>
       <button type="button" data-status="collected" aria-pressed="false">Collected <span id="doneCount">0</span></button>
     </div>
-    <label class="tag-filter"><span class="sr-only">Filter by tag</span><select id="tagFilter"><option value="all">All tags</option><option value="Secret">Secret</option><option value="Infinity">Infinity</option></select><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></label>
+    <label class="tag-filter"><span class="sr-only">Filter by tag</span><select id="tagFilter" aria-label="Filter by tag"><option value="all">All tags</option></select><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></label>
     <details class="backup-menu" id="backupMenu"><summary class="icon-button" aria-label="Collection backup" title="Collection backup"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg></summary><div class="backup-options"><strong>Collection backup</strong><button type="button" id="exportList"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Export backup</button><button type="button" id="importList"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Import backup</button><small>Import adds pets to this browser.</small></div></details>
     <input id="importFile" type="file" accept=".json,application/json" hidden>
   </section>
   <div class="collection-meta"><span id="visibleCount">Your collection</span><span class="local-save">Saved in this browser</span></div>
   <section class="pet-grid" id="petGrid" aria-label="Pet collection">
-    <button class="add-card" id="addPet" type="button" aria-label="Add a pet"><span class="add-icon"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></span><strong>Add a pet</strong></button>
     <div class="empty-state" id="emptyState" hidden><p>No pets match the current filters.</p></div>
+    <button class="add-card" id="addPet" type="button" aria-label="Add a pet"><span class="add-icon"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></span><strong>Add a pet</strong></button>
   </section>
   <noscript><p class="notice">Enable JavaScript to add pets and save your collection.</p></noscript>
 </main>
@@ -107,8 +107,17 @@
         <label class="form-field" for="petImage">Image URL<input id="petImage" name="image" type="url" maxlength="2048" placeholder="https://…/pet.webp" required autocomplete="off" aria-describedby="imageHint"></label>
         <p class="field-hint" id="imageHint">Paste a direct link to the pet image.</p>
         <fieldset class="tag-options"><legend>Tags <span>optional</span></legend>
-          <label class="tag-option"><input type="checkbox" name="tags" value="Secret"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg><span>Secret</span><svg class="icon tag-check" aria-hidden="true"><use href="#i-check"/></svg></label>
-          <label class="tag-option"><input type="checkbox" name="tags" value="Infinity"><svg class="icon" aria-hidden="true"><use href="#i-infinity"/></svg><span>Infinity</span><svg class="icon tag-check" aria-hidden="true"><use href="#i-check"/></svg></label>
+          <div class="tag-choices" id="tagChoices"></div>
+          <button class="new-tag-button" type="button" id="showCustomTag" aria-expanded="false" aria-controls="customTagEditor">New custom tag</button>
+          <div class="custom-tag-editor" id="customTagEditor" hidden>
+            <label class="custom-name-field" for="customTagName"><span>Tag name <small id="customTagNameCount">0 / 15</small></span><input id="customTagName" type="text" maxlength="15" aria-label="Custom tag name" placeholder="e.g. Favourites" autocomplete="off"></label>
+            <div class="custom-colour-fields">
+              <label class="custom-colour-picker" for="customTagColour"><span>Colour</span><input id="customTagColour" type="color" value="#3498db" aria-label="Custom tag colour"></label>
+              <label class="custom-hex-field" for="customTagHex"><span>HEX</span><input id="customTagHex" type="text" maxlength="7" value="#3498DB" aria-label="Custom tag HEX" placeholder="#3498DB" autocomplete="off" spellcheck="false"></label>
+            </div>
+            <span class="pet-tag custom-tag-preview"><span class="tag-dot" id="customTagPreviewDot" style="color:#3498db" aria-hidden="true"></span><span class="tag-name" id="customTagPreviewName">Custom tag</span></span>
+            <div class="custom-tag-actions"><button type="button" class="secondary-button" id="cancelCustomTag">Cancel</button><button type="button" class="secondary-button" id="addCustomTag">Add tag</button></div>
+          </div>
         </fieldset>
       </div>
     </div>

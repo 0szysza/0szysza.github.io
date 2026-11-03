@@ -214,8 +214,6 @@ function render() {
   visible.forEach(pet => fragment.append(petCard(pet)));
   nodes.petGrid.insertBefore(fragment, nodes.emptyState);
   nodes.emptyState.hidden = visible.length > 0 || total === 0;
-  const filtered = Boolean(nodes.searchPets.value.trim()) || status !== "all" || nodes.tagFilter.value !== "all";
-  $("visibleCount").textContent = !total ? "Your collection" : filtered ? `${visible.length} of ${total} pets shown` : `${total} ${total === 1 ? "pet" : "pets"} in your hatchlist`;
 }
 
 function previewImage() {

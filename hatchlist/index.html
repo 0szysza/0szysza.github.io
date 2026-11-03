@@ -7,18 +7,18 @@
 <title>Hatchlist — Your BGSI pet wishlist</title>
 <meta name="description" content="Build your Bubble Gum Simulator INFINITY pet wishlist. Add pets, organise Secret and Infinity tags, and check off your collection.">
 <link rel="canonical" href="https://0szysza.github.io/hatchlist/">
-<link rel="icon" type="image/svg+xml" href="./favicon.svg?v=20261103-flat">
-<link rel="apple-touch-icon" href="./favicon.svg?v=20261103-flat">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg?v=20261103-gradient">
+<link rel="apple-touch-icon" href="./favicon.svg?v=20261103-gradient">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=20261103-tags">
+<link rel="stylesheet" href="./styles.css?v=20261103-controls">
 <meta property="og:title" content="Hatchlist">
 <meta property="og:description" content="Add BGSI pets, choose tags and mark them as collected.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://0szysza.github.io/hatchlist/">
 <meta property="og:site_name" content="Hatchlist">
-<script type="module" src="./app.js?v=20261103-tags"></script>
+<script type="module" src="./app.js?v=20261103-controls"></script>
 </head>
 <body>
 <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><symbol id="i-egg" viewBox="0 0 24 24"><path d="M12 2C8 2 4 8 4 14a8 8 0 0 0 16 0c0-6-4-12-8-12" /></symbol>
@@ -60,13 +60,13 @@
 <header class="site-header">
   <div class="header-inner">
     <a class="home-link icon-button" href="/" aria-label="Back to home" title="Back to home"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg></a>
-    <a class="brand" href="./" aria-label="Hatchlist — Home"><img src="./favicon.svg?v=20261103-flat" width="40" height="40" alt=""><span><strong>Hatchlist</strong><small>Your BGSI pet wishlist.</small></span></a>
+    <a class="brand" href="./" aria-label="Hatchlist — Home"><img src="./favicon.svg?v=20261103-gradient" width="40" height="40" alt=""><span><strong>Hatchlist</strong><small>Your BGSI pet wishlist.</small></span></a>
     <nav class="tool-switcher" aria-label="Switch tool"><details class="tool-menu" id="toolsMenu">
       <summary><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg><span>Tools</span><svg class="icon chevron" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary>
       <div class="tool-menu-list">
         <a href="/trackccu/"><img src="/trackccu/favicon.png" width="18" height="18" alt=""><span><strong>TrackCCU</strong><small>Track any Roblox Game CCU!</small></span></a>
         <a href="/stat/"><img src="/stat/favicon.svg" width="18" height="18" alt=""><span><strong>BGSI Stat Calculator</strong><small>Track your BGSI stats!</small></span></a>
-        <a href="/hatchlist/" aria-current="page"><img src="./favicon.svg?v=20261103-flat" width="18" height="18" alt=""><span><strong>Hatchlist</strong><small>Your BGSI pet wishlist.</small></span></a>
+        <a href="/hatchlist/" aria-current="page"><img src="./favicon.svg?v=20261103-gradient" width="18" height="18" alt=""><span><strong>Hatchlist</strong><small>Your BGSI pet wishlist.</small></span></a>
       </div>
     </details></nav>
   </div>
@@ -86,7 +86,6 @@
     <details class="backup-menu" id="backupMenu"><summary class="icon-button" aria-label="Collection backup" title="Collection backup"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg></summary><div class="backup-options"><strong>Collection backup</strong><button type="button" id="exportList"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Export backup</button><button type="button" id="importList"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Import backup</button><small>Import adds pets to this browser.</small></div></details>
     <input id="importFile" type="file" accept=".json,application/json" hidden>
   </section>
-  <div class="collection-meta"><span id="visibleCount">Your collection</span><span class="local-save">Saved in this browser</span></div>
   <section class="pet-grid" id="petGrid" aria-label="Pet collection">
     <div class="empty-state" id="emptyState" hidden><p>No pets match the current filters.</p></div>
     <button class="add-card" id="addPet" type="button" aria-label="Add a pet"><span class="add-icon"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></span><strong>Add a pet</strong></button>

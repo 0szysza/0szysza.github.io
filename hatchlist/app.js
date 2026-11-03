@@ -1,4 +1,4 @@
-import { STORAGE_KEY, TAGS, MAX_PETS, imageUrl, normalisePet, parseCollection, serialiseCollection, mergeCollection, filterPets } from "./model.mjs?v=20261103-1";
+import { STORAGE_KEY, MAX_PETS, imageUrl, normalisePet, parseCollection, serialiseCollection, mergeCollection, filterPets } from "./model.mjs?v=20261103-1";
 
 const $ = id => document.getElementById(id);
 const nodes = Object.fromEntries(["petGrid", "addPet", "emptyState", "searchPets", "tagFilter", "statusFilters", "petDialog", "petForm", "petName", "petImage", "previewImage", "previewEgg", "previewCaption", "toast", "toastMessage", "undoDelete", "importFile"].map(id => [id, $(id)]));
@@ -81,8 +81,8 @@ function petCard(pet) {
   image.alt = pet.name;
   image.loading = "lazy";
   image.referrerPolicy = "no-referrer";
-  image.hidden = true;
-  image.addEventListener("load", () => { image.hidden = false; fallback.setAttribute("hidden", ""); });
+  image.style.opacity = "0";
+  image.addEventListener("load", () => { image.hidden = false; image.style.removeProperty("opacity"); fallback.setAttribute("hidden", ""); });
   image.addEventListener("error", () => { image.hidden = true; fallback.removeAttribute("hidden"); });
   image.src = pet.image;
   art.append(fallback, image);
@@ -109,23 +109,16 @@ function petCard(pet) {
 function render() {
   const collected = pets.filter(pet => pet.collected).length;
   const total = pets.length;
-  for (const [id, value] of [["collectedCount", collected], ["totalCount", total], ["allCount", total], ["wantedCount", total - collected], ["doneCount", collected]]) $(id).textContent = String(value);
-  const percent = total ? Math.round(collected / total * 100) : 0;
-  $("progressFill").style.width = percent + "%";
-  $("collectionProgress").setAttribute("aria-valuenow", String(percent));
-  $("collectionProgress").setAttribute("aria-valuetext", `${collected} of ${total} pets collected`);
-  $("progressCaption").textContent = !total ? "Your first pet is one click away." : collected === total ? "Every pet checked off. Nice collection!" : `${total - collected} ${total - collected === 1 ? "pet" : "pets"} left to get. One hatch at a time.`;
+  for (const [id, value] of [["allCount", total], ["wantedCount", total - collected], ["doneCount", collected]]) $(id).textContent = String(value);
   for (const button of nodes.statusFilters.querySelectorAll("button")) button.setAttribute("aria-pressed", String(button.dataset.status === status));
   const visible = filterPets(pets, { query: nodes.searchPets.value, status, tag: nodes.tagFilter.value });
   for (const card of nodes.petGrid.querySelectorAll(".pet-card")) card.remove();
   const fragment = document.createDocumentFragment();
   visible.forEach(pet => fragment.append(petCard(pet)));
   nodes.petGrid.insertBefore(fragment, nodes.emptyState);
-  nodes.emptyState.hidden = visible.length > 0;
+  nodes.emptyState.hidden = visible.length > 0 || total === 0;
   const filtered = Boolean(nodes.searchPets.value.trim()) || status !== "all" || nodes.tagFilter.value !== "all";
   $("visibleCount").textContent = !total ? "Your collection" : filtered ? `${visible.length} of ${total} pets shown` : `${total} ${total === 1 ? "pet" : "pets"} in your hatchlist`;
-  nodes.emptyState.querySelector("h2").textContent = !total ? "A little room for big goals." : "No pets in this view.";
-  nodes.emptyState.querySelector("p").textContent = !total ? "Add a pet with its image and tags. Then enjoy checking it off." : "Try another search or filter. Your other pets are still in the collection.";
 }
 
 function previewImage() {
@@ -142,7 +135,7 @@ function previewImage() {
     nodes.previewImage.onload = () => {
       nodes.previewImage.hidden = false;
       nodes.previewEgg.setAttribute("hidden", "");
-      nodes.previewCaption.textContent = "Ready for your collection";
+      nodes.previewCaption.textContent = "Image loaded";
     };
     nodes.previewImage.onerror = () => {
       nodes.previewImage.hidden = true;

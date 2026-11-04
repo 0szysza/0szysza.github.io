@@ -1,5 +1,4 @@
 import { STORAGE_KEY, MAX_PETS, imageUrl, normalisePet, normaliseTag, normaliseHex, tagKey, tagLabel, tagDetails, availableTags, parseCollection, serialiseCollection, mergeCollection, filterPets } from "./model.mjs?v=20261103-tags";
-import { hexToHsv, hsvToHex } from "./color.mjs?v=20261104-picker";
 
 const $ = id => document.getElementById(id);
 const nodes = Object.fromEntries(["petGrid", "addPet", "emptyState", "searchPets", "tagFilter", "statusFilters", "petDialog", "petForm", "petName", "petImage", "previewImage", "previewEgg", "toast", "toastMessage", "undoDelete", "importFile"].map(id => [id, $(id)]));
@@ -14,7 +13,12 @@ let filterTagSignature = "";
 let formTagOptions = [];
 let formSelectedTags = new Set();
 let formCustomTags = [];
-let customHsv = { h: 204, s: 76, v: 86 };
+const TAG_ORDER = ["Shiny", "Mythic", "XL", "Super", "Secret", "Celestial", "Infinity", "VOID", "Legendary"];
+
+function orderedTags(tags) {
+  const rank = tag => typeof tag === "string" ? TAG_ORDER.indexOf(tag) : TAG_ORDER.length;
+  return [...tags].sort((a, b) => rank(a) - rank(b));
+}
 
 function icon(name) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -54,7 +58,7 @@ function roleTag(tag) {
 }
 
 function renderTagFilter() {
-  const tags = availableTags(pets);
+  const tags = orderedTags(availableTags(pets));
   const signature = JSON.stringify(tags);
   if (signature === filterTagSignature) return;
   filterTagSignature = signature;
@@ -65,7 +69,7 @@ function renderTagFilter() {
 }
 
 function renderFormTags() {
-  formTagOptions = availableTags(pets, formCustomTags);
+  formTagOptions = orderedTags(availableTags(pets, formCustomTags));
   const host = $("tagChoices");
   host.replaceChildren();
   for (const tag of formTagOptions) {
@@ -90,13 +94,13 @@ function openCustomTag() {
   if (!$("colourSwatches").childElementCount) renderColourPalette();
   $("customTagName").setCustomValidity("");
   $("customTagHex").setCustomValidity("");
-  updateCustomPreview();
+  updateCustomTagState();
   $("customTagDialog").showModal();
   $("customTagName").focus();
 }
 
 function renderColourPalette() {
-  for (const [name, hex] of [["Red", "#ED4245"], ["Orange", "#F59E0B"], ["Yellow", "#FEE75C"], ["Green", "#57F287"], ["Teal", "#1ABC9C"], ["Blue", "#3498DB"], ["Purple", "#9B59B6"], ["Pink", "#EB459E"], ["Cream", "#F7E3BA"], ["White", "#FFFFFF"], ["Grey", "#95A5A6"], ["Charcoal", "#2C2F33"]]) {
+  for (const [name, hex] of [["Red", "#ED4245"], ["Orange", "#F59E0B"], ["Yellow", "#FEE75C"], ["Green", "#57F287"], ["Teal", "#1ABC9C"], ["Blue", "#3498DB"], ["Purple", "#9B59B6"], ["Pink", "#EB459E"], ["Cream", "#F7E3BA"], ["White", "#FFFFFF"]]) {
     const swatch = element("button", "colour-swatch");
     swatch.type = "button";
     swatch.dataset.colour = hex;
@@ -108,40 +112,13 @@ function renderColourPalette() {
   }
 }
 
-function renderColourPicker() {
-  $("colourPlane").style.backgroundColor = `hsl(${customHsv.h} 100% 50%)`;
-  $("colourCursor").style.left = `${customHsv.s}%`;
-  $("colourCursor").style.top = `${100 - customHsv.v}%`;
-  $("colourHue").value = String(Math.round(customHsv.h));
-  $("colourHue").setAttribute("aria-valuetext", `${Math.round(customHsv.h)} degrees`);
-}
-
-function updateCustomPreview(syncPicker = true) {
+function updateCustomTagState() {
   const name = $("customTagName").value;
   $("customTagNameCount").textContent = `${name.length} / 15`;
-  $("customTagPreviewName").textContent = name.trim() || "Custom tag";
   try {
     const colour = normaliseHex($("customTagHex").value);
-    $("customTagPreview").style.setProperty("--tag-paint", `linear-gradient(${colour}, ${colour})`);
-    $("customTagPreview").style.setProperty("--tag-dot-colour", colour);
-    if (syncPicker) customHsv = hexToHsv(colour, customHsv.h);
-    renderColourPicker();
     for (const swatch of $("colourSwatches").children) swatch.setAttribute("aria-pressed", String(swatch.dataset.colour === colour));
-    $("colourValue").textContent = `${colour}, saturation ${Math.round(customHsv.s)}%, brightness ${Math.round(customHsv.v)}%.`;
-  } catch { /* Keep the last valid preview while a HEX value is being typed. */ }
-}
-
-function updateFromPicker() {
-  $("customTagHex").value = hsvToHex(customHsv);
-  $("customTagHex").setCustomValidity("");
-  updateCustomPreview(false);
-}
-
-function pickColour(event) {
-  const rect = $("colourPlane").getBoundingClientRect();
-  customHsv.s = Math.max(0, Math.min(100, (event.clientX - rect.left) / rect.width * 100));
-  customHsv.v = Math.max(0, Math.min(100, 100 - (event.clientY - rect.top) / rect.height * 100));
-  updateFromPicker();
+  } catch { /* Keep the last selected swatch while the HEX field is incomplete. */ }
 }
 
 function addCustomTag() {
@@ -226,7 +203,7 @@ function petCard(pet) {
   const name = element("span", "pet-name");
   name.append(element("span", "", pet.name), icon("square-pen"));
   const tags = element("span", "pet-tags");
-  for (const tag of pet.tags) tags.append(roleTag(tag));
+  for (const tag of orderedTags(pet.tags)) tags.append(roleTag(tag));
   details.append(art, name, tags);
 
   const collect = element("button", "collect-button");
@@ -282,7 +259,7 @@ function openPet(pet = null) {
   renderFormTags();
   nodes.petName.setCustomValidity("");
   nodes.petImage.setCustomValidity("");
-  $("dialogTitle").textContent = pet ? "Edit pet" : "Add a pet";
+  $("dialogTitle").textContent = pet ? `Edit ${pet.name}` : "Add a pet";
   $("savePet").replaceChildren(icon(pet ? "check" : "plus"), element("span", "", pet ? "Save changes" : "Add pet"));
   if (pet) {
     nodes.petName.value = pet.name;
@@ -307,7 +284,10 @@ nodes.petDialog.addEventListener("click", event => {
   const rect = nodes.petDialog.getBoundingClientRect();
   if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) nodes.petDialog.close();
 });
-nodes.petName.addEventListener("input", () => nodes.petName.setCustomValidity(""));
+nodes.petName.addEventListener("input", () => {
+  nodes.petName.setCustomValidity("");
+  if (editingId) $("dialogTitle").textContent = `Edit ${nodes.petName.value.trim() || "pet"}`;
+});
 nodes.petImage.addEventListener("input", () => { nodes.petImage.setCustomValidity(""); previewImage(); });
 $("tagChoices").addEventListener("change", event => {
   const input = event.target;
@@ -323,38 +303,14 @@ $("customTagDialog").addEventListener("click", event => {
   if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) $("customTagDialog").close();
 });
 $("customTagForm").addEventListener("submit", event => { event.preventDefault(); addCustomTag(); });
-$("customTagName").addEventListener("input", () => { $("customTagName").setCustomValidity(""); updateCustomPreview(); });
-$("customTagHex").addEventListener("input", () => { $("customTagHex").setCustomValidity(""); updateCustomPreview(); });
+$("customTagName").addEventListener("input", () => { $("customTagName").setCustomValidity(""); updateCustomTagState(); });
+$("customTagHex").addEventListener("input", () => { $("customTagHex").setCustomValidity(""); updateCustomTagState(); });
 $("colourSwatches").addEventListener("click", event => {
   const swatch = event.target.closest("button[data-colour]");
   if (!swatch) return;
   $("customTagHex").value = swatch.dataset.colour;
   $("customTagHex").setCustomValidity("");
-  updateCustomPreview();
-});
-$("colourHue").addEventListener("input", () => { customHsv.h = Number($("colourHue").value); updateFromPicker(); });
-$("colourPlane").addEventListener("pointerdown", event => {
-  if (event.button !== 0 || !event.isPrimary) return;
-  event.preventDefault();
-  $("colourPlane").focus({ preventScroll: true });
-  $("colourPlane").setPointerCapture(event.pointerId);
-  pickColour(event);
-});
-$("colourPlane").addEventListener("pointermove", event => {
-  if ($("colourPlane").hasPointerCapture(event.pointerId)) pickColour(event);
-});
-$("colourPlane").addEventListener("pointerup", event => {
-  if ($("colourPlane").hasPointerCapture(event.pointerId)) $("colourPlane").releasePointerCapture(event.pointerId);
-});
-$("colourPlane").addEventListener("keydown", event => {
-  const step = event.shiftKey ? 10 : 1;
-  if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
-  event.preventDefault();
-  if (event.key === "ArrowLeft") customHsv.s = Math.max(0, customHsv.s - step);
-  if (event.key === "ArrowRight") customHsv.s = Math.min(100, customHsv.s + step);
-  if (event.key === "ArrowUp") customHsv.v = Math.min(100, customHsv.v + step);
-  if (event.key === "ArrowDown") customHsv.v = Math.max(0, customHsv.v - step);
-  updateFromPicker();
+  updateCustomTagState();
 });
 nodes.petForm.addEventListener("submit", event => {
   event.preventDefault();

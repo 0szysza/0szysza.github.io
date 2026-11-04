@@ -209,8 +209,9 @@ function addCustomTag() {
   catch (error) { colour.setCustomValidity(error.message); colour.reportValidity(); return false; }
   const tag = normaliseTag({ name: name.value, color: colour.value });
   if (!save(pets, null, [...customTags, tag])) return false;
-  formSelectedTags.add(tagKey(tag));
+  if (!$("tagLibraryDialog").open) formSelectedTags.add(tagKey(tag));
   renderFormTags();
+  if ($("tagLibraryDialog").open) renderTagLibrary();
   $("customTagDialog").close();
   return true;
 }
@@ -233,8 +234,8 @@ function notify(message, undo = null, archiveLink = false) {
 }
 
 function syncToastHost() {
-  const dialogs = [...document.querySelectorAll("dialog[open]")];
-  (dialogs.at(-1) || document.body).append(nodes.toast);
+  const host = $("customTagDialog").open ? $("customTagDialog") : $("tagLibraryDialog").open ? $("tagLibraryDialog") : nodes.petDialog.open ? nodes.petDialog : document.body;
+  host.append(nodes.toast);
 }
 
 function save(next, focus, nextTags = customTags) {
@@ -425,6 +426,7 @@ $("petTagsPopover").addEventListener("toggle", event => $("petTagsToggle").setAt
 window.addEventListener("resize", () => { if ($("petTagsPopover").matches(":popover-open")) positionFormTagMenu(); });
 nodes.petDialog.addEventListener("scroll", () => { if ($("petTagsPopover").matches(":popover-open")) positionFormTagMenu(); }, { passive: true });
 $("showCustomTag").addEventListener("click", openCustomTag);
+$("createLibraryTag").addEventListener("click", openCustomTag);
 for (const id of ["manageTags", "filterManageTags"]) $(id).addEventListener("click", openTagLibrary);
 $("closeTagLibrary").addEventListener("click", () => $("tagLibraryDialog").close());
 $("tagLibraryDialog").addEventListener("click", event => {

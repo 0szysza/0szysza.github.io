@@ -12,13 +12,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=20261103-controls">
+<link rel="stylesheet" href="./styles.css?v=20261104-dialog">
 <meta property="og:title" content="Hatchlist">
 <meta property="og:description" content="Add BGSI pets, choose tags and mark them as collected.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://0szysza.github.io/hatchlist/">
 <meta property="og:site_name" content="Hatchlist">
-<script type="module" src="./app.js?v=20261103-controls"></script>
+<script type="module" src="./app.js?v=20261104-dialog"></script>
 </head>
 <body>
 <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><symbol id="i-egg" viewBox="0 0 24 24"><path d="M12 2C8 2 4 8 4 14a8 8 0 0 0 16 0c0-6-4-12-8-12" /></symbol>
@@ -98,29 +98,40 @@
     </div></div><div class="footer-data"><p>Your collection is saved in this browser.</p><button type="button" id="footerExport"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Download your data (JSON)</button></div></div></footer>
 <dialog class="pet-dialog" id="petDialog" aria-labelledby="dialogTitle">
   <form id="petForm">
-    <div class="dialog-heading"><h2 id="dialogTitle">Add a pet</h2><button type="button" class="icon-button" id="closeDialog" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+    <button type="button" class="dialog-close icon-button" id="closeDialog" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
     <div class="pet-form-body">
-      <div class="image-preview" id="imagePreview"><svg class="icon preview-egg" id="previewEgg" aria-hidden="true"><use href="#i-egg"/></svg><img id="previewImage" alt="Pet image preview" hidden referrerpolicy="no-referrer"><span id="previewCaption">Image preview</span></div>
-      <div class="form-fields">
+      <div class="pet-dialog-hero">
+        <div class="image-preview" id="imagePreview"><svg class="icon preview-egg" id="previewEgg" aria-hidden="true"><use href="#i-egg"/></svg><img id="previewImage" alt="Pet image preview" hidden referrerpolicy="no-referrer"></div>
+        <div class="pet-dialog-heading"><span class="dialog-kicker">Hatchlist</span><h2 id="dialogTitle">Add a pet</h2><span id="previewCaption">Image preview</span></div>
+      </div>
+      <div class="pet-inputs">
         <label class="form-field" for="petName">Pet name<input id="petName" name="name" type="text" maxlength="80" placeholder="e.g. Giant Robot" required autocomplete="off"></label>
         <label class="form-field" for="petImage">Image URL<input id="petImage" name="image" type="url" maxlength="2048" placeholder="https://…/pet.webp" required autocomplete="off" aria-describedby="imageHint"></label>
-        <p class="field-hint" id="imageHint">Paste a direct link to the pet image.</p>
-        <fieldset class="tag-options"><legend>Tags <span>optional</span></legend>
-          <div class="tag-choices" id="tagChoices"></div>
-          <button class="new-tag-button" type="button" id="showCustomTag" aria-expanded="false" aria-controls="customTagEditor">New custom tag</button>
-          <div class="custom-tag-editor" id="customTagEditor" hidden>
-            <label class="custom-name-field" for="customTagName"><span>Tag name <small id="customTagNameCount">0 / 15</small></span><input id="customTagName" type="text" maxlength="15" aria-label="Custom tag name" placeholder="e.g. Favourites" autocomplete="off"></label>
-            <div class="custom-colour-fields">
-              <label class="custom-colour-picker" for="customTagColour"><span>Colour</span><input id="customTagColour" type="color" value="#3498db" aria-label="Custom tag colour"></label>
-              <label class="custom-hex-field" for="customTagHex"><span>HEX</span><input id="customTagHex" type="text" maxlength="7" value="#3498DB" aria-label="Custom tag HEX" placeholder="#3498DB" autocomplete="off" spellcheck="false"></label>
-            </div>
-            <span class="pet-tag custom-tag-preview"><span class="tag-dot" id="customTagPreviewDot" style="color:#3498db" aria-hidden="true"></span><span class="tag-name" id="customTagPreviewName">Custom tag</span></span>
-            <div class="custom-tag-actions"><button type="button" class="secondary-button" id="cancelCustomTag">Cancel</button><button type="button" class="secondary-button" id="addCustomTag">Add tag</button></div>
-          </div>
-        </fieldset>
       </div>
+      <p class="field-hint" id="imageHint">Paste a direct link to the pet image.</p>
+      <fieldset class="tag-options"><legend>Tags</legend>
+        <div class="tag-picker">
+          <div class="tag-choices" id="tagChoices"></div>
+          <button class="new-tag-button" type="button" id="showCustomTag" aria-haspopup="dialog" aria-controls="customTagDialog"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>New custom tag</button>
+        </div>
+      </fieldset>
     </div>
     <div class="dialog-actions"><button type="button" class="secondary-button" id="cancelDialog">Cancel</button><button type="submit" class="primary-button" id="savePet"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg><span>Add pet</span></button></div>
+  </form>
+</dialog>
+<dialog class="custom-tag-dialog" id="customTagDialog" aria-labelledby="customTagTitle">
+  <form id="customTagForm">
+    <button type="button" class="dialog-close icon-button" id="closeCustomTag" aria-label="Close tag editor"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+    <div class="custom-tag-body">
+      <span class="dialog-kicker">Hatchlist</span><h2 id="customTagTitle">New custom tag</h2>
+      <label class="custom-name-field" for="customTagName"><span>Tag name <small id="customTagNameCount">0 / 15</small></span><input id="customTagName" type="text" maxlength="15" aria-label="Custom tag name" placeholder="e.g. Favourites" autocomplete="off" required></label>
+      <div class="custom-colour-fields">
+        <label class="custom-colour-picker" for="customTagColour"><span>Colour</span><input id="customTagColour" type="color" value="#3498db" aria-label="Custom tag colour"></label>
+        <label class="custom-hex-field" for="customTagHex"><span>HEX</span><input id="customTagHex" type="text" maxlength="7" value="#3498DB" aria-label="Custom tag HEX" placeholder="#3498DB" autocomplete="off" spellcheck="false" required></label>
+      </div>
+      <div class="custom-tag-preview-row"><span>Preview</span><span class="pet-tag custom-tag-preview" id="customTagPreview"><span class="tag-dot" aria-hidden="true"></span><span class="tag-name" id="customTagPreviewName">Custom tag</span></span></div>
+    </div>
+    <div class="dialog-actions"><button type="button" class="secondary-button" id="cancelCustomTag">Cancel</button><button type="submit" class="primary-button" id="addCustomTag">Add tag</button></div>
   </form>
 </dialog>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden><span id="toastMessage"></span><button type="button" id="undoDelete" hidden>Undo</button><button type="button" class="toast-dismiss" id="dismissToast" aria-label="Dismiss notification"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>

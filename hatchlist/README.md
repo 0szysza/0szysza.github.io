@@ -8,8 +8,8 @@ A browser-local BGSI pet wishlist at https://0szysza.github.io/hatchlist/.
 - Data is saved under the `hatchlist.collection.v1` local-storage key. No account or server is required, and collections are separate for each browser.
 - Export a JSON backup and import it on another device. Imports add missing pets and preserve existing records.
 - Tabs on the same browser keep their collection in sync.
-- Presets: Legendary, Secret, Celestial, Infinity, VOID, Shiny, Mythic, XL and Super. Multicolour presets cycle only their dot colour; reduced-motion settings keep them static.
-- Custom tags have names of 1–15 characters and one six-digit HEX colour. Saved custom tags can be reused on other pets.
+- Presets: Legendary, Secret, Celestial, Infinity, VOID, Shiny, Mythic, XL and Super. Multicolour presets use moving gradients across the entire pill; reduced-motion settings keep them static.
+- Custom tags have names of 1–15 characters and one six-digit HEX colour. Saved custom tags can be reused on other pets. All tags share one picker; a separate compact dialog creates custom tags without submitting the pet form.
 - Six cards fit a desktop row; the add-pet tile follows the visible pets.
 - Version-one collections and backups are read without losing existing pets. New backups use version two.
 

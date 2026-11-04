@@ -1,4 +1,4 @@
-import { STORAGE_KEY, TAGS, MAX_PETS, imageUrl, normalisePet, normaliseTag, normaliseHex, tagKey, tagLabel, tagDetails, availableTags, parseCollection, serialiseCollection, mergeCollection, filterPets } from "./model.mjs?v=20261103-tags";
+import { STORAGE_KEY, MAX_PETS, imageUrl, normalisePet, normaliseTag, normaliseHex, tagKey, tagLabel, tagDetails, availableTags, parseCollection, serialiseCollection, mergeCollection, filterPets } from "./model.mjs?v=20261103-tags";
 
 const $ = id => document.getElementById(id);
 const nodes = Object.fromEntries(["petGrid", "addPet", "emptyState", "searchPets", "tagFilter", "statusFilters", "petDialog", "petForm", "petName", "petImage", "previewImage", "previewEgg", "previewCaption", "toast", "toastMessage", "undoDelete", "importFile"].map(id => [id, $(id)]));
@@ -31,18 +31,22 @@ function element(tag, className, text) {
   return node;
 }
 
-function tagDot(tag) {
+function tagDot() {
   const dot = element("span", "tag-dot");
   dot.setAttribute("aria-hidden", "true");
-  dot.style.color = tagDetails(tag).color;
-  if (typeof tag === "string") dot.dataset.preset = tag;
   return dot;
+}
+
+function tagAppearance(node, tag) {
+  if (typeof tag === "string") node.dataset.preset = tag;
+  else node.style.setProperty("--tag-paint", `linear-gradient(${tagDetails(tag).color}, ${tagDetails(tag).color})`);
 }
 
 function roleTag(tag) {
   const badge = element("span", "pet-tag");
+  tagAppearance(badge, tag);
   badge.title = tagLabel(tag) + (typeof tag === "string" ? "" : " — " + tag.color);
-  badge.append(tagDot(tag), element("span", "tag-name", tagLabel(tag)));
+  badge.append(tagDot(), element("span", "tag-name", tagLabel(tag)));
   return badge;
 }
 
@@ -61,37 +65,27 @@ function renderFormTags() {
   formTagOptions = availableTags(pets, formCustomTags);
   const host = $("tagChoices");
   host.replaceChildren();
-  for (const [title, tags] of [["Rarity", formTagOptions.filter(tag => typeof tag === "string" && TAGS.indexOf(tag) < 5)], ["Modifiers", formTagOptions.filter(tag => typeof tag === "string" && TAGS.indexOf(tag) >= 5)], ["Custom", formTagOptions.filter(tag => typeof tag !== "string")]]) {
-    if (!tags.length) continue;
-    const group = element("div", "tag-choice-group");
-    group.setAttribute("role", "group");
-    group.setAttribute("aria-label", title + " tags");
-    group.append(element("p", "tag-group-label", title));
-    const list = element("div", "tag-options-list");
-    for (const tag of tags) {
-      const label = element("label", "tag-option");
-      const input = document.createElement("input");
-      input.type = "checkbox";
-      input.name = "tags";
-      input.value = tagKey(tag);
-      input.checked = formSelectedTags.has(input.value);
-      input.setAttribute("aria-label", tagLabel(tag));
-      label.append(input, tagDot(tag), element("span", "tag-name", tagLabel(tag)));
-      list.append(label);
-    }
-    group.append(list);
-    host.append(group);
+  for (const tag of formTagOptions) {
+    const label = element("label", "tag-option");
+    tagAppearance(label, tag);
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.name = "tags";
+    input.value = tagKey(tag);
+    input.checked = formSelectedTags.has(input.value);
+    input.setAttribute("aria-label", tagLabel(tag));
+    label.append(input, tagDot(), element("span", "tag-name", tagLabel(tag)));
+    host.append(label);
   }
 }
 
-function setCustomEditor(open) {
-  $("customTagEditor").hidden = !open;
-  $("showCustomTag").setAttribute("aria-expanded", String(open));
-  if (open) $("customTagName").focus();
-  else {
-    $("customTagName").setCustomValidity("");
-    $("customTagHex").setCustomValidity("");
-  }
+function openCustomTag() {
+  $("customTagForm").reset();
+  $("customTagName").setCustomValidity("");
+  $("customTagHex").setCustomValidity("");
+  updateCustomPreview();
+  $("customTagDialog").showModal();
+  $("customTagName").focus();
 }
 
 function updateCustomPreview() {
@@ -101,7 +95,7 @@ function updateCustomPreview() {
   try {
     const colour = normaliseHex($("customTagHex").value);
     $("customTagColour").value = colour;
-    $("customTagPreviewDot").style.color = colour;
+    $("customTagPreview").style.setProperty("--tag-paint", `linear-gradient(${colour}, ${colour})`);
   } catch { /* Keep the last valid preview while a HEX value is being typed. */ }
 }
 
@@ -121,9 +115,7 @@ function addCustomTag() {
   formCustomTags.push(tag);
   formSelectedTags.add(tagKey(tag));
   renderFormTags();
-  setCustomEditor(false);
-  name.value = "";
-  updateCustomPreview();
+  $("customTagDialog").close();
   return true;
 }
 
@@ -247,10 +239,6 @@ function openPet(pet = null) {
   formCustomTags = [];
   formSelectedTags = new Set((pet?.tags || []).map(tagKey));
   renderFormTags();
-  setCustomEditor(false);
-  $("customTagName").setCustomValidity("");
-  $("customTagHex").setCustomValidity("");
-  updateCustomPreview();
   nodes.petName.setCustomValidity("");
   nodes.petImage.setCustomValidity("");
   $("dialogTitle").textContent = pet ? "Edit pet" : "Add a pet";
@@ -269,6 +257,7 @@ nodes.addPet.addEventListener("click", () => openPet());
 $("closeDialog").addEventListener("click", () => nodes.petDialog.close());
 $("cancelDialog").addEventListener("click", () => nodes.petDialog.close());
 nodes.petDialog.addEventListener("close", () => {
+  if ($("customTagDialog").open) $("customTagDialog").close();
   document.body.classList.remove("modal-open");
   clearTimeout(previewTimer);
 });
@@ -285,15 +274,14 @@ $("tagChoices").addEventListener("change", event => {
   if (input.checked) formSelectedTags.add(input.value);
   else formSelectedTags.delete(input.value);
 });
-$("showCustomTag").addEventListener("click", () => setCustomEditor($("customTagEditor").hidden));
-$("cancelCustomTag").addEventListener("click", () => {
-  setCustomEditor(false);
-  $("customTagName").value = "";
-  $("customTagName").setCustomValidity("");
-  $("customTagHex").setCustomValidity("");
-  updateCustomPreview();
+$("showCustomTag").addEventListener("click", openCustomTag);
+for (const id of ["cancelCustomTag", "closeCustomTag"]) $(id).addEventListener("click", () => $("customTagDialog").close());
+$("customTagDialog").addEventListener("click", event => {
+  if (event.target !== $("customTagDialog")) return;
+  const rect = $("customTagDialog").getBoundingClientRect();
+  if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) $("customTagDialog").close();
 });
-$("addCustomTag").addEventListener("click", addCustomTag);
+$("customTagForm").addEventListener("submit", event => { event.preventDefault(); addCustomTag(); });
 $("customTagName").addEventListener("input", () => { $("customTagName").setCustomValidity(""); updateCustomPreview(); });
 $("customTagHex").addEventListener("input", () => { $("customTagHex").setCustomValidity(""); updateCustomPreview(); });
 $("customTagColour").addEventListener("input", () => {
@@ -301,16 +289,12 @@ $("customTagColour").addEventListener("input", () => {
   $("customTagHex").setCustomValidity("");
   updateCustomPreview();
 });
-for (const id of ["customTagName", "customTagHex"]) $(id).addEventListener("keydown", event => {
-  if (event.key === "Enter") { event.preventDefault(); addCustomTag(); }
-});
 nodes.petForm.addEventListener("submit", event => {
   event.preventDefault();
   if (!nodes.petName.value.trim()) { nodes.petName.setCustomValidity("Enter a pet name."); nodes.petName.reportValidity(); return; }
   let image;
   try { image = imageUrl(nodes.petImage.value); }
   catch (error) { nodes.petImage.setCustomValidity(error.message); nodes.petImage.reportValidity(); return; }
-  if (!$("customTagEditor").hidden && $("customTagName").value.trim() && !addCustomTag()) return;
   const previous = editingId ? pets.find(pet => pet.id === editingId) : null;
   if (editingId && !previous) { nodes.petDialog.close(); notify("This pet was removed in another tab."); return; }
   if (!previous && pets.length >= MAX_PETS) { notify(`Your collection can hold up to ${MAX_PETS} pets.`); return; }

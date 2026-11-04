@@ -12,13 +12,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=20261104-dialog">
+<link rel="stylesheet" href="./styles.css?v=20261104-picker">
 <meta property="og:title" content="Hatchlist">
 <meta property="og:description" content="Add BGSI pets, choose tags and mark them as collected.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://0szysza.github.io/hatchlist/">
 <meta property="og:site_name" content="Hatchlist">
-<script type="module" src="./app.js?v=20261104-dialog"></script>
+<script type="module" src="./app.js?v=20261104-picker"></script>
 </head>
 <body>
 <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><symbol id="i-egg" viewBox="0 0 24 24"><path d="M12 2C8 2 4 8 4 14a8 8 0 0 0 16 0c0-6-4-12-8-12" /></symbol>
@@ -102,13 +102,12 @@
     <div class="pet-form-body">
       <div class="pet-dialog-hero">
         <div class="image-preview" id="imagePreview"><svg class="icon preview-egg" id="previewEgg" aria-hidden="true"><use href="#i-egg"/></svg><img id="previewImage" alt="Pet image preview" hidden referrerpolicy="no-referrer"></div>
-        <div class="pet-dialog-heading"><span class="dialog-kicker">Hatchlist</span><h2 id="dialogTitle">Add a pet</h2><span id="previewCaption">Image preview</span></div>
+        <div class="pet-dialog-heading"><h2 id="dialogTitle">Add a pet</h2></div>
       </div>
       <div class="pet-inputs">
         <label class="form-field" for="petName">Pet name<input id="petName" name="name" type="text" maxlength="80" placeholder="e.g. Giant Robot" required autocomplete="off"></label>
-        <label class="form-field" for="petImage">Image URL<input id="petImage" name="image" type="url" maxlength="2048" placeholder="https://…/pet.webp" required autocomplete="off" aria-describedby="imageHint"></label>
+        <label class="form-field" for="petImage">Image URL<input id="petImage" name="image" type="url" maxlength="2048" placeholder="https://…/pet.webp" required autocomplete="off"></label>
       </div>
-      <p class="field-hint" id="imageHint">Paste a direct link to the pet image.</p>
       <fieldset class="tag-options"><legend>Tags</legend>
         <div class="tag-picker">
           <div class="tag-choices" id="tagChoices"></div>
@@ -123,13 +122,19 @@
   <form id="customTagForm">
     <button type="button" class="dialog-close icon-button" id="closeCustomTag" aria-label="Close tag editor"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
     <div class="custom-tag-body">
-      <span class="dialog-kicker">Hatchlist</span><h2 id="customTagTitle">New custom tag</h2>
+      <h2 id="customTagTitle">New custom tag</h2>
       <label class="custom-name-field" for="customTagName"><span>Tag name <small id="customTagNameCount">0 / 15</small></span><input id="customTagName" type="text" maxlength="15" aria-label="Custom tag name" placeholder="e.g. Favourites" autocomplete="off" required></label>
-      <div class="custom-colour-fields">
-        <label class="custom-colour-picker" for="customTagColour"><span>Colour</span><input id="customTagColour" type="color" value="#3498db" aria-label="Custom tag colour"></label>
-        <label class="custom-hex-field" for="customTagHex"><span>HEX</span><input id="customTagHex" type="text" maxlength="7" value="#3498DB" aria-label="Custom tag HEX" placeholder="#3498DB" autocomplete="off" spellcheck="false" required></label>
+      <div class="colour-picker" role="group" aria-label="Tag colour">
+        <div class="colour-swatches" id="colourSwatches" role="group" aria-label="Colour palette"></div>
+        <div class="colour-plane" id="colourPlane" role="group" tabindex="0" aria-label="Saturation and brightness" aria-describedby="colourControlsHelp colourValue"><span class="colour-cursor" id="colourCursor" aria-hidden="true"></span></div>
+        <span class="sr-only" id="colourControlsHelp">Use left and right arrows to change saturation, and up and down arrows to change brightness. Hold Shift for larger steps.</span>
+        <span class="sr-only" id="colourValue" aria-live="polite"></span>
+        <label class="hue-field" for="colourHue"><span class="sr-only">Hue</span><input type="range" id="colourHue" min="0" max="360" step="1" value="204" aria-label="Colour hue"></label>
+        <div class="custom-colour-bottom">
+          <label class="custom-hex-field" for="customTagHex"><span>HEX</span><input id="customTagHex" type="text" maxlength="7" value="#3498DB" aria-label="Custom tag HEX" placeholder="#3498DB" autocomplete="off" spellcheck="false" required></label>
+          <span class="pet-tag custom-tag-preview" id="customTagPreview" aria-label="Tag preview"><span class="tag-dot" aria-hidden="true"></span><span class="tag-name" id="customTagPreviewName">Custom tag</span></span>
+        </div>
       </div>
-      <div class="custom-tag-preview-row"><span>Preview</span><span class="pet-tag custom-tag-preview" id="customTagPreview"><span class="tag-dot" aria-hidden="true"></span><span class="tag-name" id="customTagPreviewName">Custom tag</span></span></div>
     </div>
     <div class="dialog-actions"><button type="button" class="secondary-button" id="cancelCustomTag">Cancel</button><button type="submit" class="primary-button" id="addCustomTag">Add tag</button></div>
   </form>

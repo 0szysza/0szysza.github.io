@@ -1,7 +1,8 @@
 import { STORAGE_KEY, MAX_PETS, imageUrl, normalisePet, normaliseTag, normaliseHex, tagKey, tagLabel, tagDetails, availableTags, parseCollection, serialiseCollection, mergeCollection, filterPets } from "./model.mjs?v=20261103-tags";
+import { hexToHsv, hsvToHex } from "./color.mjs?v=20261104-picker";
 
 const $ = id => document.getElementById(id);
-const nodes = Object.fromEntries(["petGrid", "addPet", "emptyState", "searchPets", "tagFilter", "statusFilters", "petDialog", "petForm", "petName", "petImage", "previewImage", "previewEgg", "previewCaption", "toast", "toastMessage", "undoDelete", "importFile"].map(id => [id, $(id)]));
+const nodes = Object.fromEntries(["petGrid", "addPet", "emptyState", "searchPets", "tagFilter", "statusFilters", "petDialog", "petForm", "petName", "petImage", "previewImage", "previewEgg", "toast", "toastMessage", "undoDelete", "importFile"].map(id => [id, $(id)]));
 let pets = [];
 let status = "all";
 let editingId = null;
@@ -13,6 +14,7 @@ let filterTagSignature = "";
 let formTagOptions = [];
 let formSelectedTags = new Set();
 let formCustomTags = [];
+let customHsv = { h: 204, s: 76, v: 86 };
 
 function icon(name) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -38,6 +40,7 @@ function tagDot() {
 }
 
 function tagAppearance(node, tag) {
+  node.style.setProperty("--tag-dot-colour", tagDetails(tag).color);
   if (typeof tag === "string") node.dataset.preset = tag;
   else node.style.setProperty("--tag-paint", `linear-gradient(${tagDetails(tag).color}, ${tagDetails(tag).color})`);
 }
@@ -74,13 +77,17 @@ function renderFormTags() {
     input.value = tagKey(tag);
     input.checked = formSelectedTags.has(input.value);
     input.setAttribute("aria-label", tagLabel(tag));
-    label.append(input, tagDot(), element("span", "tag-name", tagLabel(tag)));
+    const selected = element("span", "tag-selection");
+    selected.setAttribute("aria-hidden", "true");
+    selected.append(icon("check"));
+    label.append(input, tagDot(), element("span", "tag-name", tagLabel(tag)), selected);
     host.append(label);
   }
 }
 
 function openCustomTag() {
   $("customTagForm").reset();
+  if (!$("colourSwatches").childElementCount) renderColourPalette();
   $("customTagName").setCustomValidity("");
   $("customTagHex").setCustomValidity("");
   updateCustomPreview();
@@ -88,15 +95,53 @@ function openCustomTag() {
   $("customTagName").focus();
 }
 
-function updateCustomPreview() {
+function renderColourPalette() {
+  for (const [name, hex] of [["Red", "#ED4245"], ["Orange", "#F59E0B"], ["Yellow", "#FEE75C"], ["Green", "#57F287"], ["Teal", "#1ABC9C"], ["Blue", "#3498DB"], ["Purple", "#9B59B6"], ["Pink", "#EB459E"], ["Cream", "#F7E3BA"], ["White", "#FFFFFF"], ["Grey", "#95A5A6"], ["Charcoal", "#2C2F33"]]) {
+    const swatch = element("button", "colour-swatch");
+    swatch.type = "button";
+    swatch.dataset.colour = hex;
+    swatch.style.backgroundColor = hex;
+    swatch.setAttribute("aria-label", `${name} (${hex})`);
+    swatch.setAttribute("aria-pressed", "false");
+    swatch.title = hex;
+    $("colourSwatches").append(swatch);
+  }
+}
+
+function renderColourPicker() {
+  $("colourPlane").style.backgroundColor = `hsl(${customHsv.h} 100% 50%)`;
+  $("colourCursor").style.left = `${customHsv.s}%`;
+  $("colourCursor").style.top = `${100 - customHsv.v}%`;
+  $("colourHue").value = String(Math.round(customHsv.h));
+  $("colourHue").setAttribute("aria-valuetext", `${Math.round(customHsv.h)} degrees`);
+}
+
+function updateCustomPreview(syncPicker = true) {
   const name = $("customTagName").value;
   $("customTagNameCount").textContent = `${name.length} / 15`;
   $("customTagPreviewName").textContent = name.trim() || "Custom tag";
   try {
     const colour = normaliseHex($("customTagHex").value);
-    $("customTagColour").value = colour;
     $("customTagPreview").style.setProperty("--tag-paint", `linear-gradient(${colour}, ${colour})`);
+    $("customTagPreview").style.setProperty("--tag-dot-colour", colour);
+    if (syncPicker) customHsv = hexToHsv(colour, customHsv.h);
+    renderColourPicker();
+    for (const swatch of $("colourSwatches").children) swatch.setAttribute("aria-pressed", String(swatch.dataset.colour === colour));
+    $("colourValue").textContent = `${colour}, saturation ${Math.round(customHsv.s)}%, brightness ${Math.round(customHsv.v)}%.`;
   } catch { /* Keep the last valid preview while a HEX value is being typed. */ }
+}
+
+function updateFromPicker() {
+  $("customTagHex").value = hsvToHex(customHsv);
+  $("customTagHex").setCustomValidity("");
+  updateCustomPreview(false);
+}
+
+function pickColour(event) {
+  const rect = $("colourPlane").getBoundingClientRect();
+  customHsv.s = Math.max(0, Math.min(100, (event.clientX - rect.left) / rect.width * 100));
+  customHsv.v = Math.max(0, Math.min(100, 100 - (event.clientY - rect.top) / rect.height * 100));
+  updateFromPicker();
 }
 
 function addCustomTag() {
@@ -212,22 +257,18 @@ function previewImage() {
   clearTimeout(previewTimer);
   nodes.previewImage.hidden = true;
   nodes.previewEgg.removeAttribute("hidden");
-  nodes.previewCaption.textContent = "Image preview";
   const value = nodes.petImage.value.trim();
   if (!value) { nodes.previewImage.removeAttribute("src"); return; }
   let url;
-  try { url = imageUrl(value); } catch { nodes.previewCaption.textContent = "Paste a direct image link."; return; }
+  try { url = imageUrl(value); } catch { return; }
   previewTimer = setTimeout(() => {
-    nodes.previewCaption.textContent = "Loading image…";
     nodes.previewImage.onload = () => {
       nodes.previewImage.hidden = false;
       nodes.previewEgg.setAttribute("hidden", "");
-      nodes.previewCaption.textContent = "Image loaded";
     };
     nodes.previewImage.onerror = () => {
       nodes.previewImage.hidden = true;
       nodes.previewEgg.removeAttribute("hidden");
-      nodes.previewCaption.textContent = "Image unavailable. You can update the link later.";
     };
     nodes.previewImage.src = url;
   }, 180);
@@ -284,10 +325,36 @@ $("customTagDialog").addEventListener("click", event => {
 $("customTagForm").addEventListener("submit", event => { event.preventDefault(); addCustomTag(); });
 $("customTagName").addEventListener("input", () => { $("customTagName").setCustomValidity(""); updateCustomPreview(); });
 $("customTagHex").addEventListener("input", () => { $("customTagHex").setCustomValidity(""); updateCustomPreview(); });
-$("customTagColour").addEventListener("input", () => {
-  $("customTagHex").value = $("customTagColour").value.toUpperCase();
+$("colourSwatches").addEventListener("click", event => {
+  const swatch = event.target.closest("button[data-colour]");
+  if (!swatch) return;
+  $("customTagHex").value = swatch.dataset.colour;
   $("customTagHex").setCustomValidity("");
   updateCustomPreview();
+});
+$("colourHue").addEventListener("input", () => { customHsv.h = Number($("colourHue").value); updateFromPicker(); });
+$("colourPlane").addEventListener("pointerdown", event => {
+  if (event.button !== 0 || !event.isPrimary) return;
+  event.preventDefault();
+  $("colourPlane").focus({ preventScroll: true });
+  $("colourPlane").setPointerCapture(event.pointerId);
+  pickColour(event);
+});
+$("colourPlane").addEventListener("pointermove", event => {
+  if ($("colourPlane").hasPointerCapture(event.pointerId)) pickColour(event);
+});
+$("colourPlane").addEventListener("pointerup", event => {
+  if ($("colourPlane").hasPointerCapture(event.pointerId)) $("colourPlane").releasePointerCapture(event.pointerId);
+});
+$("colourPlane").addEventListener("keydown", event => {
+  const step = event.shiftKey ? 10 : 1;
+  if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+  event.preventDefault();
+  if (event.key === "ArrowLeft") customHsv.s = Math.max(0, customHsv.s - step);
+  if (event.key === "ArrowRight") customHsv.s = Math.min(100, customHsv.s + step);
+  if (event.key === "ArrowUp") customHsv.v = Math.min(100, customHsv.v + step);
+  if (event.key === "ArrowDown") customHsv.v = Math.max(0, customHsv.v - step);
+  updateFromPicker();
 });
 nodes.petForm.addEventListener("submit", event => {
   event.preventDefault();

@@ -174,7 +174,7 @@ function openCustomTag() {
 }
 
 function renderColourPalette() {
-  for (const [name, hex] of [["Red", "#ED4245"], ["Orange", "#F59E0B"], ["Yellow", "#FEE75C"], ["Green", "#57F287"], ["Teal", "#1ABC9C"], ["Blue", "#3498DB"], ["Purple", "#9B59B6"], ["Pink", "#EB459E"], ["Cream", "#F7E3BA"], ["White", "#FFFFFF"]]) {
+  for (const [name, hex] of [["Red", "#FF3C35"], ["Orange", "#FF6A00"], ["Yellow", "#FFD800"], ["Green", "#34AF00"], ["Blue", "#00B6FF"], ["Pink", "#FF61FF"], ["Purple", "#9232FF"], ["Indigo", "#4632FF"], ["White", "#FFFFFF"], ["Grey", "#808080"]]) {
     const swatch = element("button", "colour-swatch");
     swatch.type = "button";
     swatch.dataset.colour = hex;

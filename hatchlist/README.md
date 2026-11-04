@@ -1,18 +1,18 @@
 # Hatchlist
 
-A browser-local BGSI pet wishlist at https://0szysza.github.io/hatchlist/.
+A browser-local BGSI pet collection at https://0szysza.github.io/hatchlist/.
 
-- Add pets with a name, a direct image URL, and nine built-in tags or custom role-style tags.
-- Mark pets as collected with the checkbox below each card, search, and filter by status or tag. The checkbox saves immediately without changing the card border.
-- Click a pet's image or name to edit it. Hover over a card to delete it; touch devices show the delete control continuously. A deletion can be undone for ten seconds.
-- Data is saved under the `hatchlist.collection.v1` local-storage key. No account or server is required, and collections are separate for each browser.
-- Export a JSON backup and import it on another device. Imports add missing pets and preserve existing records.
-- Tabs on the same browser keep their collection in sync.
-- Preset order: Shiny, Mythic, XL, Super, Secret, Celestial, Infinity, VOID, then Legendary. Multicolour presets keep their tinted fill with a 10-second gradient wave. Solid colour dots use their original colour cycle; reduced-motion settings keep both static. Selected tags expand to show a checkmark; unselected tags reserve no space for it.
-- Custom tags have names of 1–15 characters and one six-digit HEX colour. Saved custom tags can be reused on other pets. All tags share one picker; a separate compact dialog creates custom tags without submitting the pet form. The compact editor offers ten preset colours and a HEX field.
-- Six cards fit a desktop row; the add-pet tile follows the visible pets.
-- Version-one collections and backups are read without losing existing pets. New backups use version two.
+- List shows pets still to collect. Images are optional.
+- Checking a pet moves it to /hatchlist/archive/ and records the current date and time. Unchecking it returns it to List; the next collection replaces the old time.
+- Archive shows the time to the second in the browser's local timezone, newest first. Older collected records without a timestamp display Time not recorded.
+- Pets can only be deleted from Archive. Moving and deleting pets can be undone for ten seconds.
+- Custom tags are stored in a permanent library, including unused tags. Names have 1–15 characters and one six-digit HEX colour. The editor offers ten colour presets.
+- Manage tags deletes custom tags from the library and all pets, with Undo. Built-in presets remain available.
+- Tags appear in this order: Shiny, Mythic, XL, Super, Secret, Celestial, Infinity, VOID, Legendary, then custom tags. Multicolour presets use a ten-second gradient wave and solid colour dots. Reduced-motion preferences stop animations.
+- Search and a coloured tag menu filter the current view. Backup imports and exports include the list, archive, timestamps and custom tag library.
+- Version-three data uses the existing hatchlist.collection.v1 local-storage key. Version-one and version-two collections and backups migrate without losing pets or inventing collection times. Tabs stay in sync.
+- No account or server is required; data remains separate for each browser. Imports add missing pets and combine custom tag libraries while preserving current records.
 
-All icons are from [Lucide](https://lucide.dev/icons/) or the existing tool UI. The egg outline was selected by the site owner. See LICENSE-icons.txt.
+All icons are from Lucide or the existing tool UI. See LICENSE-icons.txt.
 
-Run the data checks with `node --test hatchlist/model.test.mjs` from the repository root. Serve the repository with a static web server for browser testing.
+Run node --test hatchlist/model.test.mjs from the repository root. Serve the repository with a static web server for browser testing.

@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { TAGS, parseCollection, serialiseCollection, mergeCollection, filterPets, imageUrl, normaliseTag, normaliseHex, tagKey, availableTags } from "./model.mjs";
+import { TAGS, parseCollection, parseLibrary, serialiseCollection, mergeCollection, filterPets, imageUrl, normaliseTag, normaliseHex, tagKey, availableTags, setCollected, deleteCustomTag } from "./model.mjs";
 
-const pet = { id: "test-robot", name: "Giant Robot", image: "https://cdn.demand.gg/i/bgsi/pets/giant-robot/256.webp", tags: ["Secret", "Infinity"], collected: true, createdAt: "2026-11-03T12:00:00.000Z" };
+const pet = { id: "test-robot", name: "Giant Robot", image: "https://cdn.demand.gg/i/bgsi/pets/giant-robot/256.webp", tags: ["Secret", "Infinity"], collected: true, collectedAt: null, createdAt: "2026-11-03T12:00:00.000Z" };
 
 test("backups preserve a pet's image, tags and collected state", () => {
   assert.deepEqual(parseCollection(serialiseCollection([pet])), [pet]);
@@ -46,7 +46,56 @@ test("custom tags normalise names and HEX colours, and round trip with a pet", (
   assert.deepEqual(custom, { name: "Favourites", color: "#A1B2C3" });
   const tagged = { ...pet, tags: ["Secret", custom] };
   assert.deepEqual(parseCollection(serialiseCollection([tagged])), [tagged]);
-  assert.equal(JSON.parse(serialiseCollection([tagged])).version, 2);
+  assert.equal(JSON.parse(serialiseCollection([tagged])).version, 3);
+});
+
+test("pets without images round trip and unsafe nonempty image links remain rejected", () => {
+  const noImage = { ...pet, image: "" };
+  assert.deepEqual(parseCollection(serialiseCollection([noImage])), [noImage]);
+  assert.equal(imageUrl("   "), "");
+  assert.throws(() => imageUrl("javascript:alert(1)"));
+});
+
+test("a custom tag remains in the library after it is removed from every pet", () => {
+  const custom = { name: "Goal", color: "#3498DB" };
+  const before = parseLibrary(JSON.stringify({ version: 2, pets: [{ ...pet, tags: [custom] }] }));
+  const after = parseLibrary(serialiseCollection([{ ...pet, tags: [] }], before.customTags));
+  assert.deepEqual(after.customTags, [custom]);
+  assert.deepEqual(after.pets[0].tags, []);
+});
+
+test("legacy collected pets migrate without inventing a collection time", () => {
+  const { collectedAt, ...legacy } = pet;
+  for (const version of [1, 2]) {
+    const migrated = parseLibrary(JSON.stringify({ version, pets: [legacy] }));
+    assert.equal(migrated.pets[0].collected, true);
+    assert.equal(migrated.pets[0].collectedAt, null);
+  }
+});
+
+test("collecting again records the newer time and returning to the list clears it", () => {
+  const first = setCollected({ ...pet, collected: false }, true, "2026-11-04T10:00:01.000Z");
+  assert.equal(first.collectedAt, "2026-11-04T10:00:01.000Z");
+  const returned = setCollected(first, false);
+  assert.equal(returned.collectedAt, null);
+  const second = setCollected(returned, true, "2026-11-04T10:03:07.000Z");
+  assert.equal(parseCollection(serialiseCollection([second]))[0].collectedAt, "2026-11-04T10:03:07.000Z");
+});
+
+test("deleting a custom tag removes assignments from list and archived pets only", () => {
+  const custom = { name: "Goal", color: "#3498DB" };
+  const source = [{ ...pet, tags: ["Secret", custom] }, { ...pet, id: "wanted", collected: false, tags: [custom, "Shiny"] }];
+  const result = deleteCustomTag(source, [custom], tagKey(custom));
+  assert.deepEqual(result.customTags, []);
+  assert.deepEqual(result.pets.map(item => item.tags), [["Secret"], ["Shiny"]]);
+  assert.throws(() => deleteCustomTag(source, [custom], "Secret"));
+  assert.deepEqual(source[0].tags, ["Secret", custom]);
+});
+
+test("backup preserves unused custom tags and rejects corrupt collection times", () => {
+  const custom = { name: "Later", color: "#D5905C" };
+  assert.deepEqual(parseLibrary(serialiseCollection([], [custom])).customTags, [custom]);
+  assert.throws(() => parseLibrary(JSON.stringify({ version: 3, pets: [{ ...pet, collectedAt: "invalid" }], customTags: [] })));
 });
 
 test("custom tags enforce the fifteen-character boundary and one plain HEX colour", () => {

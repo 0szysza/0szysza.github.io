@@ -1,18 +1,19 @@
-import { STORAGE_KEY, MAX_PETS, imageUrl, normalisePet, normaliseTag, normaliseHex, tagKey, tagLabel, tagDetails, availableTags, parseCollection, serialiseCollection, mergeCollection, filterPets } from "./model.mjs?v=20261103-tags";
+import { STORAGE_KEY, MAX_PETS, imageUrl, normalisePet, normaliseTag, normaliseHex, tagKey, tagLabel, tagDetails, availableTags, customTagLibrary, parseLibrary, serialiseCollection, mergeCollection, filterPets, setCollected, deleteCustomTag } from "./model.mjs?v=20261104-archive";
 
 const $ = id => document.getElementById(id);
-const nodes = Object.fromEntries(["petGrid", "addPet", "emptyState", "searchPets", "tagFilter", "statusFilters", "petDialog", "petForm", "petName", "petImage", "previewImage", "previewEgg", "toast", "toastMessage", "undoDelete", "importFile"].map(id => [id, $(id)]));
+const nodes = Object.fromEntries(["petGrid", "addPet", "emptyState", "searchPets", "tagFilterMenu", "tagFilterOptions", "petDialog", "petForm", "petName", "petImage", "previewImage", "previewEgg", "toast", "toastMessage", "undoDelete", "importFile"].map(id => [id, $(id)]));
 let pets = [];
-let status = "all";
+let customTags = [];
+let selectedTag = "all";
+const archivedView = /\/hatchlist\/archive\/?$/.test(location.pathname);
 let editingId = null;
-let removed = [];
+let undoAction = null;
 let toastTimer;
 let previewTimer;
 let unreadableData = null;
 let filterTagSignature = "";
 let formTagOptions = [];
 let formSelectedTags = new Set();
-let formCustomTags = [];
 const TAG_ORDER = ["Shiny", "Mythic", "XL", "Super", "Secret", "Celestial", "Infinity", "VOID", "Legendary"];
 
 function orderedTags(tags) {
@@ -58,18 +59,28 @@ function roleTag(tag) {
 }
 
 function renderTagFilter() {
-  const tags = orderedTags(availableTags(pets));
-  const signature = JSON.stringify(tags);
+  const tags = orderedTags(availableTags(pets, customTags));
+  if (!tags.some(tag => tagKey(tag) === selectedTag)) selectedTag = "all";
+  const signature = JSON.stringify([tags, selectedTag]);
   if (signature === filterTagSignature) return;
   filterTagSignature = signature;
-  const selected = nodes.tagFilter.value;
-  nodes.tagFilter.replaceChildren(new Option("All tags", "all"));
-  for (const tag of tags) nodes.tagFilter.append(new Option(tagLabel(tag), tagKey(tag)));
-  nodes.tagFilter.value = tags.some(tag => tagKey(tag) === selected) ? selected : "all";
+  nodes.tagFilterOptions.replaceChildren();
+  for (const tag of [null, ...tags]) {
+    const key = tag ? tagKey(tag) : "all";
+    const option = element("button", "tag-filter-option");
+    option.type = "button";
+    option.dataset.tag = key;
+    option.setAttribute("aria-label", tag ? tagLabel(tag) : "All tags");
+    option.setAttribute("aria-pressed", String(selectedTag === key));
+    option.append(tag ? roleTag(tag) : element("span", "", "All tags"), icon("check"));
+    nodes.tagFilterOptions.append(option);
+  }
+  const current = tags.find(tag => tagKey(tag) === selectedTag);
+  $("tagFilterCurrent").replaceChildren(current ? roleTag(current) : document.createTextNode("All tags"));
 }
 
 function renderFormTags() {
-  formTagOptions = orderedTags(availableTags(pets, formCustomTags));
+  formTagOptions = orderedTags(availableTags(pets, customTags));
   const host = $("tagChoices");
   host.replaceChildren();
   for (const tag of formTagOptions) {
@@ -87,6 +98,29 @@ function renderFormTags() {
     label.append(input, tagDot(), element("span", "tag-name", tagLabel(tag)), selected);
     host.append(label);
   }
+}
+
+function renderTagLibrary() {
+  const host = $("tagLibraryList");
+  host.replaceChildren();
+  if (!customTags.length) host.append(element("p", "library-empty", "No custom tags yet."));
+  for (const tag of customTags) {
+    const row = element("div", "tag-library-row");
+    const remove = element("button", "tag-library-delete");
+    remove.type = "button";
+    remove.dataset.tag = tagKey(tag);
+    remove.setAttribute("aria-label", "Delete tag " + tag.name);
+    remove.append(icon("trash"));
+    row.append(roleTag(tag), remove);
+    host.append(row);
+  }
+}
+
+function openTagLibrary() {
+  nodes.tagFilterMenu.open = false;
+  renderTagLibrary();
+  $("tagLibraryDialog").showModal();
+  document.body.classList.add("modal-open");
 }
 
 function openCustomTag() {
@@ -134,7 +168,7 @@ function addCustomTag() {
   try { normaliseHex(colour.value); }
   catch (error) { colour.setCustomValidity(error.message); colour.reportValidity(); return false; }
   const tag = normaliseTag({ name: name.value, color: colour.value });
-  formCustomTags.push(tag);
+  if (!save(pets, null, [...customTags, tag])) return false;
   formSelectedTags.add(tagKey(tag));
   renderFormTags();
   $("customTagDialog").close();
@@ -143,31 +177,42 @@ function addCustomTag() {
 
 function hideToast() {
   nodes.toast.hidden = true;
-  removed = [];
+  undoAction = null;
   clearTimeout(toastTimer);
 }
 
-function notify(message, undo = false) {
+function notify(message, undo = null, archiveLink = false) {
   clearTimeout(toastTimer);
-  if (!undo) removed = [];
+  undoAction = undo;
   nodes.toastMessage.textContent = message;
   nodes.undoDelete.hidden = !undo;
+  $("archiveToastLink").hidden = !archiveLink;
+  syncToastHost();
   nodes.toast.hidden = false;
   toastTimer = setTimeout(hideToast, undo ? 10000 : 6000);
 }
 
-function save(next, focus) {
+function syncToastHost() {
+  const dialogs = [...document.querySelectorAll("dialog[open]")];
+  (dialogs.at(-1) || document.body).append(nodes.toast);
+}
+
+function save(next, focus, nextTags = customTags) {
   if (unreadableData !== null) {
     notify("Export your original backup before making changes to this collection.");
     return false;
   }
-  try { localStorage.setItem(STORAGE_KEY, serialiseCollection(next)); }
+  let library;
+  try { library = customTagLibrary(next, nextTags); localStorage.setItem(STORAGE_KEY, serialiseCollection(next, library)); }
   catch { notify("This browser could not save the change. Try freeing some browser storage."); return false; }
   pets = next;
+  customTags = library;
+  hideToast();
   render();
   if (focus) {
     const card = [...nodes.petGrid.querySelectorAll(".pet-card")].find(node => node.dataset.petId === focus.id);
-    (card?.querySelector(`[data-action="${focus.action}"]`) || nodes.addPet).focus({ preventScroll: true });
+    const fallback = nodes.petGrid.querySelector('input[data-action="collect"]') || (archivedView ? $("archiveView") : nodes.addPet);
+    (card?.querySelector(`[data-action="${focus.action}"]`) || fallback).focus({ preventScroll: true });
   }
   return true;
 }
@@ -190,7 +235,7 @@ function petCard(pet) {
   details.setAttribute("aria-label", "Edit " + pet.name);
   details.title = "Edit pet";
   const art = element("span", "pet-art");
-  const fallback = icon("egg");
+  const fallback = icon("image");
   const image = document.createElement("img");
   image.alt = pet.name;
   image.loading = "lazy";
@@ -198,13 +243,23 @@ function petCard(pet) {
   image.style.opacity = "0";
   image.addEventListener("load", () => { image.hidden = false; image.style.removeProperty("opacity"); fallback.setAttribute("hidden", ""); });
   image.addEventListener("error", () => { image.hidden = true; fallback.removeAttribute("hidden"); });
-  image.src = pet.image;
-  art.append(fallback, image);
+  art.append(fallback);
+  if (pet.image) { image.src = pet.image; art.append(image); }
   const name = element("span", "pet-name");
   name.append(element("span", "", pet.name), icon("square-pen"));
   const tags = element("span", "pet-tags");
   for (const tag of orderedTags(pet.tags)) tags.append(roleTag(tag));
   details.append(art, name, tags);
+  if (archivedView) {
+    const time = element("time", "collected-time");
+    if (pet.collectedAt) {
+      time.dateTime = pet.collectedAt;
+      const date = new Date(pet.collectedAt);
+      time.title = date.toString();
+      time.append(element("span", "", new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(date)), element("strong", "", new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZoneName: "short" }).format(date)));
+    } else time.textContent = "Time not recorded";
+    details.append(time);
+  }
 
   const collect = element("label", "collect-control");
   const checkbox = document.createElement("input");
@@ -212,26 +267,32 @@ function petCard(pet) {
   checkbox.dataset.action = "collect";
   checkbox.checked = pet.collected;
   checkbox.setAttribute("aria-label", `${pet.name} collected`);
+  collect.title = archivedView ? "Uncheck to return to List" : "Check to move to Archive";
   const check = element("span", "collect-check");
   check.setAttribute("aria-hidden", "true");
   check.append(icon("check"));
   collect.append(checkbox, check, element("span", "", "Collected"));
-  card.append(remove, details, collect);
+  if (archivedView) card.append(remove);
+  card.append(details, collect);
   return card;
 }
 
 function render() {
   renderTagFilter();
   const collected = pets.filter(pet => pet.collected).length;
-  const total = pets.length;
-  for (const [id, value] of [["allCount", total], ["wantedCount", total - collected], ["doneCount", collected]]) $(id).textContent = String(value);
-  for (const button of nodes.statusFilters.querySelectorAll("button")) button.setAttribute("aria-pressed", String(button.dataset.status === status));
-  const visible = filterPets(pets, { query: nodes.searchPets.value, status, tag: nodes.tagFilter.value });
+  $("listCount").textContent = String(pets.length - collected);
+  $("archiveCount").textContent = String(collected);
+  $("pageTitle").textContent = archivedView ? "Archive" : "Pets";
+  $(archivedView ? "archiveView" : "listView").setAttribute("aria-current", "page");
+  nodes.addPet.hidden = archivedView;
+  const visible = filterPets(pets, { query: nodes.searchPets.value, status: archivedView ? "collected" : "wanted", tag: selectedTag });
+  if (archivedView) visible.sort((a, b) => (Date.parse(b.collectedAt) || 0) - (Date.parse(a.collectedAt) || 0));
   for (const card of nodes.petGrid.querySelectorAll(".pet-card")) card.remove();
   const fragment = document.createDocumentFragment();
   visible.forEach(pet => fragment.append(petCard(pet)));
   nodes.petGrid.insertBefore(fragment, nodes.emptyState);
-  nodes.emptyState.hidden = visible.length > 0 || total === 0;
+  nodes.emptyState.hidden = visible.length > 0 || (!archivedView && !nodes.searchPets.value.trim() && selectedTag === "all");
+  nodes.emptyState.querySelector("p").textContent = archivedView && !collected ? "No archived pets yet." : "No pets match the current filters.";
 }
 
 function previewImage() {
@@ -258,7 +319,6 @@ function previewImage() {
 function openPet(pet = null) {
   editingId = pet?.id || null;
   nodes.petForm.reset();
-  formCustomTags = [];
   formSelectedTags = new Set((pet?.tags || []).map(tagKey));
   renderFormTags();
   nodes.petName.setCustomValidity("");
@@ -280,8 +340,10 @@ $("closeDialog").addEventListener("click", () => nodes.petDialog.close());
 $("cancelDialog").addEventListener("click", () => nodes.petDialog.close());
 nodes.petDialog.addEventListener("close", () => {
   if ($("customTagDialog").open) $("customTagDialog").close();
+  if ($("tagLibraryDialog").open) $("tagLibraryDialog").close();
   document.body.classList.remove("modal-open");
   clearTimeout(previewTimer);
+  syncToastHost();
 });
 nodes.petDialog.addEventListener("click", event => {
   if (event.target !== nodes.petDialog) return;
@@ -300,6 +362,40 @@ $("tagChoices").addEventListener("change", event => {
   else formSelectedTags.delete(input.value);
 });
 $("showCustomTag").addEventListener("click", openCustomTag);
+for (const id of ["manageTags", "filterManageTags"]) $(id).addEventListener("click", openTagLibrary);
+$("closeTagLibrary").addEventListener("click", () => $("tagLibraryDialog").close());
+$("tagLibraryDialog").addEventListener("click", event => {
+  if (event.target !== $("tagLibraryDialog")) return;
+  const rect = $("tagLibraryDialog").getBoundingClientRect();
+  if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) $("tagLibraryDialog").close();
+});
+for (const id of ["customTagDialog", "tagLibraryDialog"]) $(id).addEventListener("close", () => {
+  syncToastHost();
+  if (!document.querySelector("dialog[open]")) document.body.classList.remove("modal-open");
+});
+$("tagLibraryList").addEventListener("click", event => {
+  const button = event.target.closest("button[data-tag]");
+  if (!button) return;
+  const key = button.dataset.tag;
+  const tag = customTags.find(item => tagKey(item) === key);
+  if (!tag) return;
+  const ids = new Set(pets.filter(pet => pet.tags.some(item => tagKey(item) === key)).map(pet => pet.id));
+  const wasSelected = formSelectedTags.has(key);
+  const editedPet = editingId;
+  const next = deleteCustomTag(pets, customTags, key);
+  if (!save(next.pets, null, next.customTags)) return;
+  formSelectedTags.delete(key);
+  renderFormTags();
+  renderTagLibrary();
+  notify(`${tag.name} deleted.`, () => {
+    const restored = pets.map(pet => ids.has(pet.id) && !pet.tags.some(item => tagKey(item) === key) ? { ...pet, tags: [...pet.tags, tag] } : pet);
+    if (!save(restored, null, [...customTags, tag])) return false;
+    if (wasSelected && editingId === editedPet) formSelectedTags.add(key);
+    renderFormTags();
+    renderTagLibrary();
+    return true;
+  });
+});
 for (const id of ["cancelCustomTag", "closeCustomTag"]) $(id).addEventListener("click", () => $("customTagDialog").close());
 $("customTagDialog").addEventListener("click", event => {
   if (event.target !== $("customTagDialog")) return;
@@ -331,6 +427,7 @@ nodes.petForm.addEventListener("submit", event => {
     image,
     tags: formTagOptions.filter(tag => formSelectedTags.has(tagKey(tag))),
     collected: previous?.collected || false,
+    collectedAt: previous?.collectedAt || null,
     createdAt: previous?.createdAt || new Date().toISOString(),
   });
   if (save(previous ? pets.map(item => item.id === pet.id ? pet : item) : [...pets, pet])) {
@@ -347,10 +444,15 @@ nodes.petGrid.addEventListener("click", event => {
   if (!pet) return;
   if (button.dataset.action === "edit") openPet(pet);
   if (button.dataset.action === "delete") {
+    if (!archivedView || !pet.collected) return;
     const index = pets.findIndex(item => item.id === id);
     if (save(pets.filter(item => item.id !== id), { id, action: "delete" })) {
-      removed.push({ pet, index });
-      notify(removed.length > 1 ? `${removed.length} pets removed.` : `${pet.name} removed.`, true);
+      notify(`${pet.name} deleted.`, () => {
+        if (pets.some(item => item.id === id)) return false;
+        const restored = [...pets];
+        restored.splice(Math.min(index, restored.length), 0, pet);
+        return save(restored);
+      });
     }
   }
 });
@@ -362,27 +464,32 @@ nodes.petGrid.addEventListener("change", event => {
   const pet = pets.find(item => item.id === id);
   if (!pet) return;
   const collected = checkbox.checked;
-  if (!save(pets.map(item => item.id === id ? { ...item, collected } : item), { id, action: "collect" })) checkbox.checked = pet.collected;
+  const updated = setCollected(pet, collected);
+  if (!save(pets.map(item => item.id === id ? updated : item), { id, action: "collect" })) { checkbox.checked = pet.collected; return; }
+  notify(`${pet.name} moved to ${collected ? "Archive" : "List"}.`, () => {
+    if (!pets.some(item => item.id === id)) return false;
+    return save(pets.map(item => item.id === id ? { ...item, collected: pet.collected, collectedAt: pet.collectedAt } : item));
+  }, collected);
 });
 
 nodes.undoDelete.addEventListener("click", () => {
-  const restored = [...pets];
-  for (const { pet, index } of [...removed].reverse()) if (!restored.some(item => item.id === pet.id)) restored.splice(Math.min(index, restored.length), 0, pet);
-  if (save(restored)) { removed = []; notify("Pets restored."); }
+  const undo = undoAction;
+  if (undo && undo()) notify("Change undone.");
 });
 $("dismissToast").addEventListener("click", hideToast);
 nodes.searchPets.addEventListener("input", render);
-nodes.tagFilter.addEventListener("change", render);
-nodes.statusFilters.addEventListener("click", event => {
-  const button = event.target.closest("button[data-status]");
+nodes.tagFilterOptions.addEventListener("click", event => {
+  const button = event.target.closest("button[data-tag]");
   if (!button) return;
-  status = button.dataset.status;
+  selectedTag = button.dataset.tag;
+  nodes.tagFilterMenu.open = false;
   render();
+  nodes.tagFilterMenu.querySelector("summary").focus();
 });
 
 function exportCollection() {
   const recovery = unreadableData !== null;
-  const file = new Blob([recovery ? unreadableData : serialiseCollection(pets)], { type: "application/json" });
+  const file = new Blob([recovery ? unreadableData : serialiseCollection(pets, customTags)], { type: "application/json" });
   const url = URL.createObjectURL(file);
   const link = document.createElement("a");
   link.href = url;
@@ -403,14 +510,14 @@ nodes.importFile.addEventListener("change", async () => {
   if (!file) return;
   if (file.size > 3 * 1024 * 1024) { notify("Choose a backup smaller than 3 MB."); return; }
   try {
-    const incoming = parseCollection(await file.text());
-    const next = mergeCollection(pets, incoming);
+    const incoming = parseLibrary(await file.text());
+    const next = mergeCollection(pets, incoming.pets);
     const added = next.length - pets.length;
-    if (save(next)) notify(added ? `${added} ${added === 1 ? "pet" : "pets"} imported.` : "All pets in this backup are already in your collection.");
+    if (save(next, null, [...customTags, ...incoming.customTags])) notify(added ? `${added} ${added === 1 ? "pet" : "pets"} imported.` : "Backup imported.");
   } catch (error) { notify(error.message); }
 });
 
-for (const menu of [$("toolsMenu"), $("backupMenu")]) {
+for (const menu of [$("toolsMenu"), $("backupMenu"), nodes.tagFilterMenu]) {
   document.addEventListener("pointerdown", event => { if (!menu.contains(event.target)) menu.open = false; });
   menu.addEventListener("keydown", event => {
     if (event.key === "Escape") { menu.open = false; menu.querySelector("summary").focus(); }
@@ -418,14 +525,19 @@ for (const menu of [$("toolsMenu"), $("backupMenu")]) {
 }
 window.addEventListener("storage", event => {
   if (event.key !== STORAGE_KEY) return;
-  try { pets = event.newValue ? parseCollection(event.newValue) : []; unreadableData = null; render(); }
+  try {
+    const state = event.newValue ? parseLibrary(event.newValue) : { pets: [], customTags: [] };
+    pets = state.pets; customTags = state.customTags; unreadableData = null; hideToast(); render();
+    if (nodes.petDialog.open) renderFormTags();
+    if ($("tagLibraryDialog").open) renderTagLibrary();
+  }
   catch { notify("An update from another tab could not be read. Your current view has been kept."); }
 });
 
 try {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored) {
-    try { pets = parseCollection(stored); }
+    try { const state = parseLibrary(stored); pets = state.pets; customTags = state.customTags; }
     catch { unreadableData = stored; notify("Saved data could not be read. Export a backup before starting again."); }
   }
 } catch { notify("This browser has disabled local storage. Enable it to keep your collection."); }

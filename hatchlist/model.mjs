@@ -54,6 +54,7 @@ export function availableTags(pets, additional = []) {
 
 export function imageUrl(value) {
   if (typeof value !== "string" || value.length > 2048) throw new Error("Paste a valid image URL.");
+  if (!value.trim()) return "";
   let url;
   try { url = new URL(value.trim()); } catch { throw new Error("Paste a valid image URL."); }
   if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) throw new Error("Use an http or https image URL.");
@@ -66,21 +67,48 @@ export function normalisePet(value) {
   if (!Array.isArray(value.tags) || typeof value.collected !== "boolean") throw new Error("The backup contains invalid pet details.");
   if (typeof value.createdAt !== "string" || !Number.isFinite(Date.parse(value.createdAt))) throw new Error("The backup contains an invalid date.");
   const tags = [...new Map(value.tags.map(normaliseTag).map(tag => [tagKey(tag), tag])).values()];
-  return { id: value.id, name: value.name.trim(), image: imageUrl(value.image), tags, collected: value.collected, createdAt: new Date(value.createdAt).toISOString() };
+  let collectedAt = null;
+  if (value.collected && value.collectedAt != null) {
+    if (typeof value.collectedAt !== "string" || !Number.isFinite(Date.parse(value.collectedAt))) throw new Error("The backup contains an invalid collection time.");
+    collectedAt = new Date(value.collectedAt).toISOString();
+  }
+  return { id: value.id, name: value.name.trim(), image: imageUrl(value.image ?? ""), tags, collected: value.collected, collectedAt, createdAt: new Date(value.createdAt).toISOString() };
 }
 
-export function parseCollection(json) {
+export function customTagLibrary(pets, tags = []) {
+  if (!Array.isArray(tags) || tags.some(tag => typeof tag !== "object" || !tag)) throw new Error("The backup contains an invalid tag library.");
+  return availableTags(pets, tags).filter(tag => typeof tag !== "string");
+}
+
+export function parseLibrary(json) {
   let source;
   try { source = JSON.parse(json); } catch { throw new Error("This file is not a valid Hatchlist backup."); }
-  if (!source || ![1, 2].includes(source.version) || !Array.isArray(source.pets)) throw new Error("Choose a Hatchlist backup exported from this app.");
+  if (!source || ![1, 2, 3].includes(source.version) || !Array.isArray(source.pets)) throw new Error("Choose a Hatchlist backup exported from this app.");
   if (source.pets.length > MAX_PETS) throw new Error(`A collection can hold up to ${MAX_PETS} pets.`);
   const pets = source.pets.map(normalisePet);
   if (new Set(pets.map(pet => pet.id)).size !== pets.length) throw new Error("The backup contains duplicate pet IDs.");
-  return pets;
+  return { pets, customTags: customTagLibrary(pets, source.customTags ?? []) };
 }
 
-export function serialiseCollection(pets) {
-  return JSON.stringify({ version: 2, pets }, null, 2);
+export function parseCollection(json) {
+  return parseLibrary(json).pets;
+}
+
+export function serialiseCollection(pets, customTags = []) {
+  return JSON.stringify({ version: 3, pets, customTags: customTagLibrary(pets, customTags) }, null, 2);
+}
+
+export function setCollected(pet, collected, now = new Date().toISOString()) {
+  return normalisePet({ ...pet, collected, collectedAt: collected ? now : null });
+}
+
+export function deleteCustomTag(pets, customTags, key) {
+  const tag = customTags.find(item => tagKey(item) === key);
+  if (!tag) throw new Error("Only custom tags can be deleted.");
+  return {
+    pets: pets.map(pet => ({ ...pet, tags: pet.tags.filter(item => tagKey(item) !== key) })),
+    customTags: customTags.filter(item => tagKey(item) !== key),
+  };
 }
 
 export function mergeCollection(current, incoming) {

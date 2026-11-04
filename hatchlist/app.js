@@ -206,12 +206,16 @@ function petCard(pet) {
   for (const tag of orderedTags(pet.tags)) tags.append(roleTag(tag));
   details.append(art, name, tags);
 
-  const collect = element("button", "collect-button");
-  collect.type = "button";
-  collect.dataset.action = "collect";
-  collect.setAttribute("aria-pressed", String(pet.collected));
-  collect.setAttribute("aria-label", `Mark ${pet.name} as ${pet.collected ? "not collected" : "collected"}`);
-  collect.append(icon(pet.collected ? "check" : "square"), document.createTextNode(pet.collected ? "Collected" : "Mark as collected"));
+  const collect = element("label", "collect-control");
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.dataset.action = "collect";
+  checkbox.checked = pet.collected;
+  checkbox.setAttribute("aria-label", `${pet.name} collected`);
+  const check = element("span", "collect-check");
+  check.setAttribute("aria-hidden", "true");
+  check.append(icon("check"));
+  collect.append(checkbox, check, element("span", "", "Collected"));
   card.append(remove, details, collect);
   return card;
 }
@@ -342,10 +346,6 @@ nodes.petGrid.addEventListener("click", event => {
   const pet = pets.find(item => item.id === id);
   if (!pet) return;
   if (button.dataset.action === "edit") openPet(pet);
-  if (button.dataset.action === "collect") {
-    const collected = !pet.collected;
-    if (save(pets.map(item => item.id === id ? { ...item, collected } : item), { id, action: "collect" })) notify(`${pet.name} ${collected ? "collected!" : "moved back to your wishlist."}`);
-  }
   if (button.dataset.action === "delete") {
     const index = pets.findIndex(item => item.id === id);
     if (save(pets.filter(item => item.id !== id), { id, action: "delete" })) {
@@ -353,6 +353,16 @@ nodes.petGrid.addEventListener("click", event => {
       notify(removed.length > 1 ? `${removed.length} pets removed.` : `${pet.name} removed.`, true);
     }
   }
+});
+
+nodes.petGrid.addEventListener("change", event => {
+  const checkbox = event.target.closest('input[data-action="collect"]');
+  if (!checkbox) return;
+  const id = checkbox.closest(".pet-card")?.dataset.petId;
+  const pet = pets.find(item => item.id === id);
+  if (!pet) return;
+  const collected = checkbox.checked;
+  if (!save(pets.map(item => item.id === id ? { ...item, collected } : item), { id, action: "collect" })) checkbox.checked = pet.collected;
 });
 
 nodes.undoDelete.addEventListener("click", () => {

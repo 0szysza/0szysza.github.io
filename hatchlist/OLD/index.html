@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0d17">
+<title>Hatchlist — Your BGSI pet wishlist</title>
+<meta name="description" content="Build your Bubble Gum Simulator INFINITY pet wishlist. Add pets, organise Secret and Infinity tags, and check off your collection.">
+<link rel="canonical" href="https://0szysza.github.io/hatchlist/OLD/">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="apple-touch-icon" href="./favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css?v=20261103-1">
+<meta property="og:title" content="Hatchlist">
+<meta property="og:description" content="Your next hatch, checked off. A personal BGSI pet wishlist.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://0szysza.github.io/hatchlist/OLD/">
+<meta property="og:site_name" content="Hatchlist">
+<script type="module" src="./app.js?v=20261103-1"></script>
+</head>
+<body>
+<svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><symbol id="i-egg" viewBox="0 0 24 24"><path d="M12 2C8 2 4 8 4 14a8 8 0 0 0 16 0c0-6-4-12-8-12" /></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" />
+  <path d="M12 5v14" /></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" />
+  <path d="m6 6 12 12" /></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34" />
+  <circle cx="11" cy="11" r="8" /></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M10 11v6" />
+  <path d="M14 11v6" />
+  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+  <path d="M3 6h18" />
+  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+  <circle cx="9" cy="9" r="2" />
+  <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 15V3" />
+  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+  <path d="m7 10 5 5 5-5" /></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 3v12" />
+  <path d="m17 8-5-5-5 5" />
+  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /></symbol>
+<symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
+  <path d="M20 2v4" />
+  <path d="M22 4h-4" />
+  <circle cx="4" cy="20" r="2" /></symbol>
+<symbol id="i-infinity" viewBox="0 0 24 24"><path d="M6 16c5 0 7-8 12-8a4 4 0 0 1 0 8c-5 0-7-8-12-8a4 4 0 1 0 0 8" /></symbol>
+<symbol id="i-square-pen" viewBox="0 0 24 24"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+  <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z" /></symbol>
+<symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol>
+<symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7" />
+  <path d="M19 12H5" /></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" />
+  <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+  <path d="M2 12h20" /></symbol>
+<symbol id="i-square" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" /></symbol></svg>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="home-link icon-button" href="/" aria-label="Back to home" title="Back to home"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg></a>
+    <a class="brand" href="./" aria-label="Hatchlist — Home"><img src="./favicon.svg" width="39" height="39" alt=""><span><strong>Hatchlist</strong><small>Your BGSI pet wishlist.</small></span></a>
+    <nav class="tool-switcher" aria-label="Switch tool"><details class="tool-menu" id="toolsMenu">
+      <summary><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg><span>Tools</span><svg class="icon chevron" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary>
+      <div class="tool-menu-list">
+        <a href="/trackccu/"><img src="/trackccu/favicon.png" width="18" height="18" alt=""><span><strong>TrackCCU</strong><small>Track any Roblox Game CCU!</small></span></a>
+        <a href="/stat/"><img src="/stat/favicon.svg" width="18" height="18" alt=""><span><strong>BGSI Stat Calculator</strong><small>Track your BGSI stats!</small></span></a>
+        <a href="/hatchlist/OLD/" aria-current="page"><img src="./favicon.svg" width="18" height="18" alt=""><span><strong>Hatchlist</strong><small>Your BGSI pet wishlist.</small></span></a>
+      </div>
+    </details></nav>
+  </div>
+</header>
+<main class="page-shell">
+  <section class="page-intro" aria-labelledby="pageTitle">
+    <div class="intro-copy"><p class="eyebrow">Bubble Gum Simulator INFINITY</p><h1 id="pageTitle">Your hatchlist<span class="title-dot">.</span></h1><p class="intro-description">Pick your next pets. Check off every new catch.</p></div>
+    <div class="progress-panel"><div class="progress-heading"><span>Collection progress</span><strong><b id="collectedCount">0</b><span class="progress-separator"> / </span><b id="totalCount">0</b></strong></div><div class="progress-track" role="progressbar" aria-label="Collection progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="collectionProgress"><span id="progressFill"></span></div><p id="progressCaption">Your first pet is one click away.</p></div>
+  </section>
+  <section class="collection-tools" aria-label="Collection controls">
+    <label class="search-field"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input type="search" id="searchPets" aria-label="Search pets" placeholder="Search your pets…" maxlength="100" autocomplete="off"></label>
+    <div class="status-filters" id="statusFilters" role="group" aria-label="Pet status">
+      <button type="button" data-status="all" aria-pressed="true">All <span id="allCount">0</span></button>
+      <button type="button" data-status="wanted" aria-pressed="false">To get <span id="wantedCount">0</span></button>
+      <button type="button" data-status="collected" aria-pressed="false">Collected <span id="doneCount">0</span></button>
+    </div>
+    <label class="tag-filter"><span class="sr-only">Filter by tag</span><select id="tagFilter"><option value="all">All tags</option><option value="Secret">Secret</option><option value="Infinity">Infinity</option></select><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></label>
+    <details class="backup-menu" id="backupMenu"><summary class="icon-button" aria-label="Collection backup" title="Collection backup"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg></summary><div class="backup-options"><strong>Your collection, backed up.</strong><button type="button" id="exportList"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Export backup</button><button type="button" id="importList"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>Import backup</button><small>Import adds pets to this browser.</small></div></details>
+    <input id="importFile" type="file" accept=".json,application/json" hidden>
+  </section>
+  <div class="collection-meta"><span id="visibleCount">Your collection</span><span class="local-save"><span aria-hidden="true"></span>Saved in this browser</span></div>
+  <section class="pet-grid" id="petGrid" aria-label="Pet collection">
+    <button class="add-card" id="addPet" type="button" aria-label="Add a pet"><span class="add-icon"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></span><strong>Add a pet</strong><small>One step closer to your collection.</small></button>
+    <div class="empty-state" id="emptyState"><div class="empty-illustration"><svg class="icon" aria-hidden="true"><use href="#i-egg"/></svg><span></span><span></span></div><h2>A little room for big goals.</h2><p>Add a pet with its image and tags.<br>Then enjoy checking it off.</p></div>
+  </section>
+  <noscript><p class="notice">Enable JavaScript to add pets and save your collection.</p></noscript>
+</main>
+<footer class="site-footer"><div><a href="./" class="footer-brand"><img src="./favicon.svg" width="17" height="17" alt="">Hatchlist</a><span>A little closer to your dream collection.</span></div><p>Your list is saved on this device. <button type="button" id="footerExport">Keep a backup.</button></p></footer>
+<dialog class="pet-dialog" id="petDialog" aria-labelledby="dialogTitle">
+  <form id="petForm">
+    <div class="dialog-heading"><div><p class="eyebrow">Make room for the next one</p><h2 id="dialogTitle">Add a pet</h2></div><button type="button" class="icon-button" id="closeDialog" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+    <div class="pet-form-body">
+      <div class="image-preview" id="imagePreview"><svg class="icon preview-egg" id="previewEgg" aria-hidden="true"><use href="#i-egg"/></svg><img id="previewImage" alt="Pet image preview" hidden referrerpolicy="no-referrer"><span id="previewCaption">Image preview</span></div>
+      <div class="form-fields">
+        <label class="form-field" for="petName">Pet name<input id="petName" name="name" type="text" maxlength="80" placeholder="e.g. Giant Robot" required autocomplete="off"></label>
+        <label class="form-field" for="petImage">Image URL<input id="petImage" name="image" type="url" maxlength="2048" placeholder="https://…/pet.webp" required autocomplete="off" aria-describedby="imageHint"></label>
+        <p class="field-hint" id="imageHint">Paste a direct link to the pet image.</p>
+        <fieldset class="tag-options"><legend>Tags <span>optional</span></legend>
+          <label class="tag-option"><input type="checkbox" name="tags" value="Secret"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg><span>Secret</span><svg class="icon tag-check" aria-hidden="true"><use href="#i-check"/></svg></label>
+          <label class="tag-option"><input type="checkbox" name="tags" value="Infinity"><svg class="icon" aria-hidden="true"><use href="#i-infinity"/></svg><span>Infinity</span><svg class="icon tag-check" aria-hidden="true"><use href="#i-check"/></svg></label>
+        </fieldset>
+      </div>
+    </div>
+    <div class="dialog-actions"><button type="button" class="secondary-button" id="cancelDialog">Cancel</button><button type="submit" class="primary-button" id="savePet"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg><span>Add pet</span></button></div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden><span id="toastMessage"></span><button type="button" id="undoDelete" hidden>Undo</button><button type="button" class="toast-dismiss" id="dismissToast" aria-label="Dismiss notification"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+</body>
+</html>
+

@@ -219,7 +219,7 @@ function save(next, focus, nextTags = customTags) {
   render();
   if (focus) {
     const card = [...nodes.petGrid.querySelectorAll(".pet-card")].find(node => node.dataset.petId === focus.id);
-    const fallback = nodes.petGrid.querySelector('input[data-action="collect"]') || (archivedView ? $("archiveView") : nodes.addPet);
+    const fallback = nodes.petGrid.querySelector('button[data-action="collect"]') || (archivedView ? $("archiveView") : nodes.addPet);
     (card?.querySelector(`[data-action="${focus.action}"]`) || fallback).focus({ preventScroll: true });
   }
   return true;
@@ -281,7 +281,7 @@ function petCard(pet) {
     collect.append(check);
   }
   collect.append(element("span", "", archivedView ? "Return to checklist" : "Mark collected"));
-  if (archivedView) card.append(remove);
+  card.append(remove);
   card.append(details, collect);
   return card;
 }
@@ -454,7 +454,6 @@ nodes.petGrid.addEventListener("click", event => {
   if (button.dataset.action === "edit") openPet(pet);
   if (button.dataset.action === "collect") movePet(pet);
   if (button.dataset.action === "delete") {
-    if (!archivedView || !pet.collected) return;
     const index = pets.findIndex(item => item.id === id);
     if (save(pets.filter(item => item.id !== id), { id, action: "delete" })) {
       notify(`${pet.name} deleted.`, () => {
@@ -548,4 +547,5 @@ try {
   }
 } catch { notify("This browser has disabled local storage. Enable it to keep your collection."); }
 render();
+
 

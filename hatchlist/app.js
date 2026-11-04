@@ -60,8 +60,10 @@ function roleTag(tag) {
 
 function renderTagFilter() {
   const tags = orderedTags(availableTags(pets, customTags));
-  if (!tags.some(tag => tagKey(tag) === selectedTag)) selectedTag = "all";
-  const signature = JSON.stringify([tags, selectedTag]);
+  const viewPets = pets.filter(pet => pet.collected === archivedView);
+  const counts = new Map(tags.map(tag => [tagKey(tag), viewPets.filter(pet => pet.tags.some(item => tagKey(item) === tagKey(tag))).length]));
+  if (!counts.get(selectedTag)) selectedTag = "all";
+  const signature = JSON.stringify([tags, selectedTag, [...counts], viewPets.length]);
   if (signature === filterTagSignature) return;
   filterTagSignature = signature;
   nodes.tagFilterOptions.replaceChildren();
@@ -72,7 +74,13 @@ function renderTagFilter() {
     option.dataset.tag = key;
     option.setAttribute("aria-label", tag ? tagLabel(tag) : "All tags");
     option.setAttribute("aria-pressed", String(selectedTag === key));
-    option.append(tag ? roleTag(tag) : element("span", "", "All tags"), icon("check"));
+    const count = tag ? counts.get(key) : viewPets.length;
+    option.disabled = Boolean(tag && !count);
+    if (option.disabled) option.title = `No pets with this tag in ${archivedView ? "Archive" : "List"}`;
+    const meta = element("span", "tag-filter-meta");
+    meta.setAttribute("aria-hidden", "true");
+    meta.append(element("span", "", String(count)), icon("check"));
+    option.append(tag ? roleTag(tag) : element("span", "", "All tags"), meta);
     nodes.tagFilterOptions.append(option);
   }
   const current = tags.find(tag => tagKey(tag) === selectedTag);
@@ -290,7 +298,7 @@ function render() {
   for (const card of nodes.petGrid.querySelectorAll(".pet-card")) card.remove();
   const fragment = document.createDocumentFragment();
   visible.forEach(pet => fragment.append(petCard(pet)));
-  nodes.petGrid.insertBefore(fragment, nodes.emptyState);
+  nodes.petGrid.insertBefore(fragment, nodes.addPet);
   nodes.emptyState.hidden = visible.length > 0 || (!archivedView && !nodes.searchPets.value.trim() && selectedTag === "all");
   nodes.emptyState.querySelector("p").textContent = archivedView && !collected ? "No archived pets yet." : "No pets match the current filters.";
 }

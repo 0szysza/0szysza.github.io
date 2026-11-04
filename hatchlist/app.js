@@ -76,7 +76,7 @@ function renderTagFilter() {
     option.setAttribute("aria-pressed", String(selectedTag === key));
     const count = tag ? counts.get(key) : viewPets.length;
     option.disabled = Boolean(tag && !count);
-    if (option.disabled) option.title = `No pets with this tag in ${archivedView ? "Archive" : "List"}`;
+    if (option.disabled) option.title = `No pets with this tag in ${archivedView ? "Archive" : "Checklist"}`;
     const meta = element("span", "tag-filter-meta");
     meta.setAttribute("aria-hidden", "true");
     meta.append(element("span", "", String(count)), icon("check"));
@@ -269,17 +269,18 @@ function petCard(pet) {
     details.append(time);
   }
 
-  const collect = element("label", "collect-control");
-  const checkbox = document.createElement("input");
-  checkbox.type = "checkbox";
-  checkbox.dataset.action = "collect";
-  checkbox.checked = pet.collected;
-  checkbox.setAttribute("aria-label", `${pet.name} collected`);
-  collect.title = archivedView ? "Uncheck to return to List" : "Check to move to Archive";
-  const check = element("span", "collect-check");
-  check.setAttribute("aria-hidden", "true");
-  check.append(icon("check"));
-  collect.append(checkbox, check, element("span", "", "Collected"));
+  const collect = element("button", "collect-control" + (archivedView ? " is-restore" : ""));
+  collect.type = "button";
+  collect.dataset.action = "collect";
+  collect.setAttribute("aria-label", archivedView ? `Return ${pet.name} to checklist` : `Mark ${pet.name} as collected`);
+  if (archivedView) collect.append(icon("arrow-left"));
+  else {
+    const check = element("span", "collect-check");
+    check.setAttribute("aria-hidden", "true");
+    check.append(icon("check"));
+    collect.append(check);
+  }
+  collect.append(element("span", "", archivedView ? "Return to checklist" : "Mark collected"));
   if (archivedView) card.append(remove);
   card.append(details, collect);
   return card;
@@ -451,6 +452,7 @@ nodes.petGrid.addEventListener("click", event => {
   const pet = pets.find(item => item.id === id);
   if (!pet) return;
   if (button.dataset.action === "edit") openPet(pet);
+  if (button.dataset.action === "collect") movePet(pet);
   if (button.dataset.action === "delete") {
     if (!archivedView || !pet.collected) return;
     const index = pets.findIndex(item => item.id === id);
@@ -465,20 +467,16 @@ nodes.petGrid.addEventListener("click", event => {
   }
 });
 
-nodes.petGrid.addEventListener("change", event => {
-  const checkbox = event.target.closest('input[data-action="collect"]');
-  if (!checkbox) return;
-  const id = checkbox.closest(".pet-card")?.dataset.petId;
-  const pet = pets.find(item => item.id === id);
-  if (!pet) return;
-  const collected = checkbox.checked;
+function movePet(pet) {
+  const id = pet.id;
+  const collected = !pet.collected;
   const updated = setCollected(pet, collected);
-  if (!save(pets.map(item => item.id === id ? updated : item), { id, action: "collect" })) { checkbox.checked = pet.collected; return; }
-  notify(`${pet.name} moved to ${collected ? "Archive" : "List"}.`, () => {
+  if (!save(pets.map(item => item.id === id ? updated : item), { id, action: "collect" })) return;
+  notify(`${pet.name} moved to ${collected ? "Archive" : "Checklist"}.`, () => {
     if (!pets.some(item => item.id === id)) return false;
     return save(pets.map(item => item.id === id ? { ...item, collected: pet.collected, collectedAt: pet.collectedAt } : item));
   }, collected);
-});
+}
 
 nodes.undoDelete.addEventListener("click", () => {
   const undo = undoAction;
@@ -550,3 +548,4 @@ try {
   }
 } catch { notify("This browser has disabled local storage. Enable it to keep your collection."); }
 render();
+

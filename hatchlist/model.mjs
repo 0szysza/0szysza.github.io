@@ -9,6 +9,9 @@ export const TAG_DEFINITIONS = Object.freeze([
   { name: "Mythic", color: "#783DF7" },
   { name: "XL", color: "#FFCF54" },
   { name: "Super", color: "#FFF931" },
+  { name: "Limited", color: "#32FF00" },
+  { name: "Perm", color: "#FF8D1C" },
+  { name: "Bounty", color: "#FF0000" },
 ].map(tag => Object.freeze(tag)));
 export const TAGS = Object.freeze(TAG_DEFINITIONS.map(tag => tag.name));
 export const MAX_PETS = 1000;

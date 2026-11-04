@@ -1,4 +1,4 @@
-import { STORAGE_KEY, MAX_PETS, imageUrl, normalisePet, normaliseTag, normaliseHex, tagKey, tagLabel, tagDetails, availableTags, customTagLibrary, parseLibrary, serialiseCollection, mergeCollection, filterPets, setCollected, setArchived, deleteCustomTag } from "./model.mjs?v=20261104-manual-archive";
+import { STORAGE_KEY, MAX_PETS, imageUrl, normalisePet, normaliseTag, normaliseHex, tagKey, tagLabel, tagDetails, availableTags, customTagLibrary, parseLibrary, serialiseCollection, mergeCollection, filterPets, setCollected, setArchived, deleteCustomTag } from "./model.mjs?v=20261104-tag-dropdown";
 
 const $ = id => document.getElementById(id);
 const nodes = Object.fromEntries(["petGrid", "addPet", "emptyState", "searchPets", "tagFilterMenu", "tagFilterOptions", "petDialog", "petForm", "petName", "petImage", "previewImage", "previewEgg", "toast", "toastMessage", "undoDelete", "importFile"].map(id => [id, $(id)]));
@@ -14,7 +14,7 @@ let unreadableData = null;
 let filterTagSignature = "";
 let formTagOptions = [];
 let formSelectedTags = new Set();
-const TAG_ORDER = ["Shiny", "Mythic", "XL", "Super", "Secret", "Celestial", "Infinity", "VOID", "Legendary"];
+const TAG_ORDER = ["Shiny", "Mythic", "XL", "Super", "Secret", "Celestial", "Infinity", "VOID", "Legendary", "Limited", "Perm", "Bounty"];
 
 function orderedTags(tags) {
   const rank = tag => typeof tag === "string" ? TAG_ORDER.indexOf(tag) : TAG_ORDER.length;
@@ -92,20 +92,50 @@ function renderFormTags() {
   const host = $("tagChoices");
   host.replaceChildren();
   for (const tag of formTagOptions) {
-    const label = element("label", "tag-option");
-    tagAppearance(label, tag);
+    const label = element("label", "tag-menu-option");
     const input = document.createElement("input");
     input.type = "checkbox";
     input.name = "tags";
     input.value = tagKey(tag);
     input.checked = formSelectedTags.has(input.value);
     input.setAttribute("aria-label", tagLabel(tag));
-    const selected = element("span", "tag-selection");
+    const selected = element("span", "tag-menu-check");
     selected.setAttribute("aria-hidden", "true");
     selected.append(icon("check"));
-    label.append(input, tagDot(), element("span", "tag-name", tagLabel(tag)), selected);
+    label.append(input, roleTag(tag), selected);
     host.append(label);
   }
+  renderFormTagSummary();
+}
+
+function renderFormTagSummary() {
+  const selected = formTagOptions.filter(tag => formSelectedTags.has(tagKey(tag)));
+  const summary = $("petTagsSummary");
+  summary.replaceChildren();
+  if (!selected.length) summary.textContent = "Select tags";
+  else {
+    selected.slice(0, 3).forEach(tag => summary.append(roleTag(tag)));
+    if (selected.length > 3) summary.append(element("span", "selected-tag-count", `+${selected.length - 3}`));
+  }
+}
+
+function closeFormTagMenu() {
+  const menu = $("petTagsPopover");
+  if (menu.matches(":popover-open")) menu.hidePopover();
+}
+
+function positionFormTagMenu() {
+  const menu = $("petTagsPopover");
+  const trigger = $("petTagsToggle").getBoundingClientRect();
+  const width = Math.min(trigger.width, window.innerWidth - 24);
+  const below = window.innerHeight - trigger.bottom - 20;
+  const above = trigger.top - 20;
+  const opensBelow = below >= 220 || below >= above;
+  menu.style.width = `${width}px`;
+  menu.style.left = `${Math.max(12, Math.min(trigger.left, window.innerWidth - width - 12))}px`;
+  menu.style.top = opensBelow ? `${trigger.bottom + 8}px` : "auto";
+  menu.style.bottom = opensBelow ? "auto" : `${window.innerHeight - trigger.top + 8}px`;
+  menu.style.maxHeight = `${Math.min(360, Math.max(120, opensBelow ? below : above))}px`;
 }
 
 function renderTagLibrary() {
@@ -126,12 +156,14 @@ function renderTagLibrary() {
 
 function openTagLibrary() {
   nodes.tagFilterMenu.open = false;
+  closeFormTagMenu();
   renderTagLibrary();
   $("tagLibraryDialog").showModal();
   document.body.classList.add("modal-open");
 }
 
 function openCustomTag() {
+  closeFormTagMenu();
   $("customTagForm").reset();
   if (!$("colourSwatches").childElementCount) renderColourPalette();
   $("customTagName").setCustomValidity("");
@@ -339,6 +371,7 @@ function previewImage() {
 }
 
 function openPet(pet = null) {
+  closeFormTagMenu();
   editingId = pet?.id || null;
   nodes.petForm.reset();
   formSelectedTags = new Set((pet?.tags || []).map(tagKey));
@@ -361,6 +394,7 @@ nodes.addPet.addEventListener("click", () => openPet());
 $("closeDialog").addEventListener("click", () => nodes.petDialog.close());
 $("cancelDialog").addEventListener("click", () => nodes.petDialog.close());
 nodes.petDialog.addEventListener("close", () => {
+  closeFormTagMenu();
   if ($("customTagDialog").open) $("customTagDialog").close();
   if ($("tagLibraryDialog").open) $("tagLibraryDialog").close();
   document.body.classList.remove("modal-open");
@@ -382,7 +416,14 @@ $("tagChoices").addEventListener("change", event => {
   if (input.name !== "tags") return;
   if (input.checked) formSelectedTags.add(input.value);
   else formSelectedTags.delete(input.value);
+  renderFormTagSummary();
 });
+$("petTagsPopover").addEventListener("beforetoggle", event => {
+  if (event.newState === "open") positionFormTagMenu();
+});
+$("petTagsPopover").addEventListener("toggle", event => $("petTagsToggle").setAttribute("aria-expanded", String(event.newState === "open")));
+window.addEventListener("resize", () => { if ($("petTagsPopover").matches(":popover-open")) positionFormTagMenu(); });
+nodes.petDialog.addEventListener("scroll", () => { if ($("petTagsPopover").matches(":popover-open")) positionFormTagMenu(); }, { passive: true });
 $("showCustomTag").addEventListener("click", openCustomTag);
 for (const id of ["manageTags", "filterManageTags"]) $(id).addEventListener("click", openTagLibrary);
 $("closeTagLibrary").addEventListener("click", () => $("tagLibraryDialog").close());

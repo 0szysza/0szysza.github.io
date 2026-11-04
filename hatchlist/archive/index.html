@@ -12,13 +12,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/hatchlist/styles.css?v=20261104-manual-archive">
+<link rel="stylesheet" href="/hatchlist/styles.css?v=20261104-tag-dropdown">
 <meta property="og:title" content="Hatchlist">
 <meta property="og:description" content="Add BGSI pets, choose tags and mark them as collected.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://0szysza.github.io/hatchlist/archive/">
 <meta property="og:site_name" content="Hatchlist">
-<script type="module" src="/hatchlist/app.js?v=20261104-manual-archive"></script>
+<script type="module" src="/hatchlist/app.js?v=20261104-tag-dropdown"></script>
 </head>
 <body>
 <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><symbol id="i-egg" viewBox="0 0 24 24"><path d="M12 2C8 2 4 8 4 14a8 8 0 0 0 16 0c0-6-4-12-8-12" /></symbol>
@@ -107,9 +107,13 @@
       </div>
       <fieldset class="tag-options"><legend>Tags</legend>
         <div class="tag-picker">
-          <div class="tag-choices" id="tagChoices"></div>
+          <button class="pet-tags-toggle" id="petTagsToggle" type="button" popovertarget="petTagsPopover" aria-label="Choose tags" aria-expanded="false"><span id="petTagsSummary">Select tags</span><svg class="icon chevron" aria-hidden="true"><use href="#i-chevron-down"/></svg></button>
+          <div class="pet-tags-panel" id="petTagsPopover" popover="auto" aria-label="Pet tags">
+          <div class="tag-menu-list" id="tagChoices" role="group" aria-label="Available tags"></div>
+          <div class="tag-menu-actions">
           <button class="new-tag-button" type="button" id="showCustomTag" aria-haspopup="dialog" aria-controls="customTagDialog"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Custom tag</button>
           <button class="new-tag-button" type="button" id="manageTags" aria-haspopup="dialog" aria-controls="tagLibraryDialog">Manage tags</button>
+          </div></div>
         </div>
       </fieldset>
     </div>

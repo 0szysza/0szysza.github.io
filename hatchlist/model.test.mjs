@@ -35,9 +35,9 @@ test("existing version-one collections retain their pets, tags and status", () =
   assert.deepEqual(parseCollection(JSON.stringify({ version: 1, pets: [pet] })), [{ ...pet, archived: true }]);
 });
 
-test("all nine preset tags survive an export and import", () => {
+test("all twelve preset tags survive an export and import", () => {
   const tagged = { ...pet, tags: [...TAGS] };
-  assert.deepEqual(TAGS, ["Legendary", "Secret", "Celestial", "Infinity", "VOID", "Shiny", "Mythic", "XL", "Super"]);
+  assert.deepEqual(TAGS, ["Legendary", "Secret", "Celestial", "Infinity", "VOID", "Shiny", "Mythic", "XL", "Super", "Limited", "Perm", "Bounty"]);
   assert.deepEqual(parseCollection(serialiseCollection([tagged])), [tagged]);
 });
 

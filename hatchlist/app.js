@@ -1,4 +1,4 @@
-import { STORAGE_KEY, MAX_PETS, imageUrl, normalisePet, normaliseTag, normaliseHex, tagKey, tagLabel, tagDetails, availableTags, customTagLibrary, parseLibrary, serialiseCollection, mergeCollection, filterPets, setCollected, deleteCustomTag } from "./model.mjs?v=20261104-archive";
+import { STORAGE_KEY, MAX_PETS, imageUrl, normalisePet, normaliseTag, normaliseHex, tagKey, tagLabel, tagDetails, availableTags, customTagLibrary, parseLibrary, serialiseCollection, mergeCollection, filterPets, setCollected, setArchived, deleteCustomTag } from "./model.mjs?v=20261104-manual-archive";
 
 const $ = id => document.getElementById(id);
 const nodes = Object.fromEntries(["petGrid", "addPet", "emptyState", "searchPets", "tagFilterMenu", "tagFilterOptions", "petDialog", "petForm", "petName", "petImage", "previewImage", "previewEgg", "toast", "toastMessage", "undoDelete", "importFile"].map(id => [id, $(id)]));
@@ -60,7 +60,7 @@ function roleTag(tag) {
 
 function renderTagFilter() {
   const tags = orderedTags(availableTags(pets, customTags));
-  const viewPets = pets.filter(pet => pet.collected === archivedView);
+  const viewPets = pets.filter(pet => pet.archived === archivedView);
   const counts = new Map(tags.map(tag => [tagKey(tag), viewPets.filter(pet => pet.tags.some(item => tagKey(item) === tagKey(tag))).length]));
   if (!counts.get(selectedTag)) selectedTag = "all";
   const signature = JSON.stringify([tags, selectedTag, [...counts], viewPets.length]);
@@ -219,7 +219,7 @@ function save(next, focus, nextTags = customTags) {
   render();
   if (focus) {
     const card = [...nodes.petGrid.querySelectorAll(".pet-card")].find(node => node.dataset.petId === focus.id);
-    const fallback = nodes.petGrid.querySelector('button[data-action="collect"]') || (archivedView ? $("archiveView") : nodes.addPet);
+    const fallback = nodes.petGrid.querySelector('button[data-action="collect"], button[data-action="restore"]') || (archivedView ? $("listView") : nodes.addPet);
     (card?.querySelector(`[data-action="${focus.action}"]`) || fallback).focus({ preventScroll: true });
   }
   return true;
@@ -236,6 +236,17 @@ function petCard(pet) {
   remove.setAttribute("aria-label", "Delete " + pet.name);
   remove.title = "Delete pet";
   remove.append(icon("trash"));
+  const actions = element("div", "pet-actions");
+  if (!archivedView && pet.collected) {
+    const archive = element("button", "archive-pet");
+    archive.type = "button";
+    archive.dataset.action = "archive";
+    archive.setAttribute("aria-label", "Archive " + pet.name);
+    archive.title = "Move to Archive";
+    archive.append(icon("archive"));
+    actions.append(archive);
+  }
+  actions.append(remove);
 
   const details = element("button", "pet-details");
   details.type = "button";
@@ -269,10 +280,11 @@ function petCard(pet) {
     details.append(time);
   }
 
-  const collect = element("button", "collect-control" + (archivedView ? " is-restore" : ""));
+  const collect = element("button", "collect-control" + (archivedView ? " is-restore" : pet.collected ? " is-done" : ""));
   collect.type = "button";
-  collect.dataset.action = "collect";
-  collect.setAttribute("aria-label", archivedView ? `Return ${pet.name} to checklist` : `Mark ${pet.name} as collected`);
+  collect.dataset.action = archivedView ? "restore" : "collect";
+  collect.setAttribute("aria-label", archivedView ? `Return ${pet.name} to checklist` : `Mark ${pet.name} as ${pet.collected ? "not collected" : "collected"}`);
+  if (!archivedView) collect.setAttribute("aria-pressed", String(pet.collected));
   if (archivedView) collect.append(icon("arrow-left"));
   else {
     const check = element("span", "collect-check");
@@ -280,28 +292,29 @@ function petCard(pet) {
     check.append(icon("check"));
     collect.append(check);
   }
-  collect.append(element("span", "", archivedView ? "Return to checklist" : "Mark collected"));
-  card.append(remove);
+  collect.append(element("span", "", archivedView ? "Return to checklist" : pet.collected ? "Collected" : "Mark collected"));
+  card.append(actions);
   card.append(details, collect);
   return card;
 }
 
 function render() {
   renderTagFilter();
-  const collected = pets.filter(pet => pet.collected).length;
-  $("listCount").textContent = String(pets.length - collected);
-  $("archiveCount").textContent = String(collected);
+  const archived = pets.filter(pet => pet.archived).length;
+  $("listCount").textContent = String(pets.length - archived);
+  $("archiveCount").textContent = String(archived);
+  $("archiveView").hidden = archived === 0;
   $("pageTitle").textContent = archivedView ? "Archive" : "Pets";
   $(archivedView ? "archiveView" : "listView").setAttribute("aria-current", "page");
   nodes.addPet.hidden = archivedView;
-  const visible = filterPets(pets, { query: nodes.searchPets.value, status: archivedView ? "collected" : "wanted", tag: selectedTag });
+  const visible = filterPets(pets, { query: nodes.searchPets.value, view: archivedView ? "archive" : "checklist", tag: selectedTag });
   if (archivedView) visible.sort((a, b) => (Date.parse(b.collectedAt) || 0) - (Date.parse(a.collectedAt) || 0));
   for (const card of nodes.petGrid.querySelectorAll(".pet-card")) card.remove();
   const fragment = document.createDocumentFragment();
   visible.forEach(pet => fragment.append(petCard(pet)));
   nodes.petGrid.insertBefore(fragment, nodes.addPet);
   nodes.emptyState.hidden = visible.length > 0 || (!archivedView && !nodes.searchPets.value.trim() && selectedTag === "all");
-  nodes.emptyState.querySelector("p").textContent = archivedView && !collected ? "No archived pets yet." : "No pets match the current filters.";
+  nodes.emptyState.querySelector("p").textContent = archivedView && !archived ? "No archived pets yet." : "No pets match the current filters.";
 }
 
 function previewImage() {
@@ -436,6 +449,7 @@ nodes.petForm.addEventListener("submit", event => {
     image,
     tags: formTagOptions.filter(tag => formSelectedTags.has(tagKey(tag))),
     collected: previous?.collected || false,
+    archived: previous?.archived || false,
     collectedAt: previous?.collectedAt || null,
     createdAt: previous?.createdAt || new Date().toISOString(),
   });
@@ -453,6 +467,8 @@ nodes.petGrid.addEventListener("click", event => {
   if (!pet) return;
   if (button.dataset.action === "edit") openPet(pet);
   if (button.dataset.action === "collect") movePet(pet);
+  if (button.dataset.action === "archive" && pet.collected) archivePet(pet, true);
+  if (button.dataset.action === "restore") archivePet(pet, false);
   if (button.dataset.action === "delete") {
     const index = pets.findIndex(item => item.id === id);
     if (save(pets.filter(item => item.id !== id), { id, action: "delete" })) {
@@ -471,10 +487,19 @@ function movePet(pet) {
   const collected = !pet.collected;
   const updated = setCollected(pet, collected);
   if (!save(pets.map(item => item.id === id ? updated : item), { id, action: "collect" })) return;
-  notify(`${pet.name} moved to ${collected ? "Archive" : "Checklist"}.`, () => {
+  notify(`${pet.name} marked as ${collected ? "collected" : "not collected"}.`, () => {
     if (!pets.some(item => item.id === id)) return false;
-    return save(pets.map(item => item.id === id ? { ...item, collected: pet.collected, collectedAt: pet.collectedAt } : item));
-  }, collected);
+    return save(pets.map(item => item.id === id ? { ...item, collected: pet.collected, archived: pet.archived, collectedAt: pet.collectedAt } : item));
+  });
+}
+
+function archivePet(pet, archived) {
+  const updated = setArchived(pet, archived);
+  if (!save(pets.map(item => item.id === pet.id ? updated : item), { id: pet.id, action: archived ? "archive" : "restore" })) return;
+  notify(`${pet.name} moved to ${archived ? "Archive" : "Checklist"}.`, () => {
+    if (!pets.some(item => item.id === pet.id)) return false;
+    return save(pets.map(item => item.id === pet.id ? { ...item, archived: pet.archived } : item));
+  }, archived);
 }
 
 nodes.undoDelete.addEventListener("click", () => {

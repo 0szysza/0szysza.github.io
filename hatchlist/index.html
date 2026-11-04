@@ -12,13 +12,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/hatchlist/styles.css?v=20261104-nav-delete">
+<link rel="stylesheet" href="/hatchlist/styles.css?v=20261104-manual-archive">
 <meta property="og:title" content="Hatchlist">
 <meta property="og:description" content="Add BGSI pets, choose tags and mark them as collected.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://0szysza.github.io/hatchlist/">
 <meta property="og:site_name" content="Hatchlist">
-<script type="module" src="/hatchlist/app.js?v=20261104-nav-delete"></script>
+<script type="module" src="/hatchlist/app.js?v=20261104-manual-archive"></script>
 </head>
 <body>
 <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><symbol id="i-egg" viewBox="0 0 24 24"><path d="M12 2C8 2 4 8 4 14a8 8 0 0 0 16 0c0-6-4-12-8-12" /></symbol>
@@ -29,6 +29,7 @@
   <path d="m6 6 12 12" /></symbol>
 <symbol id="i-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34" />
   <circle cx="11" cy="11" r="8" /></symbol>
+<symbol id="i-archive" viewBox="0 0 24 24"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></symbol>
 <symbol id="i-trash" viewBox="0 0 24 24"><path d="M10 11v6" />
   <path d="M14 11v6" />
   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
@@ -61,7 +62,7 @@
   <div class="header-inner">
     <a class="home-link icon-button" href="/" aria-label="Back to Tools" title="Back to Tools"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow-left"/></svg></a>
     <a class="brand" href="/hatchlist/" aria-label="Hatchlist — Home"><img src="/hatchlist/favicon.svg?v=20261103-gradient" width="40" height="40" alt=""><span><strong>Hatchlist</strong><small>Your BGSI pet wishlist.</small></span></a>
-    <nav class="view-tabs" aria-label="Collection views"><a id="listView" href="/hatchlist/">Checklist <span id="listCount">0</span></a><a id="archiveView" href="/hatchlist/archive/">Archive <span id="archiveCount">0</span></a></nav>
+    <nav class="view-tabs" aria-label="Collection views"><a id="listView" href="/hatchlist/">Checklist <span id="listCount">0</span></a><a id="archiveView" href="/hatchlist/archive/" hidden>Archive <span id="archiveCount">0</span></a></nav>
     <nav class="tool-switcher" aria-label="Switch tool"><details class="tool-menu" id="toolsMenu">
       <summary aria-label="Tools"><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg><span>Tools</span><svg class="icon chevron" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary>
       <div class="tool-menu-list">

@@ -65,6 +65,9 @@ export function normalisePet(value) {
   if (!value || typeof value !== "object" || typeof value.id !== "string" || !/^[a-zA-Z0-9_-]{1,100}$/.test(value.id)) throw new Error("The backup contains an invalid pet.");
   if (typeof value.name !== "string" || !value.name.trim() || value.name.trim().length > 80) throw new Error("Pet names must contain 1–80 characters.");
   if (!Array.isArray(value.tags) || typeof value.collected !== "boolean") throw new Error("The backup contains invalid pet details.");
+  if (value.archived !== undefined && typeof value.archived !== "boolean") throw new Error("The backup contains an invalid archive state.");
+  const archived = value.archived ?? false;
+  if (archived && !value.collected) throw new Error("Only collected pets can be archived.");
   if (typeof value.createdAt !== "string" || !Number.isFinite(Date.parse(value.createdAt))) throw new Error("The backup contains an invalid date.");
   const tags = [...new Map(value.tags.map(normaliseTag).map(tag => [tagKey(tag), tag])).values()];
   let collectedAt = null;
@@ -72,7 +75,7 @@ export function normalisePet(value) {
     if (typeof value.collectedAt !== "string" || !Number.isFinite(Date.parse(value.collectedAt))) throw new Error("The backup contains an invalid collection time.");
     collectedAt = new Date(value.collectedAt).toISOString();
   }
-  return { id: value.id, name: value.name.trim(), image: imageUrl(value.image ?? ""), tags, collected: value.collected, collectedAt, createdAt: new Date(value.createdAt).toISOString() };
+  return { id: value.id, name: value.name.trim(), image: imageUrl(value.image ?? ""), tags, collected: value.collected, archived, collectedAt, createdAt: new Date(value.createdAt).toISOString() };
 }
 
 export function customTagLibrary(pets, tags = []) {
@@ -83,9 +86,9 @@ export function customTagLibrary(pets, tags = []) {
 export function parseLibrary(json) {
   let source;
   try { source = JSON.parse(json); } catch { throw new Error("This file is not a valid Hatchlist backup."); }
-  if (!source || ![1, 2, 3].includes(source.version) || !Array.isArray(source.pets)) throw new Error("Choose a Hatchlist backup exported from this app.");
+  if (!source || ![1, 2, 3, 4].includes(source.version) || !Array.isArray(source.pets)) throw new Error("Choose a Hatchlist backup exported from this app.");
   if (source.pets.length > MAX_PETS) throw new Error(`A collection can hold up to ${MAX_PETS} pets.`);
-  const pets = source.pets.map(normalisePet);
+  const pets = source.pets.map(pet => normalisePet(source.version < 4 && pet && typeof pet === "object" ? { ...pet, archived: pet.collected } : pet));
   if (new Set(pets.map(pet => pet.id)).size !== pets.length) throw new Error("The backup contains duplicate pet IDs.");
   return { pets, customTags: customTagLibrary(pets, source.customTags ?? []) };
 }
@@ -95,11 +98,15 @@ export function parseCollection(json) {
 }
 
 export function serialiseCollection(pets, customTags = []) {
-  return JSON.stringify({ version: 3, pets, customTags: customTagLibrary(pets, customTags) }, null, 2);
+  return JSON.stringify({ version: 4, pets, customTags: customTagLibrary(pets, customTags) }, null, 2);
 }
 
 export function setCollected(pet, collected, now = new Date().toISOString()) {
-  return normalisePet({ ...pet, collected, collectedAt: collected ? now : null });
+  return normalisePet({ ...pet, collected, archived: collected ? (pet.archived ?? false) : false, collectedAt: collected ? now : null });
+}
+
+export function setArchived(pet, archived) {
+  return normalisePet({ ...pet, archived });
 }
 
 export function deleteCustomTag(pets, customTags, key) {
@@ -118,7 +125,8 @@ export function mergeCollection(current, incoming) {
   return [...current, ...additions];
 }
 
-export function filterPets(pets, { query = "", status = "all", tag = "all" } = {}) {
+export function filterPets(pets, { query = "", status = "all", tag = "all", view = "all" } = {}) {
   const term = query.trim().toLocaleLowerCase();
-  return pets.filter(pet => (!term || pet.name.toLocaleLowerCase().includes(term)) && (status === "all" || pet.collected === (status === "collected")) && (tag === "all" || pet.tags.some(item => tagKey(item) === tag)));
+  return pets.filter(pet => (!term || pet.name.toLocaleLowerCase().includes(term)) && (view === "all" || Boolean(pet.archived) === (view === "archive")) && (status === "all" || pet.collected === (status === "collected")) && (tag === "all" || pet.tags.some(item => tagKey(item) === tag)));
 }
+

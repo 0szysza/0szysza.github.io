@@ -12,13 +12,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/hatchlist/styles.css?v=20261104-library-create">
+<link rel="stylesheet" href="/hatchlist/styles.css?v=20261108-drop-chance">
 <meta property="og:title" content="Hatchlist">
 <meta property="og:description" content="Add BGSI pets, choose tags and mark them as collected.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://0szysza.github.io/hatchlist/archive/">
 <meta property="og:site_name" content="Hatchlist">
-<script type="module" src="/hatchlist/app.js?v=20261104-tag-colours"></script>
+<script type="module" src="/hatchlist/app.js?v=20261108-drop-chance"></script>
 </head>
 <body>
 <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><symbol id="i-egg" viewBox="0 0 24 24"><path d="M12 2C8 2 4 8 4 14a8 8 0 0 0 16 0c0-6-4-12-8-12" /></symbol>
@@ -103,6 +103,7 @@
         <div class="pet-inputs">
           <label class="form-field" for="petName">Pet name<input id="petName" name="name" type="text" maxlength="80" placeholder="e.g. Giant Robot" required autocomplete="off"></label>
           <label class="form-field" for="petImage">Image URL<input id="petImage" name="image" type="url" maxlength="2048" placeholder="Leave empty for no image" autocomplete="off"></label>
+          <label class="form-field" for="petChance">Drop chance (optional)<input id="petChance" name="chance" type="text" maxlength="32" placeholder="e.g. 40B or 40,000,000,000" autocomplete="off"></label>
         </div>
       </div>
       <fieldset class="tag-options"><legend>Tags</legend>

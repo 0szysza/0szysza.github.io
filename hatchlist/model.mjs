@@ -64,6 +64,27 @@ export function imageUrl(value) {
   return url.href;
 }
 
+export function normaliseChance(value) {
+  const error = "Enter a positive number such as 40B or 40,000,000,000.";
+  if (typeof value !== "string" || value.length > 32) throw new Error(error);
+  const chance = value.trim().toUpperCase();
+  if (!chance) return "";
+
+  const compact = /^(\d+(?:\.\d+)?)\s*([KMBT])$/.exec(chance);
+  if (compact && /[1-9]/.test(compact[1])) return compact[1] + compact[2];
+
+  if (!/^(?:\d+|\d{1,3}(?:,\d{3})+|\d{1,3}(?:\s\d{3})+)$/.test(chance)) throw new Error(error);
+  const digits = chance.replace(/[,\s]/g, "").replace(/^0+/, "");
+  if (!digits) throw new Error(error);
+
+  const group = Math.min(Math.floor((digits.length - 1) / 3), 4);
+  if (!group) return digits;
+  const split = digits.length - group * 3;
+  const fraction = digits.slice(split).replace(/0+$/, "");
+  const number = fraction ? digits.slice(0, split) + "." + fraction : digits.slice(0, split);
+  return number + "KMBT"[group - 1];
+}
+
 export function normalisePet(value) {
   if (!value || typeof value !== "object" || typeof value.id !== "string" || !/^[a-zA-Z0-9_-]{1,100}$/.test(value.id)) throw new Error("The backup contains an invalid pet.");
   if (typeof value.name !== "string" || !value.name.trim() || value.name.trim().length > 80) throw new Error("Pet names must contain 1–80 characters.");
@@ -78,7 +99,8 @@ export function normalisePet(value) {
     if (typeof value.collectedAt !== "string" || !Number.isFinite(Date.parse(value.collectedAt))) throw new Error("The backup contains an invalid collection time.");
     collectedAt = new Date(value.collectedAt).toISOString();
   }
-  return { id: value.id, name: value.name.trim(), image: imageUrl(value.image ?? ""), tags, collected: value.collected, archived, collectedAt, createdAt: new Date(value.createdAt).toISOString() };
+  const chance = normaliseChance(value.chance ?? "");
+  return { id: value.id, name: value.name.trim(), image: imageUrl(value.image ?? ""), ...(chance ? { chance } : {}), tags, collected: value.collected, archived, collectedAt, createdAt: new Date(value.createdAt).toISOString() };
 }
 
 export function customTagLibrary(pets, tags = []) {

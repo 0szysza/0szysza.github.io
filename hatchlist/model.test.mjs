@@ -1,12 +1,31 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { TAGS, parseCollection, parseLibrary, serialiseCollection, mergeCollection, filterPets, imageUrl, normaliseTag, normaliseHex, tagKey, availableTags, setCollected, setArchived, deleteCustomTag } from "./model.mjs";
+import { TAGS, parseCollection, parseLibrary, serialiseCollection, mergeCollection, filterPets, imageUrl, normaliseChance, normaliseTag, normaliseHex, tagKey, availableTags, setCollected, setArchived, deleteCustomTag } from "./model.mjs";
 
 const pet = { id: "test-robot", name: "Giant Robot", image: "https://cdn.demand.gg/i/bgsi/pets/giant-robot/256.webp", tags: ["Secret", "Infinity"], collected: true, archived: false, collectedAt: null, createdAt: "2026-11-03T12:00:00.000Z" };
 
 test("backups preserve a pet's image, tags and collected state", () => {
   assert.deepEqual(parseCollection(serialiseCollection([pet])), [pet]);
 });
+test("drop chances accept optional compact and grouped values without rounding", () => {
+  for (const [input, expected] of [
+    ["", ""], ["  ", ""], ["40B", "40B"], ["2.5 m", "2.5M"],
+    ["40,000,000,000", "40B"], ["40000000000", "40B"], ["40 000 000 000", "40B"],
+    ["40,000,000,001", "40.000000001B"], ["1000000000000", "1T"], ["500", "500"],
+  ]) assert.equal(normaliseChance(input), expected);
+  for (const invalid of ["0", "0B", "-40B", "40,00", "oops", "1e9"]) {
+    assert.throws(() => normaliseChance(invalid));
+  }
+});
+
+test("drop chances persist in backups and through collection changes", () => {
+  const [withChance] = parseCollection(serialiseCollection([{ ...pet, chance: "40,000,000,000" }]));
+  assert.equal(withChance.chance, "40B");
+  assert.equal(setArchived(withChance, true).chance, "40B");
+  assert.equal(setCollected(withChance, false).chance, "40B");
+  assert.deepEqual(parseCollection(serialiseCollection([{ ...withChance, chance: "" }])), [pet]);
+});
+
 test("importing an older backup preserves the current pet and adds new pets", () => {
   const fresh = { ...pet, id: "new-pet", name: "Another pet", collected: false };
   const result = mergeCollection([pet], [{ ...pet, collected: false }, fresh]);

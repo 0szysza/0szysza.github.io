@@ -1,7 +1,7 @@
-import { STORAGE_KEY, MAX_PETS, imageUrl, normalisePet, normaliseTag, normaliseHex, tagKey, tagLabel, tagDetails, availableTags, customTagLibrary, parseLibrary, serialiseCollection, mergeCollection, filterPets, setCollected, setArchived, deleteCustomTag } from "./model.mjs?v=20261104-tag-dropdown";
+import { STORAGE_KEY, MAX_PETS, imageUrl, normaliseChance, normalisePet, normaliseTag, normaliseHex, tagKey, tagLabel, tagDetails, availableTags, customTagLibrary, parseLibrary, serialiseCollection, mergeCollection, filterPets, setCollected, setArchived, deleteCustomTag } from "./model.mjs?v=20261108-drop-chance";
 
 const $ = id => document.getElementById(id);
-const nodes = Object.fromEntries(["petGrid", "addPet", "emptyState", "searchPets", "tagFilterMenu", "tagFilterOptions", "petDialog", "petForm", "petName", "petImage", "previewImage", "previewEgg", "toast", "toastMessage", "undoDelete", "importFile"].map(id => [id, $(id)]));
+const nodes = Object.fromEntries(["petGrid", "addPet", "emptyState", "searchPets", "tagFilterMenu", "tagFilterOptions", "petDialog", "petForm", "petName", "petImage", "petChance", "previewImage", "previewEgg", "toast", "toastMessage", "undoDelete", "importFile"].map(id => [id, $(id)]));
 let pets = [];
 let customTags = [];
 let selectedTag = "all";
@@ -298,7 +298,14 @@ function petCard(pet) {
   art.append(fallback);
   if (pet.image) { image.src = pet.image; art.append(image); }
   const name = element("span", "pet-name");
-  name.append(element("span", "", pet.name), icon("square-pen"));
+  const nameText = element("span", "", pet.name);
+  const editIcon = icon("square-pen");
+  if (pet.chance) {
+    nameText.append(" ", element("span", "pet-chance", `1/${pet.chance}`), editIcon);
+    name.append(nameText);
+  } else {
+    name.append(nameText, editIcon);
+  }
   const tags = element("span", "pet-tags");
   for (const tag of orderedTags(pet.tags)) tags.append(roleTag(tag));
   details.append(art, name, tags);
@@ -379,11 +386,13 @@ function openPet(pet = null) {
   renderFormTags();
   nodes.petName.setCustomValidity("");
   nodes.petImage.setCustomValidity("");
+  nodes.petChance.setCustomValidity("");
   $("dialogTitle").textContent = pet ? `Edit ${pet.name}` : "Add a pet";
   $("savePet").replaceChildren(icon(pet ? "check" : "plus"), element("span", "", pet ? "Save changes" : "Add pet"));
   if (pet) {
     nodes.petName.value = pet.name;
     nodes.petImage.value = pet.image;
+    nodes.petChance.value = pet.chance ?? "";
   }
   previewImage();
   nodes.petDialog.showModal();
@@ -412,6 +421,7 @@ nodes.petName.addEventListener("input", () => {
   if (editingId) $("dialogTitle").textContent = `Edit ${nodes.petName.value.trim() || "pet"}`;
 });
 nodes.petImage.addEventListener("input", () => { nodes.petImage.setCustomValidity(""); previewImage(); });
+nodes.petChance.addEventListener("input", () => nodes.petChance.setCustomValidity(""));
 $("tagChoices").addEventListener("change", event => {
   const input = event.target;
   if (input.name !== "tags") return;
@@ -483,6 +493,9 @@ nodes.petForm.addEventListener("submit", event => {
   let image;
   try { image = imageUrl(nodes.petImage.value); }
   catch (error) { nodes.petImage.setCustomValidity(error.message); nodes.petImage.reportValidity(); return; }
+  let chance;
+  try { chance = normaliseChance(nodes.petChance.value); }
+  catch (error) { nodes.petChance.setCustomValidity(error.message); nodes.petChance.reportValidity(); return; }
   const previous = editingId ? pets.find(pet => pet.id === editingId) : null;
   if (editingId && !previous) { nodes.petDialog.close(); notify("This pet was removed in another tab."); return; }
   if (!previous && pets.length >= MAX_PETS) { notify(`Your collection can hold up to ${MAX_PETS} pets.`); return; }
@@ -490,6 +503,7 @@ nodes.petForm.addEventListener("submit", event => {
     id: previous?.id || crypto.randomUUID(),
     name: nodes.petName.value,
     image,
+    chance,
     tags: formTagOptions.filter(tag => formSelectedTags.has(tagKey(tag))),
     collected: previous?.collected || false,
     archived: previous?.archived || false,

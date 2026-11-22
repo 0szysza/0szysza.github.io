@@ -17,34 +17,35 @@
     :focus-visible{outline:2px solid #5cddfa;outline-offset:3px}
     main{width:min(100% - 48px,1180px);padding:44px 0}
     h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
-    .choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px;width:min(100%,940px);margin-inline:auto}
-    .tool{--tool-accent:#5cddfa;display:grid;grid-template-rows:56px auto;align-content:start;justify-items:center;gap:24px;min-width:0;padding:26px 12px 28px;border-bottom:1px solid #2a3142;text-align:center;transition:border-color .16s ease}
-    .tool:nth-child(2){--tool-accent:#b4afff}
-    .tool:nth-child(3){--tool-accent:#ebbd83}
-    .tool:hover,.tool:focus-visible{border-bottom-color:var(--tool-accent)}
-    .tool:focus-visible{outline:2px solid var(--tool-accent);outline-offset:8px}
-    .tool:hover strong,.tool:focus-visible strong{color:var(--tool-accent)}
-    .tool img{display:block;width:56px;height:56px;object-fit:contain}
-    .tool-copy{display:flex;flex-direction:column;gap:7px;min-width:0}
-    .tool-copy strong{color:#f3f4f6;font-size:22px;font-weight:700;letter-spacing:-.5px;line-height:30px;transition:color .16s ease}
-    .tool-copy small{color:#9aa7ba;font-size:14px;font-weight:400;line-height:21px}
+    .choices{display:grid;grid-template-columns:minmax(0,1fr) 32px minmax(0,1.15fr) 32px minmax(0,1fr);align-items:center}
+    .tool{display:flex;align-items:center;justify-content:center;gap:14px;min-width:0;min-height:108px;padding:16px;border-radius:10px}
+    .tool:focus-visible{outline:none}
+    .tool:focus-visible strong{text-decoration:underline;text-underline-offset:5px}
+    .tool img{display:block;width:56px;height:56px;flex:none;object-fit:contain}
+    .tool-copy{display:flex;flex-direction:column;min-width:0}
+    .tool-copy strong{color:#fff;font-size:24px;font-weight:800;letter-spacing:-.6px;line-height:32px;white-space:nowrap}
+    .tool-copy small{color:#94a3b8;font-size:12px;font-weight:400;line-height:18px;white-space:nowrap}
+    .divider{display:grid;place-items:center;width:32px;height:54px;color:#596171;font-size:30px;font-weight:300;line-height:1;user-select:none}
     .socials{display:flex;align-items:center;justify-content:center;gap:28px;margin-top:72px}
     .socials a{display:inline-flex;align-items:center;gap:7px;color:#94a3b8;font-size:12px;font-weight:600;transition:color .16s}
     .socials a:hover{color:#fff}
     .socials svg{width:16px;height:16px;flex:none}
-    @media(max-width:760px){
+    @media(max-width:1050px){
       body{padding:max(20px,env(safe-area-inset-top)) 0 max(20px,env(safe-area-inset-bottom))}
-      main{width:min(100% - 48px,400px);padding:24px 0}
-      .choices{grid-template-columns:1fr;gap:0}
-      .tool{grid-template-columns:48px minmax(0,1fr);grid-template-rows:auto;align-items:center;justify-items:start;gap:20px;min-height:116px;padding:26px 0;text-align:left}
-      .tool img{width:48px;height:48px}
-      .tool-copy{gap:4px}
-      .tool-copy strong{font-size:21px;line-height:29px}
-      .tool-copy small{font-size:14px;line-height:21px}
+      main{width:min(100% - 40px,360px);padding:24px 0}
+      .choices{grid-template-columns:1fr}
+      .tool{flex-direction:column;justify-content:center;gap:14px;min-height:150px;padding:16px 12px;text-align:center}
+      .tool img{width:64px;height:64px}
+      .tool-copy{align-items:center;gap:2px}
+      .tool-copy strong{font-size:22px;line-height:28px;white-space:normal}
+      .tool-copy small{font-size:11px;line-height:18px;white-space:normal}
+      .tool:hover,.tool:focus-visible{transform:none}
+      .tool:active{transform:scale(.98)}
+      .divider{width:auto;height:auto;justify-self:center;margin:14px 0;font-size:24px}
       .socials{margin-top:40px;gap:32px}
       .socials a{min-height:44px;font-size:12px}
     }
-    @media(prefers-reduced-motion:reduce){.tool,.tool-copy strong,.socials a{transition:none}}
+    @media(prefers-reduced-motion:reduce){.tool,.socials a{transition:none}.tool:hover,.tool:focus-visible,.tool:active{transform:none}}
 
 /* The existing palette and layout, with quieter interaction styling. */
 [data-copy-discord]{display:inline-flex;align-items:center;gap:7px;padding:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
@@ -73,15 +74,17 @@
     <nav class="choices" aria-label="Choose a tool">
       <a class="tool" href="https://0szysza.github.io/trackccu/">
         <img src="https://0szysza.github.io/trackccu/favicon.png" alt="">
-        <span class="tool-copy"><strong>TrackCCU</strong><small>Roblox player counts</small></span>
+        <span class="tool-copy"><strong>TrackCCU</strong><small>Track any Roblox Game CCU!</small></span>
       </a>
+      <span class="divider" aria-hidden="true">/</span>
       <a class="tool" href="https://0szysza.github.io/stat/">
         <img src="https://0szysza.github.io/stat/favicon.svg" alt="">
-        <span class="tool-copy"><strong>Stat Calculator</strong><small>BGSI stats &amp; restock timers</small></span>
+        <span class="tool-copy"><strong>Stat Calculator</strong><small>Track your BGSI stats!</small></span>
       </a>
+      <span class="divider" aria-hidden="true">/</span>
       <a class="tool" href="https://0szysza.github.io/hatchlist/">
         <img src="/hatchlist/favicon.svg" alt="">
-        <span class="tool-copy"><strong>Hatchlist</strong><small>Your BGSI pet checklist</small></span>
+        <span class="tool-copy"><strong>Hatchlist</strong><small>Your BGSI pet wishlist.</small></span>
       </a>
     </nav>
     <div class="socials" aria-label="Social links">

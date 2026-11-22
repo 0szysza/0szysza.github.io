@@ -155,3 +155,24 @@ export function filterPets(pets, { query = "", status = "all", tag = "all", view
   return pets.filter(pet => (!term || pet.name.toLocaleLowerCase().includes(term)) && (view === "all" || Boolean(pet.archived) === (view === "archive")) && (status === "all" || pet.collected === (status === "collected")) && (tag === "all" || pet.tags.some(item => tagKey(item) === tag)));
 }
 
+
+// Merge only fields actually edited in this tab. Independent changes made in
+// another tab survive; overlapping edits need an explicit choice in the UI.
+export function mergePetEdit(base, current, draft, { overwrite = false } = {}) {
+  if (!base || !current || base.id !== current.id) return { error: "This pet was removed in another tab." };
+  const fields = ["name", "image", "chance", "tags"];
+  const comparable = (field, pet) => field === "tags" ? JSON.stringify(pet.tags.map(tagKey).sort()) : pet[field] ?? "";
+  const conflicts = fields.filter(field => comparable(field, draft) !== comparable(field, base) && comparable(field, current) !== comparable(field, base) && comparable(field, draft) !== comparable(field, current));
+  if (conflicts.length && !overwrite) return { conflicts };
+  const merged = { ...current };
+  for (const field of fields) if (comparable(field, draft) !== comparable(field, base)) merged[field] = draft[field];
+  return { pet: normalisePet(merged), conflicts: [] };
+}
+
+export function countTags(pets, archived = false) {
+  const counts = new Map();
+  for (const pet of pets) if (pet.archived === archived) {
+    for (const key of new Set(pet.tags.map(tagKey))) counts.set(key, (counts.get(key) || 0) + 1);
+  }
+  return counts;
+}

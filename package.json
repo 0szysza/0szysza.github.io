@@ -1,0 +1,15 @@
+{
+  "name": "szysza-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test hatchlist/model.test.mjs hatchlist/OLD/model.test.mjs",
+    "lint": "node scripts/lint.mjs",
+    "check": "npm run lint && npm test",
+    "build": "node scripts/build.mjs"
+  },
+  "devDependencies": {
+    "eslint": "10.15.0",
+    "globals": "17.14.0"
+  }
+}

@@ -184,3 +184,23 @@ test("custom tag filters use both the name and colour and preserve other presets
   assert.deepEqual(availableTags([first, { ...first, id: "same-tag" }, second]).slice(TAGS.length), [blue, pink]);
 });
 
+
+test('independent tab edits merge and overlapping field edits require a decision', async () => {
+  const { mergePetEdit } = await import('./model.mjs');
+  const base = { ...pet, name: 'Old name' };
+  const remote = { ...base, image: 'https://example.com/new.webp', collected: false, collectedAt: null };
+  const draft = { ...base, name: 'My name' };
+  const result = mergePetEdit(base, remote, draft);
+  assert.equal(result.pet.name, 'My name'); assert.equal(result.pet.image, remote.image); assert.equal(result.pet.collected, false);
+  const conflict = mergePetEdit(base, { ...remote, name: 'Remote name' }, draft);
+  assert.deepEqual(conflict.conflicts, ['name']);
+  const forced = mergePetEdit(base, { ...remote, name: 'Remote name' }, draft, { overwrite: true });
+  assert.equal(forced.pet.name, 'My name'); assert.equal(forced.pet.image, remote.image);
+  assert.match(mergePetEdit(base, null, draft).error, /removed/);
+});
+
+test('tag counts cover only the selected view without double-counting a tag', async () => {
+  const { countTags } = await import('./model.mjs');
+  const source = [{ ...pet, tags: ['Secret','Secret'] }, { ...pet, id: 'archived', archived: true }, { ...pet, id: 'wanted', collected: false }];
+  assert.equal(countTags(source).get('Secret'), 2); assert.equal(countTags(source, true).get('Secret'), 1);
+});

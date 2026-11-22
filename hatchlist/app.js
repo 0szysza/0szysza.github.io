@@ -1,4 +1,4 @@
-import { STORAGE_KEY, MAX_PETS, imageUrl, normaliseChance, normalisePet, normaliseTag, normaliseHex, tagKey, tagLabel, tagDetails, availableTags, customTagLibrary, parseLibrary, serialiseCollection, mergeCollection, filterPets, setCollected, setArchived, deleteCustomTag } from "./model.mjs?v=20261108-drop-chance";
+import { STORAGE_KEY, MAX_PETS, imageUrl, normaliseChance, normalisePet, normaliseTag, normaliseHex, tagKey, tagLabel, tagDetails, availableTags, customTagLibrary, parseLibrary, serialiseCollection, mergeCollection, filterPets, setCollected, setArchived, deleteCustomTag, mergePetEdit, countTags } from "./model.mjs?v=20261122-rework";
 
 const $ = id => document.getElementById(id);
 const nodes = Object.fromEntries(["petGrid", "addPet", "emptyState", "searchPets", "tagFilterMenu", "tagFilterOptions", "petDialog", "petForm", "petName", "petImage", "petChance", "previewImage", "previewEgg", "toast", "toastMessage", "undoDelete", "importFile"].map(id => [id, $(id)]));
@@ -7,6 +7,12 @@ let customTags = [];
 let selectedTag = "all";
 const archivedView = /\/hatchlist\/archive\/?$/.test(location.pathname);
 let editingId = null;
+let editingBase = null;
+let overwriteEdit = false;
+let lastStored = null;
+let tagData = null;
+let collectionRevision = 0;
+const cardCache = new WeakMap();
 let undoAction = null;
 let toastTimer;
 let previewTimer;
@@ -59,11 +65,10 @@ function roleTag(tag) {
 }
 
 function renderTagFilter() {
-  const tags = orderedTags(availableTags(pets, customTags));
-  const viewPets = pets.filter(pet => pet.archived === archivedView);
-  const counts = new Map(tags.map(tag => [tagKey(tag), viewPets.filter(pet => pet.tags.some(item => tagKey(item) === tagKey(tag))).length]));
-  if (!counts.get(selectedTag)) selectedTag = "all";
-  const signature = JSON.stringify([tags, selectedTag, [...counts], viewPets.length]);
+  if (!tagData) tagData = { tags: orderedTags(availableTags(pets, customTags)), counts: countTags(pets, archivedView), total: pets.filter(pet => pet.archived === archivedView).length };
+  const { tags, counts } = tagData;
+  if (selectedTag !== "all" && !counts.get(selectedTag)) selectedTag = "all";
+  const signature = `${collectionRevision}:${selectedTag}`;
   if (signature === filterTagSignature) return;
   filterTagSignature = signature;
   nodes.tagFilterOptions.replaceChildren();
@@ -74,7 +79,7 @@ function renderTagFilter() {
     option.dataset.tag = key;
     option.setAttribute("aria-label", tag ? tagLabel(tag) : "All tags");
     option.setAttribute("aria-pressed", String(selectedTag === key));
-    const count = tag ? counts.get(key) : viewPets.length;
+    const count = tag ? counts.get(key) || 0 : tagData.total;
     option.disabled = Boolean(tag && !count);
     if (option.disabled) option.title = `No pets with this tag in ${archivedView ? "Archive" : "Checklist"}`;
     const meta = element("span", "tag-filter-meta");
@@ -244,10 +249,20 @@ function save(next, focus, nextTags = customTags) {
     return false;
   }
   let library;
-  try { library = customTagLibrary(next, nextTags); localStorage.setItem(STORAGE_KEY, serialiseCollection(next, library)); }
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored !== lastStored) {
+      const state = stored ? parseLibrary(stored) : { pets: [], customTags: [] };
+      pets = state.pets; customTags = state.customTags; lastStored = stored; tagData = null; collectionRevision++; render();
+      notify("The collection changed in another tab. Review the latest data and try again."); return false;
+    }
+    library = customTagLibrary(next, nextTags);
+    const json = serialiseCollection(next, library);
+    localStorage.setItem(STORAGE_KEY, json); lastStored = json;
+  }
   catch { notify("This browser could not save the change. Try freeing some browser storage."); return false; }
   pets = next;
-  customTags = library;
+  customTags = library; tagData = null; collectionRevision++;
   hideToast();
   render();
   if (focus) {
@@ -259,6 +274,7 @@ function save(next, focus, nextTags = customTags) {
 }
 
 function petCard(pet) {
+  if (cardCache.has(pet)) return cardCache.get(pet);
   const card = element("article", "pet-card" + (pet.collected ? " is-collected" : ""));
   card.dataset.petId = pet.id;
   card.setAttribute("aria-label", pet.name);
@@ -335,6 +351,7 @@ function petCard(pet) {
   collect.append(element("span", "", archivedView ? "Return to checklist" : pet.collected ? "Collected" : "Mark collected"));
   card.append(actions);
   card.append(details, collect);
+  cardCache.set(pet, card);
   return card;
 }
 
@@ -380,7 +397,8 @@ function previewImage() {
 
 function openPet(pet = null) {
   closeFormTagMenu();
-  editingId = pet?.id || null;
+  editingId = pet?.id || null; editingBase = pet ? structuredClone(pet) : null; overwriteEdit = false;
+  document.getElementById("editConflict")?.remove();
   nodes.petForm.reset();
   formSelectedTags = new Set((pet?.tags || []).map(tagKey));
   renderFormTags();
@@ -487,6 +505,18 @@ $("colourSwatches").addEventListener("click", event => {
   $("customTagHex").setCustomValidity("");
   updateCustomTagState();
 });
+
+function showEditConflict(fields) {
+  document.getElementById("editConflict")?.remove();
+  const note = element("div", "edit-conflict"); note.id = "editConflict"; note.setAttribute("role", "alert");
+  note.append(element("p", "", `This pet changed in another tab (${fields.join(", ")}). Choose which edits to keep.`));
+  const reload = element("button", "secondary-button", "Load latest"); reload.type = "button";
+  reload.addEventListener("click", () => { const latest = pets.find(pet => pet.id === editingId); if (latest) openPet(latest); else { nodes.petDialog.close(); notify("This pet was removed in another tab."); } });
+  const keep = element("button", "secondary-button", "Keep my edits"); keep.type = "button";
+  keep.addEventListener("click", () => { overwriteEdit = true; nodes.petForm.requestSubmit(); });
+  note.append(reload, keep); nodes.petForm.querySelector(".dialog-actions").before(note); reload.focus();
+}
+
 nodes.petForm.addEventListener("submit", event => {
   event.preventDefault();
   if (!nodes.petName.value.trim()) { nodes.petName.setCustomValidity("Enter a pet name."); nodes.petName.reportValidity(); return; }
@@ -499,7 +529,7 @@ nodes.petForm.addEventListener("submit", event => {
   const previous = editingId ? pets.find(pet => pet.id === editingId) : null;
   if (editingId && !previous) { nodes.petDialog.close(); notify("This pet was removed in another tab."); return; }
   if (!previous && pets.length >= MAX_PETS) { notify(`Your collection can hold up to ${MAX_PETS} pets.`); return; }
-  const pet = normalisePet({
+  let pet = normalisePet({
     id: previous?.id || crypto.randomUUID(),
     name: nodes.petName.value,
     image,
@@ -510,6 +540,12 @@ nodes.petForm.addEventListener("submit", event => {
     collectedAt: previous?.collectedAt || null,
     createdAt: previous?.createdAt || new Date().toISOString(),
   });
+  if (previous) {
+    const merged = mergePetEdit(editingBase, previous, pet, { overwrite: overwriteEdit });
+    if (merged.conflicts?.length) { showEditConflict(merged.conflicts); return; }
+    if (merged.error) { notify(merged.error); return; }
+    pet = merged.pet;
+  }
   if (save(previous ? pets.map(item => item.id === pet.id ? pet : item) : [...pets, pet])) {
     nodes.petDialog.close();
     notify(previous ? "Pet updated." : `${pet.name} added to your hatchlist.`);
@@ -600,7 +636,8 @@ nodes.importFile.addEventListener("change", async () => {
     const incoming = parseLibrary(await file.text());
     const next = mergeCollection(pets, incoming.pets);
     const added = next.length - pets.length;
-    if (save(next, null, [...customTags, ...incoming.customTags])) notify(added ? `${added} ${added === 1 ? "pet" : "pets"} imported.` : "Backup imported.");
+    const skipped = incoming.pets.length - added;
+    if (save(next, null, [...customTags, ...incoming.customTags])) notify(`${added} added. ${skipped} existing ${skipped === 1 ? "pet kept" : "pets kept"} unchanged.`);
   } catch (error) { notify(error.message); }
 });
 
@@ -611,10 +648,10 @@ for (const menu of [$("toolsMenu"), $("backupMenu"), nodes.tagFilterMenu]) {
   });
 }
 window.addEventListener("storage", event => {
-  if (event.key !== STORAGE_KEY) return;
+  if (event.key !== STORAGE_KEY && event.key !== null) return;
   try {
     const state = event.newValue ? parseLibrary(event.newValue) : { pets: [], customTags: [] };
-    pets = state.pets; customTags = state.customTags; unreadableData = null; hideToast(); render();
+    pets = state.pets; customTags = state.customTags; lastStored = event.newValue; unreadableData = null; tagData = null; collectionRevision++; hideToast(); render();
     if (nodes.petDialog.open) renderFormTags();
     if ($("tagLibraryDialog").open) renderTagLibrary();
   }
@@ -622,7 +659,7 @@ window.addEventListener("storage", event => {
 });
 
 try {
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = localStorage.getItem(STORAGE_KEY); lastStored = stored;
   if (stored) {
     try { const state = parseLibrary(stored); pets = state.pets; customTags = state.customTags; }
     catch { unreadableData = stored; notify("Saved data could not be read. Export a backup before starting again."); }

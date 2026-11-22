@@ -109,3 +109,13 @@
 
 .tag-library-create{width:100%}.tag-library-create>.icon{width:16px;height:16px}
 
+
+/* The existing palette and layout, with quieter interaction styling. */
+[data-copy-discord]{display:inline-flex;align-items:center;gap:7px;padding:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
+[data-copy-discord] svg{width:16px;height:16px;flex:none}
+[data-copy-discord]:focus-visible{outline:2px solid #5cddfa;outline-offset:4px}
+.copy-feedback{font-size:12px;color:#cbd5e1}
+
+.pet-card,.add-card{box-shadow:none;border-radius:10px}.pet-card:hover{transform:none}
+.edit-conflict{margin:0 24px 16px;padding:14px;border:1px solid #6d582f;border-radius:8px;background:#211d18;color:#f0d79b;font-size:14px;line-height:1.5}
+.edit-conflict p{margin:0 0 12px}.edit-conflict button+button{margin-left:8px}.footer-socials [data-copy-discord]{font-size:12px;color:#94a3b8}
